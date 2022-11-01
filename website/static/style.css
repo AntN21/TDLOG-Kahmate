@@ -59,6 +59,7 @@ body {
     text-align:center;
     display: table-cell;
     vertical-align:middle;
+    display: flex;
 }
 .white {
     float: left;
@@ -70,4 +71,5 @@ body {
     text-align:center;
     display: table-cell;
     vertical-align:middle;
+    display: flex;
 }

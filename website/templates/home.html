@@ -1,17 +1,12 @@
 {% extends "base.html" %}
 {% block content %}
-<script>
-    function click_box(e) {
-        var cursorX = Math.floor((e.pageX - document.getElementById("board").offsetLeft - 5)/52);
-        var cursorY = Math.floor((e.pageY - document.getElementById("board").offsetTop - 5)/52);
-        console.log(String(cursorX)+String(cursorY))
-        document.getElementById(String(cursorX)+String(cursorY)).innerHTML = "x";
-    }
-</script>
+<script type="text/javascript" src="../static/board_actions.js"></script>
 <div class="field">
     <div class="board" id="board" onclick="click_box(event)">
         <!-- 0 -->
-        <div class="white" id="00"></div>
+        <div class="white" id="00">
+            <img src="../static/circle-256.png" draggable="false"/>
+        </div>
         <div class="black" id="10"></div>
         <div class="white" id="20"></div>
         <div class="black" id="30"></div>
