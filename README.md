@@ -1,6 +1,6 @@
 # TDLOG-Kahmate
 
- 
+ http://jeuxstrategieter.free.fr/Kahmate_complet.php
 1 pion ballon
 
 Pour chaque équipe 
