@@ -28,3 +28,8 @@ RAPIDE_DEF_BONUS = -1
 FUTE_MAX_MOVE = 3
 FUTE_ATT_BONUS = 0
 FUTE_DEF_BONUS = 1
+
+# players in the field
+PLAYERS_TYPES_LIST = ['ordinaire', 'ordinaire', 'costaud', 'dur', 'rapide', 'fute']
+
+

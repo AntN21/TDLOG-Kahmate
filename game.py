@@ -1,4 +1,5 @@
 import constants as cst
+import random as rd
 
 
 class RugbyPlayer:
@@ -77,12 +78,18 @@ class Ordinaire(RugbyPlayer):
     def __init__(self, team):
         super().__init__(team, cst.ORDINAIRE_MAX_MOVE, cst.ORDINAIRE_ATT_BONUS, cst.ORDINAIRE_DEF_BONUS)
 
+    def __str__(self):
+        return f' {self.team[0]} Ord '
+
 
 class Costaud(RugbyPlayer):
     """Define a 'costaud' player with its characteristics."""
 
     def __init__(self, team):
         super().__init__(team, cst.COSTAUD_MAX_MOVE, cst.COSTAUD_ATT_BONUS, cst.COSTAUD_DEF_BONUS)
+
+    def __str__(self):
+        return f' {self.team[0]} Cos '
 
 
 class Dur(RugbyPlayer):
@@ -91,6 +98,9 @@ class Dur(RugbyPlayer):
     def __init__(self, team):
         super().__init__(team, cst.DUR_MAX_MOVE, cst.DUR_ATT_BONUS, cst.DUR_DEF_BONUS)
 
+    def __str__(self):
+        return f' {self.team[0]} Dur '
+
 
 class Rapide(RugbyPlayer):
     """Define a 'rapide' player with its characteristics."""
@@ -98,12 +108,18 @@ class Rapide(RugbyPlayer):
     def __init__(self, team):
         super().__init__(team, cst.RAPIDE_MAX_MOVE, cst.RAPIDE_ATT_BONUS, cst.RAPIDE_DEF_BONUS)
 
+    def __str__(self):
+        return f' {self.team[0]} Rap '
+
 
 class Fute(RugbyPlayer):
     """Define a 'fute' player with its characteristics."""
 
     def __init__(self, team):
         super().__init__(team, cst.FUTE_MAX_MOVE, cst.FUTE_ATT_BONUS, cst.FUTE_DEF_BONUS)
+
+    def __str__(self):
+        return f' {self.team[0]} Fut '
 
 
 class Square:
@@ -116,6 +132,11 @@ class Square:
     def __init__(self):
         self._ball = False
         self._player = None
+
+    def __str__(self):
+        if self.player is None:
+            return '   *   '
+        return str(self.player)
 
     @property
     def ball(self):
@@ -182,9 +203,9 @@ class Board:
     def square(self, x, y):
         """Return the square of coordinates x and y."""
         return self._squares[self.length * y + x]
-    def __call__(self,p):
-        return self.square(p[0],p[1])
 
+    def __call__(self, p):
+        return self.square(p[0], p[1])
 
     def put_ball(self, x, y):
         """Put the ball in the (x,y) square."""
@@ -277,16 +298,105 @@ class Game:
         self._board=Board()
         self.selected_case1=None #could represent the rugby player who throws the ball
         self.selected_case2=None
+        self.input_placing()
 
     @property
     def board(self):
         """Return the field length."""
         return self._board
 
+    def random_placing(self):
+        """Place the players randomly in the legal cases."""
+
+        # Red team
+        n = 6           # Remaining players to place
+        while n > 0:
+            x = rd.randint(1, 2)
+            y = rd.randint(0, self.board.width - 1)
+            if self.board([x, y]).player is None:
+                if n == 6 or n == 5:
+                    self._board.put_player(Ordinaire('red'), x, y)
+                elif n == 4:
+                    self._board.put_player(Costaud('red'), x, y)
+                elif n == 3:
+                    self._board.put_player(Dur('red'), x, y)
+                elif n == 2:
+                    self._board.put_player(Rapide('red'), x, y)
+                else:
+                    self._board.put_player(Fute('red'), x, y)
+                n -= 1
+
+        # Blue team
+        n = 6           # Remaining players to place
+        while n > 0:
+            x = rd.randint(self.board.length - 3, self.board.length - 2)
+            y = rd.randint(0, self.board.width - 1)
+            if self.board([x, y]).player is None:
+                if n == 6 or n == 5:
+                    self._board.put_player(Ordinaire('blue'), x, y)
+                elif n == 4:
+                    self._board.put_player(Costaud('blue'), x, y)
+                elif n == 3:
+                    self._board.put_player(Dur('blue'), x, y)
+                elif n == 2:
+                    self._board.put_player(Rapide('blue'), x, y)
+                else:
+                    self._board.put_player(Fute('blue'), x, y)
+                n -= 1
+
+    def input_placing(self):
+        """Place the players according to the inputs."""
+
+        colors = ['red', 'blue']
+        team = 0        # Choosing team (0='red' 1='blue')
+        x_start = [1, self.board.length - 3]
+        x_end = [2, self.board.length - 2]
+        n = 6           # Remaining players to place
+        while n > 0:
+            x = int(input(f'{colors[team]} team choose {cst.PLAYERS_TYPES_LIST[6 - n]} player column between '
+                          f'{x_start[team]} and {x_end[team]} : '))
+            assert x_start[team] <= x <= x_end[team], 'T\'es con ou quoi ?'
+            y = int(input(f'{colors[team]} team choose {cst.PLAYERS_TYPES_LIST[6 - n]} player row between 0 and '
+                      f'{self.board.width - 1} : '))
+            assert 0 <= y <= self.board.width - 1, 'T\'es con ou quoi ?'
+
+            if self.board([x, y]).player is None:
+                if n == 6 or n == 5:
+                    self._board.put_player(Ordinaire(colors[team]), x, y)
+                elif n == 4:
+                    self._board.put_player(Costaud(colors[team]), x, y)
+                elif n == 3:
+                    self._board.put_player(Dur(colors[team]), x, y)
+                elif n == 2:
+                    self._board.put_player(Rapide(colors[team]), x, y)
+                else:
+                    self._board.put_player(Fute(colors[team]), x, y)
+                if team == 0:
+                    team += 1
+                else:
+                    team = 0
+                    n -= 1
+            else:
+                print('Unavailable placement.')
 
 
 
-def test():
+
+
+def test_placing():
+    game = Game()
+
+    for y in range(game.board.width - 1, -1, -1):
+        res = ''
+        for x in range(game.board.length):
+            res += str(game.board([x, y]))
+        print(res)
+
+    pass
+
+test_placing()
+
+def test_move_player():
     player = Fute('red')
     board = Board()
     x = 6
@@ -305,8 +415,6 @@ def test():
     print(board.square(x2, y2).player.def_bonus)
 
     pass
-
-test()
 
 
 
