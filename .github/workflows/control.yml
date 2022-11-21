@@ -34,3 +34,13 @@ jobs:
         run: |
           echo Add other actions to build,
           echo test, and deploy your project.
+      
+      # Runs black formatter
+      - name: Run black formatter
+        uses: rickstaa/action-black@v1.3.0
+      
+      # Runs flake8 to check simple code-smells
+      - name: Flake8 action
+        uses: suo/flake8-github-action@v1
+
+
