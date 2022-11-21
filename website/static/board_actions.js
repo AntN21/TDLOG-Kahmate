@@ -1,4 +1,3 @@
-
 function mark_box(x, y) {
     if(x >= 0 && x < 11 && y >= 0 && y < 8) {
         var element = document.getElementById(String(x)+String(y))
@@ -7,9 +6,18 @@ function mark_box(x, y) {
 }
 
 function click_box(e) {
+    println("TOCA!")
     var cursorX = Math.floor((e.pageX - document.getElementById("board").offsetLeft - 5)/52)
     var cursorY = Math.floor((e.pageY - document.getElementById("board").offsetTop - 5)/52)
     var element = document.getElementById(String(cursorX)+String(cursorY))
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", yourUrl, true);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.send(JSON.stringify({
+        value: value,
+        element: element
+    }));
+    /*
     if(element.style.borderColor=="white") {
         console.log("CREATES")
         console.log(selected_chip)
@@ -33,7 +41,7 @@ function click_box(e) {
         } else {
             clear()
         }
-    }
+    }*/
 }
 
 function clear() {
