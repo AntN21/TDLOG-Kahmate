@@ -187,6 +187,8 @@ class Board:
     def square(self, x, y):
         """Return the square of coordinates x and y."""
         return self._squares[self.length * y + x]
+    def __call__(self,p):
+        return self.square(p[0],p[1])
 
 
 # Maybe unnecessary
@@ -201,9 +203,83 @@ class RugbyTeam:
 
 
 class Action:
-
+    def __init__(self):
+        pass
     pass
 
+
+#-Déplacement -Passe -> interception => Duel -coup de pied à suivre -Marquer un essai -Plaquage (parfait) => Duel -Forcer le passage => Duel
+# red à gauche blue à droite
+ #essai
+class Pass(Action):
+    def __init__(self):
+        super().__init__()
+
+    def is_possible(self,game):
+        case1=game.selected_case1
+        case2=game.selected_case2
+        if case1.player is not None and case2.player is not None:
+            if case1.ball==True:
+                if case1.player.team==case2.player.team:
+                    if abs(case1.y-case2.y)<3:
+                        if (case2.x < case1.x and case1.x-case2.x<=2  and case1.player.team=="red") or (case1.x < case2.x and case2.x-case1.x<=2 and case2.player.team=='blue'):
+                            return True
+        return False
+
+    def play(self,game):
+        #if not(is_possible(game)) : raise Exception("can't throw")
+        #if truc : interception
+        game.selected_case1.ball = False
+        game.selected_case2.ball = True
+
+class Duel(Action):
+    def __init__(self):
+        super().__init__()
+
+    def play(self,game):
+        #tirer carte1
+        #tirer carte2
+        #if carte1>carte2:
+        #   return 'red'
+        #else:
+        #   return 'blue'
+        pass
+
+    pass
+class BallKick(Action):
+    def __init__(self):
+        super().__init__()
+
+    def is_possible(self,game):
+        case1=game.selected_case1
+        case2=game.selected_case2
+        if case1.player is not None:
+            if case1.ball==True:
+                    if abs(case1.y-case2.y)<=3:
+                        if (case2.x > case1.x and case2.x<=3 +case1.x  and case1.player.team=="red") or (case1.x > case2.x and case1.x<=3+case2.x and case2.player.team=='blue'):
+                            return True
+        return False
+
+    def play(self,game):
+        game.selected_case1.ball = False
+        game.selected_case2.ball = True
+    pass
+class Plaquage(Action):
+    def __init__(self):
+        super().__init__()
+    pass
+
+#essai
+class Game:
+    def __init__(self):
+        self._board=Board()
+        self.selected_case1=None #could represent the rugby player who throws the ball
+        self.selected_case2=None
+
+    @property
+    def board(self):
+        """Return the field length."""
+        return self._board
 
 
 
