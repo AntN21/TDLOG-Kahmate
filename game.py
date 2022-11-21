@@ -1,29 +1,4 @@
-import random
-
-
-# Constants
-BOARD_LENGTH = 13
-BOARD_WIDTH = 8
-
-ORDINAIRE_MAX_MOVE = 3
-ORDINAIRE_ATT_BONUS = 0
-ORDINAIRE_DEF_BONUS = 0
-
-COSTAUD_MAX_MOVE = 2
-COSTAUD_ATT_BONUS = 2
-COSTAUD_DEF_BONUS = 1
-
-DUR_MAX_MOVE = 3
-DUR_ATT_BONUS = 1
-DUR_DEF_BONUS = 0
-
-RAPIDE_MAX_MOVE = 4
-RAPIDE_ATT_BONUS = -1
-RAPIDE_DEF_BONUS = -1
-
-FUTE_MAX_MOVE = 3
-FUTE_ATT_BONUS = 0
-FUTE_DEF_BONUS = 1
+import constants as cst
 
 
 class RugbyPlayer:
@@ -37,10 +12,11 @@ class RugbyPlayer:
     def __init__(self, team, max_move, att_bonus, def_bonus):
         assert (team == 'red' or team == 'blue'), f'{team} is not a correct team color.'
         self._team = team
-        self._is_stunt = False
+        self._stunned = False
         self._max_move = max_move
         self._att_bonus = att_bonus
         self._def_bonus = def_bonus
+        self._available_moves = self.max_move
 
     @property
     def team(self):
@@ -48,9 +24,9 @@ class RugbyPlayer:
         return self._team
 
     @property
-    def is_stunt(self):
+    def stunned(self):
         """Return the stunning state of the player."""
-        return self._is_stunt
+        return self._stunned
 
     @property
     def max_move(self):
@@ -67,65 +43,79 @@ class RugbyPlayer:
         """Return the defense bonus of the player."""
         return self._def_bonus
 
+    @property
+    def available_moves(self):
+        """Return the number of available moves of the player."""
+        return self._available_moves
+
+    def is_stunned(self):
+        """Turn the player stunning state into True."""
+        self._stunned = True
+
+    def is_not_stunned(self):
+        """Turn the player stunning state into False."""
+        self._stunned = False
+
+    def move(self, n):
+        """Reduce _available_moves of n moves."""
+        assert n <= self.available_moves, 'The player has not enough available moves to go that far.'
+        self._available_moves -= n
+
+    def reset_moves(self):
+        """Reset _available_moves to the maximum number of moves."""
+        self._available_moves = self.max_move
+
+    def full_reset(self):
+        """Reset the state of the player : stunning state and available moves."""
+        self.is_not_stunned()
+        self.reset_moves()
+
 
 class Ordinaire(RugbyPlayer):
     """Define an 'ordinaire' player with its characteristics."""
 
     def __init__(self, team):
-        super().__init__(team, ORDINAIRE_MAX_MOVE, ORDINAIRE_ATT_BONUS, ORDINAIRE_DEF_BONUS)
+        super().__init__(team, cst.ORDINAIRE_MAX_MOVE, cst.ORDINAIRE_ATT_BONUS, cst.ORDINAIRE_DEF_BONUS)
 
 
 class Costaud(RugbyPlayer):
     """Define a 'costaud' player with its characteristics."""
 
     def __init__(self, team):
-        super().__init__(team, COSTAUD_MAX_MOVE, COSTAUD_ATT_BONUS, COSTAUD_DEF_BONUS)
+        super().__init__(team, cst.COSTAUD_MAX_MOVE, cst.COSTAUD_ATT_BONUS, cst.COSTAUD_DEF_BONUS)
 
 
 class Dur(RugbyPlayer):
     """Define a 'dur' player with its characteristics."""
 
     def __init__(self, team):
-        super().__init__(team, DUR_MAX_MOVE, DUR_ATT_BONUS, DUR_DEF_BONUS)
+        super().__init__(team, cst.DUR_MAX_MOVE, cst.DUR_ATT_BONUS, cst.DUR_DEF_BONUS)
 
 
 class Rapide(RugbyPlayer):
     """Define a 'rapide' player with its characteristics."""
 
     def __init__(self, team):
-        super().__init__(team, RAPIDE_MAX_MOVE, RAPIDE_ATT_BONUS, RAPIDE_DEF_BONUS)
+        super().__init__(team, cst.RAPIDE_MAX_MOVE, cst.RAPIDE_ATT_BONUS, cst.RAPIDE_DEF_BONUS)
 
 
 class Fute(RugbyPlayer):
     """Define a 'fute' player with its characteristics."""
 
     def __init__(self, team):
-        super().__init__(team, FUTE_MAX_MOVE, FUTE_ATT_BONUS, FUTE_DEF_BONUS)
+        super().__init__(team, cst.FUTE_MAX_MOVE, cst.FUTE_ATT_BONUS, cst.FUTE_DEF_BONUS)
 
 
 class Square:
     """
     Contain the information about a square of the board:
-        - its position (int x and int y);
         - if the ball is on this square (bool ball);
         - if a player is on this square (RugbyPlayer player, None if not).
     """
 
-    def __init__(self, x, y):
-        self._x = x
-        self._y = y
+    def __init__(self):
         self._ball = False
         self._player = None
-
-    @property
-    def x(self):
-        """Return the x position of the square."""
-        return self._x
-
-    @property
-    def y(self):
-        """Return the y position of the square."""
-        return self._y
 
     @property
     def ball(self):
@@ -150,8 +140,13 @@ class Square:
         self._player = player
 
     def has_not_player(self):
-        """A player leaves this square, _player turns into None."""
+        """
+        A player leaves this square, _player turns into None.
+        Return the player who left.
+        """
+        player = self.player
         self._player = None
+        return player
 
 
 class Board:
@@ -162,12 +157,12 @@ class Board:
     """
 
     def __init__(self):
-        self._length = BOARD_LENGTH
-        self._width = BOARD_WIDTH
+        self._length = cst.BOARD_LENGTH
+        self._width = cst.BOARD_WIDTH
         self._squares = []
         for y in range(self.width):
             for x in range(self.length):
-                self._squares.append(Square(x, y))
+                self._squares.append(Square())
 
     @property
     def length(self):
@@ -191,15 +186,22 @@ class Board:
         return self.square(p[0],p[1])
 
 
-# Maybe unnecessary
-class RugbyTeam:
-    """Contain the information about a team of RugbyPlayers."""
+    def put_ball(self, x, y):
+        """Put the ball in the (x,y) square."""
+        self._squares[self.length * y + x].has_ball()
 
-    def __init__(self, board, color):
-        assert (color == 'red' or color == 'blue'), f'{color} is not a correct color.'
-        self._color = color
+    def put_player(self, player, x, y):
+        """Put the ball in the (x,y) square."""
+        self._squares[self.length * y + x].has_player(player)
 
-    pass
+    def move_ball(self, x1, y1, x2, y2):
+        """Move the ball from (x1,y1) to (x2,y2)."""
+        self._squares[self.length * y1 + x1].has_not_ball()
+        self._squares[self.length * y2 + x2].has_ball()
+
+    def move_player(self, x1, y1, x2, y2):
+        """Move the player from (x1,y1) to (x2,y2)."""
+        self._squares[self.length * y2 + x2].has_player(self._squares[self.length * y1 + x1].has_not_player())
 
 
 class Action:
@@ -284,10 +286,27 @@ class Game:
 
 
 
+def test():
+    player = Fute('red')
+    board = Board()
+    x = 6
+    y = 2
+    x2 = 9
+    y2 = 4
 
+    board.put_player(player, x, y)
 
+    board.move_player(x, y, x2, y2)
 
+    if board.square(x, y).player is not None:
+        print(board.square(x, y).player.def_bonus)
+    else:
+        print('no player')
+    print(board.square(x2, y2).player.def_bonus)
 
+    pass
+
+test()
 
 
 
