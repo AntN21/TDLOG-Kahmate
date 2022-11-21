@@ -1,5 +1,6 @@
 import constants as cst
 
+import random as rd
 
 class RugbyPlayer:
     """
@@ -205,21 +206,31 @@ class Board:
 
 
 class Action:
-    def __init__(self):
-        pass
-    pass
+    def __init__(self,p1,p2):
+        self._p1=p1
+        self._p2=p2
+
+    @property
+    def p1(self):
+        return self._p1
+    @property
+    def p2(self):
+        return self._p2
 
 
 #-Déplacement -Passe -> interception => Duel -coup de pied à suivre -Marquer un essai -Plaquage (parfait) => Duel -Forcer le passage => Duel
-# red à gauche blue à droite
- #essai
+# red à gauche blue à droite #
+def front(team):
+    if team=='red':
+        return 1
+    else:
+        return -1
+
 class Pass(Action):
-    def __init__(self):
-        super().__init__()
 
     def is_possible(self,game):
-        case1=game.selected_case1
-        case2=game.selected_case2
+        case1=game.board(self.p1)
+        case2=game.board(self.p2)
         if case1.player is not None and case2.player is not None:
             if case1.ball==True:
                 if case1.player.team==case2.player.team:
@@ -231,26 +242,59 @@ class Pass(Action):
     def play(self,game):
         #if not(is_possible(game)) : raise Exception("can't throw")
         #if truc : interception
-        game.selected_case1.ball = False
-        game.selected_case2.ball = True
+        game.board.move_ball(self.p1[0],self.p1[1],self.p2[0],self.p2[1])
+
+def defender(attacker):
+    if attacker=='red':
+        return 'blue'
+    elif attacker=='blue':
+        return 'red'
+    else:
+        return 'error'
+def Duell(game,attacker,AskPlayer=False):
+    nbr_cards=len(game.Teams[0].Cards)
+    if AskPlayer:
+        choix1,choix2=1,1
+    else:
+        choix1,choix2=rd.choices(list(range(nbr_cards)))
+    carte1,carte2=game.Teams[0].Cards.pop(choix1),game.Teams[1].Cards.pop(choix2)
+    if carte1>carte2:
+        return 'red'
+    else:
+        return 'blue'
+
+
 
 class Duel(Action):
-    def __init__(self):
-        super().__init__()
 
-    def play(self,game):
-        #tirer carte1
-        #tirer carte2
-        #if carte1>carte2:
-        #   return 'red'
-        #else:
-        #   return 'blue'
-        pass
+
+    def play(self,game,step=0):
+        attacker=game.board(self.p1).player.team
+        assert(attacker == game.team_playing)
+
+        nbr_cards = len(game.Teams[0].Cards)
+        AskPlayer=False
+        if AskPlayer:
+            choix1, choix2 = 1, 1
+        else:
+            choix1, choix2 = rd.choices(list(range(nbr_cards)))
+        carte1, carte2 = game.Teams[attacker].Cards.pop(choix1), game.Teams[defender(attacker)].Cards.pop(choix2)
+        player1=game.board(self.p1).player
+        player2 = game.board(self.p2).player
+        score_att=carte1 + player1.att_bonus
+        score_def=carte2 + player2.def_bonus
+        if score_att>score_def:
+            return (attacker,score_att,score_def)
+        elif score_def>score_def:
+            return (defender(attacker),score_def,score_att)
+        else:
+            if step>=0:
+                self.play(game,-1)
+            else:
+                return (defender(attacker),score_def,score_att)
 
     pass
 class BallKick(Action):
-    def __init__(self):
-        super().__init__()
 
     def is_possible(self,game):
         case1=game.selected_case1
@@ -266,22 +310,62 @@ class BallKick(Action):
         game.selected_case1.ball = False
         game.selected_case2.ball = True
     pass
+
 class Plaquage(Action):
-    def __init__(self):
-        super().__init__()
-    pass
+
+
+    def play(self,game):
+
+        duel=Duel(self.p1,self.p2)
+        res=duel.play(game)
+        attacker=game.team_playing
+        if res[0]==attacker:
+            if res[1]-res[2]>=2:
+                p_ball=self.p1
+            else:
+                p_ball=[self.p2[0]+front(attacker),self.p2[1]]
+                if p_ball[0]<0 or p_ball[0]>game.board.length:
+                    delta_y=self.p2[0]-self.p1[0]
+                    if delta_y!=0:
+                        if p_ball[1]+delta_y<game.board.width and p_ball[1]+delta_y>=0:
+                            p_ball[1]+=delta_y
+                        else:
+                            p_ball[0]-=2*front(attacker)
+                    else:
+                        #choice
+                        Lp=[[self.p2[0],self.p2[1]+1],[self.p2[0],self.p2[1]-1]]
+                        Lp=[p for p in Lp if p[1]>=0 and p[1]<game.board.width]
+                        p_ball=rd.choice(Lp)
+            game.board.move_ball(self.p2[0], self.p2[1], p_ball[0], p_ball[1])
+            game.board(self.p2).player.is_stunned()
+        else:
+            game.board(self.p1).player.is_stunned()
+
+
+
+
+
 
 #essai
+
+class Team:
+    def __init__(self,name):
+        self._name=name
+        self.Cards=list (range(1,6+1))
+
+
 class Game:
     def __init__(self):
         self._board=Board()
         self.selected_case1=None #could represent the rugby player who throws the ball
         self.selected_case2=None
+        self.Teams={'red':Team('red'), 'blue':Team('blue')}
+        self.team_playing='red'
 
     @property
     def board(self):
-        """Return the field length."""
         return self._board
+
 
 
 
