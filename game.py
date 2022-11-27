@@ -353,6 +353,45 @@ class Team:
         self._name=name
         self.Cards=list (range(1,6+1))
 
+class Actions:
+    def __init__(self,length,width):
+        self.All_moves=Init_Actions(length,width)
+        self.length=length
+        self.width=width
+        self.List_actions = [Plaquage, Pass, BallKick]
+        self.List_actions_names=['plaquages','passes','ballkicks','moves']
+        self.possible_moves=self.All_moves
+
+    def update(self):
+
+        for index,key in enumerate(self.List_actions):
+            self.possible_moves[self.List_actions_names[index]] = [[[] for i in range(self.length)] for j in range(self.width)]
+            for i1 in range(self.length):
+                for j1 in range(self.width):
+                    for i2 in range(self.length):
+                        for j2 in range(self.width):
+                            for action in self.All_moves[str(key)][j1][i1]:
+                                if action.is_possible():
+                                    self.possible_moves[self.List_actions_names[index]][j1][i1].append(action)
+
+
+def Init_Actions(length,width):
+    moves_dict={}
+    List_actions=[Plaquage,Pass,BallKick]
+    list_action_names=['plaquages','passes','ballkicks','moves']
+    for index,key in enumerate(List_actions):
+        moves_dict[list_action_names[index]]=[[[] for i in range(length)] for j in range(width)]
+
+        for i1 in range(length):
+            for j1 in range(width):
+                for i2 in range(length):
+                    for j2 in range(width):
+                        moves_dict[list_action_names[index]][j1][i1].append(key([i1,j1],[i2,j2]))
+    return moves_dict
+
+
+
+
 
 class Game:
     def __init__(self):
@@ -365,6 +404,24 @@ class Game:
     @property
     def board(self):
         return self._board
+
+    def play(self):
+        #initialisation
+        #...
+        win=False
+        actions=Actions(self.board.length,self.board.width)
+        while win==False:
+            for nb_actions in range(2):
+                actions.update()
+                #choose move
+                #make_move
+
+            self.team_playing=defender(self.team_playing)
+
+
+
+        pass
+
 
 
 
