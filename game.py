@@ -342,7 +342,8 @@ class Plaquage(Action):
             game.board(self.p1).player.is_stunned()
 
 
-
+class Move(Action):
+    pass
 
 
 
@@ -355,7 +356,7 @@ class Team:
 
 class Actions:
     def __init__(self,length,width):
-        self.All_moves=Init_Actions(length,width)
+        self.All_moves=init_actions(length,width)
         self.length=length
         self.width=width
         self.List_actions = [Plaquage, Pass, BallKick]
@@ -375,11 +376,11 @@ class Actions:
                                     self.possible_moves[self.List_actions_names[index]][j1][i1].append(action)
 
 
-def Init_Actions(length,width):
+def init_actions(length,width):
     moves_dict={}
-    List_actions=[Plaquage,Pass,BallKick]
+    list_actions=[Plaquage,Pass,BallKick]
     list_action_names=['plaquages','passes','ballkicks','moves']
-    for index,key in enumerate(List_actions):
+    for index,key in enumerate(list_actions):
         moves_dict[list_action_names[index]]=[[[] for i in range(length)] for j in range(width)]
 
         for i1 in range(length):
@@ -398,7 +399,7 @@ class Game:
         self._board=Board()
         self.selected_case1=None #could represent the rugby player who throws the ball
         self.selected_case2=None
-        self.Teams={'red':Team('red'), 'blue':Team('blue')}
+        self.teams={'red':Team('red'), 'blue':Team('blue')}
         self.team_playing='red'
 
     @property
