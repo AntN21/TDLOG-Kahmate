@@ -137,7 +137,7 @@ class Square:
         if self.ball:
             if self.player is None:
                 return '   B   '
-            return str(self.player[1:5] + ' B')
+            return str(str(self.player).replace(' ', '', 1) + 'B')
         if self.player is None:
             return '   *   '
         return str(self.player)
@@ -188,6 +188,14 @@ class Board:
         for y in range(self.width):
             for x in range(self.length):
                 self._squares.append(Square())
+
+    def __str__(self):
+        res = ''
+        for y in range(self.width - 1, -1, -1):
+            res += '\n'
+            for x in range(self.length):
+                res += str(self([x, y]))
+        return res
 
     @property
     def length(self):
@@ -291,6 +299,8 @@ class BallKick(Action):
         game.selected_case1.ball = False
         game.selected_case2.ball = True
     pass
+
+
 class Plaquage(Action):
     def __init__(self):
         super().__init__()
@@ -393,35 +403,9 @@ class Game:
 
 
 
-def test_placing():
-    game = Game()
-
-    for y in range(game.board.width - 1, -1, -1):
-        res = ''
-        for x in range(game.board.length):
-            res += str(game.board([x, y]))
-        print(res)
-
-    pass
 
 
-def test_move_player():
-    player = Fute('red')
-    board = Board()
-    x = 6
-    y = 2
-    x2 = 9
-    y2 = 4
 
-    board.put_player(player, x, y)
-
-    board.move_player(x, y, x2, y2)
-
-    assert board.square(x, y).player is None
-
-    assert isinstance(board.square(x2, y2).player, Fute)
-
-    pass
 
 
 
