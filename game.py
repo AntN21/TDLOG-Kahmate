@@ -668,6 +668,13 @@ def test_move_player():
 
 
 
+class Controller:
+    def __init__(self):
+        pass
+    def get_case(self):
+        pass
 
+    def get_card(self):
+        pass
 
 
