@@ -254,15 +254,25 @@ class Pass(Action):
         case2=game.board(self.p2)
         if case1.player is not None and case2.player is not None:
             if case1.ball==True:
-                if case1.player.team==case2.player.team:
+                if case1.player.team==case2.player.team and case1.player.team==game.team_playing:
                     if abs(case1.y-case2.y)<3:
-                        if (case2.x < case1.x and case1.x-case2.x<=2  and case1.player.team=="red") or (case1.x < case2.x and case2.x-case1.x<=2 and case2.player.team=='blue'):
+                        if 0< front(game.team_playing)*(case1.x - case2.x) and front(game.team_playint)*(case1.x-case2.x-2)<=0:
                             return True
         return False
 
     def play(self,game):
-        #if not(is_possible(game)) : raise Exception("can't throw")
+        if not(self.is_possible(game)) : raise Exception("can't throw")
         #if truc : interception
+        if min(abs(self.p1[0]-self.p2[0]),abs(self.p1[1]-self.p2[1]))>1:
+            inbetween=[self.p1[0]+(self.p1[0]-self.p2[0])/abs(self.p1[0]-self.p2[0]),self.p1[1]+(self.p1[1]-self.p2[1])/abs(self.p1[1]-self.p2[1])]
+            if game.board(inbetween).player.team!=game.team_playing:
+                duel=Duel(self.p1,inbetween)
+                winner=duel.play(game)
+                if winner!=game.team_playing:
+                    game.board.move_ball(self.p1[0], self.p1[1], inbetween[0], inbetween[1])
+                    return "interception"
+
+
         game.board.move_ball(self.p1[0],self.p1[1],self.p2[0],self.p2[1])
 
 def defender(attacker):
@@ -364,7 +374,48 @@ class Plaquage(Action):
 
 
 class Move(Action):
-    pass
+    def play(self,game):
+        if game.board(self.p1).ball:
+            game.board.move_ball(self.p1[0],self.p1[1],self.p2[0],self.p2[1])
+        game.board.move_player(self.p1[0],self.p1[1],self.p2[0],self.p2[1])
+
+    def is_possible(self,game):
+        player=game.board(self.p1).player
+        if player is not None:
+            if player.team == game.team_playing:
+                if path_exists(player.available_moves,player.team,game.board,self.p1,self.p2):
+                    return True
+        return False
+
+
+
+def inbound(board,pos):
+    return 0 <= pos[0] and pos[0] < board.length and 0 <= pos[1] and pos[1] <board.width
+
+def neighbours(case):
+    res=[]
+    for delta0 in [-1,1]:
+        for delta1 in [-1,1]:
+            res.append([case[0]+delta0,case[1]+delta1])
+    return res
+
+def accessibles_cases(path_length,team,board,position1):
+    acc_cases=set(position1)
+    new_cases=[]
+    for iter in range(path_length):
+        for new_case in new_cases:
+            acc_cases.add(new_case)
+        new_cases = []
+        for case in acc_cases:
+            for n_case in neighbours(case):
+                if inbound(board,n_case):
+                    if board(n_case).player is None or board(n_case).player.team==team:
+                        new_cases.append(n_case)
+
+
+def path_exists(path_length,team,board,position1,position2):
+    return position2 in accessibles_cases(path_length,team,board,position1)
+
 
 
 
@@ -377,24 +428,34 @@ class Team:
 
 class Actions:
     def __init__(self,length,width):
-        self.All_moves=init_actions(length,width)
+        self.All_moves={}
+
         self.length=length
         self.width=width
-        self.List_actions = [Plaquage, Pass, BallKick]
-        self.List_actions_names=['plaquages','passes','ballkicks','moves']
+        self.actions = [Plaquage, Pass, BallKick]
+        self.action_names=['plaquages','passes','ballkicks','moves']
+
+        for index, key in enumerate(self.actions):
+            self.All_moves[self.action_names[index]] = [[[] for i in range(length)] for j in range(width)]
+
+            for i1 in range(length):
+                for j1 in range(width):
+                    for i2 in range(length):
+                        for j2 in range(width):
+                            self.All_moves[self.action_names[index]][j1][i1].append(key([i1, j1], [i2, j2]))
         self.possible_moves=self.All_moves
 
     def update(self):
 
-        for index,key in enumerate(self.List_actions):
-            self.possible_moves[self.List_actions_names[index]] = [[[] for i in range(self.length)] for j in range(self.width)]
+        for index,key in enumerate(self.actions):
+            self.possible_moves[self.action_names[index]] = [[[] for i in range(self.length)] for j in range(self.width)]
             for i1 in range(self.length):
                 for j1 in range(self.width):
                     for i2 in range(self.length):
                         for j2 in range(self.width):
                             for action in self.All_moves[str(key)][j1][i1]:
                                 if action.is_possible():
-                                    self.possible_moves[self.List_actions_names[index]][j1][i1].append(action)
+                                    self.possible_moves[self.action_names[index]][j1][i1].append(action)
 
 
 def init_actions(length,width):
