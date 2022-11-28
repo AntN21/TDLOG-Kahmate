@@ -672,9 +672,13 @@ class Controller:
     def __init__(self):
         pass
     def get_case(self):
+
+        return 1,1
         pass
 
     def get_card(self):
+
+        return 1
         pass
 
 
