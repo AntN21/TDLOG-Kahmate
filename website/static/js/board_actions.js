@@ -1,3 +1,12 @@
+$(document).ready(function () {
+    console.log("TOCA!");
+    var socket = io.connect();
+    //receive details from server
+    socket.on("updateChips", function (msg) {
+      console.log("UPDATE CHIPS");
+    });
+  });
+
 function mark_box(x, y) {
     if(x >= 0 && x < 11 && y >= 0 && y < 8) {
         var element = document.getElementById(String(x)+String(y))
