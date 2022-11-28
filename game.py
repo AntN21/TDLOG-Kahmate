@@ -134,6 +134,10 @@ class Square:
         self._player = None
 
     def __str__(self):
+        if self.ball:
+            if self.player is None:
+                return '   B   '
+            return str(self.player[1:5] + ' B')
         if self.player is None:
             return '   *   '
         return str(self.player)
@@ -294,11 +298,17 @@ class Plaquage(Action):
 
 #essai
 class Game:
-    def __init__(self):
+    def __init__(self, random=False):
         self._board=Board()
         self.selected_case1=None #could represent the rugby player who throws the ball
         self.selected_case2=None
-        self.input_placing()
+        # Players initialization
+        if random:
+            self.random_placing()
+        else:
+            self.input_placing()
+        # Ball initialization
+        self._board._squares[self.board.length * rd.randint(1, self.board.width - 2) + self.board.length//2].has_ball()
 
     @property
     def board(self):
@@ -394,7 +404,6 @@ def test_placing():
 
     pass
 
-test_placing()
 
 def test_move_player():
     player = Fute('red')
@@ -408,14 +417,11 @@ def test_move_player():
 
     board.move_player(x, y, x2, y2)
 
-    if board.square(x, y).player is not None:
-        print(board.square(x, y).player.def_bonus)
-    else:
-        print('no player')
-    print(board.square(x2, y2).player.def_bonus)
+    assert board.square(x, y).player is None
+
+    assert isinstance(board.square(x2, y2).player, Fute)
 
     pass
-
 
 
 
