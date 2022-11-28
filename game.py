@@ -19,6 +19,7 @@ class RugbyPlayer:
         self._att_bonus = att_bonus
         self._def_bonus = def_bonus
         self._available_moves = self.max_move
+        self._just_lost=False
 
     @property
     def team(self):
@@ -67,11 +68,18 @@ class RugbyPlayer:
         """Reset _available_moves to the maximum number of moves."""
         self._available_moves = self.max_move
 
+    def lost(self):
+        self._just_lost=True
+    def reset_lost(self):
+        self._just_lost=False
+
+    def has_just_lost(self):
+        return self._just_lost
     def full_reset(self):
         """Reset the state of the player : stunning state and available moves."""
         self.is_not_stunned()
         self.reset_moves()
-
+        self.reset_lost()
 
 class Ordinaire(RugbyPlayer):
     """Define an 'ordinaire' player with its characteristics."""
@@ -267,7 +275,7 @@ class Pass(Action):
             inbetween=[self.p1[0]+(self.p1[0]-self.p2[0])/abs(self.p1[0]-self.p2[0]),self.p1[1]+(self.p1[1]-self.p2[1])/abs(self.p1[1]-self.p2[1])]
             if game.board(inbetween).player.team!=game.team_playing:
                 duel=Duel(self.p1,inbetween)
-                winner=duel.play(game)
+                winner=duel.play(game)[0]
                 if winner!=game.team_playing:
                     game.board.move_ball(self.p1[0], self.p1[1], inbetween[0], inbetween[1])
                     return "interception"
@@ -338,12 +346,20 @@ class BallKick(Action):
         return False
 
     def play(self,game):
-        game.selected_case1.ball = False
-        game.selected_case2.ball = True
+        game.board.move_ball(self.p1[0],self.p1[1],self.p2[0],self.p2[1])
+
     pass
 
 class Plaquage(Action):
 
+    def is_possible(self,game):
+        if game.board(self.p1).player is not None and game.board(self.p2).player:
+            player1=game.board(self.p1).player
+            player2=game.board(self.p2).player
+            if player1.team!=player2.team:
+                if path_exists(player1.available_moves,player1.team,game.board,self.p1,self.p2):
+                    return True
+        return False
 
     def play(self,game):
 
@@ -372,6 +388,28 @@ class Plaquage(Action):
         else:
             game.board(self.p1).player.is_stunned()
 
+class PassageEnForce(Action):
+    def is_possible(self,game):
+        if game.board(self.p1).player is not None and game.board(self.p2).player:
+            player1=game.board(self.p1).player
+            player2=game.board(self.p2).player
+            if player1.team!=player2.team:
+                if path_exists(player1.available_moves-1,player1.team,game.board,self.p1,self.p2):
+                    return True
+        return False
+
+    def play(self,game):
+        duel = Duel(self.p1, self.p2)
+        winner = duel.play(game)[0]
+        attacker = game.team_playing
+        if winner == attacker:
+            game.board(self.p2).player.is_stunned()
+            game.board(self.p2).player.lost()
+        else:
+            game.board(self.p1).player.is_stunned()
+
+
+
 
 class Move(Action):
     def play(self,game):
@@ -384,7 +422,8 @@ class Move(Action):
         if player is not None:
             if player.team == game.team_playing:
                 if path_exists(player.available_moves,player.team,game.board,self.p1,self.p2):
-                    return True
+                    if game.board(self.p2).player is None:
+                        return True
         return False
 
 
@@ -409,7 +448,8 @@ def accessibles_cases(path_length,team,board,position1):
         for case in acc_cases:
             for n_case in neighbours(case):
                 if inbound(board,n_case):
-                    if board(n_case).player is None or board(n_case).player.team==team:
+                    player=board(n_case).player
+                    if player is None or player.team == team or player.has_just_lost():
                         new_cases.append(n_case)
 
 
