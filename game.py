@@ -1,6 +1,6 @@
 import constants as cst
 import random as rd
-import Controller
+import controller
 
 class RugbyPlayer:
     """
@@ -248,6 +248,8 @@ class Action:
 
 #-Déplacement -Passe -> interception => Duel -coup de pied à suivre -Marquer un essai -Plaquage (parfait) => Duel -Forcer le passage => Duel
 # red à gauche blue à droite #
+
+#other file ?
 def front(team):
     if team=='red':
         return 1
@@ -282,6 +284,7 @@ class Pass(Action):
 
         game.board.move_ball(self.p1[0],self.p1[1],self.p2[0],self.p2[1])
 
+#other file ? in game class ?
 def defender(attacker):
     if attacker=='red':
         return 'blue'
@@ -289,17 +292,6 @@ def defender(attacker):
         return 'red'
     else:
         return 'error'
-def Duell(game,attacker,AskPlayer=False):
-    nbr_cards=len(game.Teams[0].Cards)
-    if AskPlayer:
-        choix1,choix2=1,1
-    else:
-        choix1,choix2=rd.choices(list(range(nbr_cards)))
-    carte1,carte2=game.Teams[0].Cards.pop(choix1),game.Teams[1].Cards.pop(choix2)
-    if carte1>carte2:
-        return 'red'
-    else:
-        return 'blue'
 
 
 
@@ -332,6 +324,7 @@ class Duel(Action):
                 return (defender(attacker),score_def,score_att)
 
     pass
+
 class BallKick(Action):
 
     def is_possible(self,game):
@@ -387,6 +380,7 @@ class Plaquage(Action):
         else:
             game.board(self.p1).player.is_stunned()
 
+#In English
 class PassageEnForce(Action):
     def is_possible(self,game):
         if game.board(self.p1).player is not None and game.board(self.p2).player:
@@ -426,7 +420,7 @@ class Move(Action):
         return False
 
 
-
+#functions to put in an other file
 def inbound(board,pos):
     return 0 <= pos[0] and pos[0] < board.length and 0 <= pos[1] and pos[1] <board.width
 
@@ -663,17 +657,5 @@ def test_move_player():
     print(board.square(x2, y2).player.def_bonus)
 
     pass
-
-
-
-
-class Controller:
-    def __init__(self):
-        pass
-    def get_case(self):
-        pass
-
-    def get_card(self):
-        pass
 
 
