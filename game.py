@@ -305,7 +305,7 @@ class Duel(Action):
         nbr_cards = len(game.Teams[0].Cards)
         AskPlayer=False
         if AskPlayer:
-            choix1, choix2 = 1, 1
+            (choix1,choix2)=game.controller.get_cards()
         else:
             choix1, choix2 = rd.choices(list(range(nbr_cards)))
         carte1, carte2 = game.Teams[attacker].Cards.pop(choix1), game.Teams[defender(attacker)].Cards.pop(choix2)
@@ -519,6 +519,8 @@ class Game:
 
         self.teams={'red':Team('red'), 'blue':Team('blue')}
         self.team_playing='red'
+
+        self.controller=controller.Console()
 
 
     @property

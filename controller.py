@@ -20,10 +20,13 @@ class Console(Controller):
         print(f'Choose a square')
         x_input=int(input(f'Put the abciss first'))
         y_input=int(input(f'Put the ordinate now'))
+
         return (x_input,y_input)
 
-    def get_card(self):
-        return int(input("Choose a card."))
+    def get_cards(self):
+        card1 = int(input(f'Choose a card for player 1'))
+        card2 = int(input(f'Choose a card for player 2'))
+        return (card1,card2)
 
     def get_action(self):
         print(f'{constants.ACTION_ORDER_LIST}')
