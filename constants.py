@@ -32,4 +32,6 @@ FUTE_DEF_BONUS = 1
 # players in the field
 PLAYERS_TYPES_LIST = ['ordinaire', 'ordinaire', 'costaud', 'dur', 'rapide', 'fute']
 
+# Actions
 
+ACTION_ORDER_LIST=["Move","Pass","BallKick","Plaquage","Passage en force"]

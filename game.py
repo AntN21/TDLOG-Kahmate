@@ -1,7 +1,6 @@
 import constants as cst
 import random as rd
-
-import random as rd
+import Controller
 
 class RugbyPlayer:
     """
