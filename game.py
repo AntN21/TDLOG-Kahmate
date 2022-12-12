@@ -1,5 +1,11 @@
-import constants as cst
 import random as rd
+import json
+""""
+Definition of constants
+"""
+
+import constants as cst
+
 import controller
 
 class RugbyPlayer:
@@ -189,8 +195,8 @@ class Board:
         self._length = cst.BOARD_LENGTH
         self._width = cst.BOARD_WIDTH
         self._squares = []
-        for y in range(self.width):
-            for x in range(self.length):
+        for _ in range(self.width):
+            for _ in range(self.length):
                 self._squares.append(Square())
 
     @property
@@ -234,15 +240,24 @@ class Board:
 
 
 class Action:
+    """
+    Represent th differents actions.
+    It has two parameters which are lists of 2 ints representing squares:
+        -position1 represents the square from which the action is done
+        -position2 represents the square targeted by the action
+    """
+
     def __init__(self,position1,position2):
         self._position1=position1
         self._position2=position2
 
     @property
     def position1(self):
+        """Return the position of origin """
         return self._position1
     @property
     def position2(self):
+        """Return the targeted position"""
         return self._position2
 
 
@@ -257,6 +272,7 @@ def front(team):
         return -1
 
 class Pass(Action):
+    """ Represent the action of pass."""
 
     def is_possible(self,game):
         case1=game.board(self.position1)
@@ -296,6 +312,7 @@ def defender(attacker):
 
 
 class Duel(Action):
+    """Represent a duel"""
 
 
     def play(self,game,step=0):
@@ -323,24 +340,24 @@ class Duel(Action):
             else:
                 return (defender(attacker),score_def,score_att)
 
-    pass
 
 class BallKick(Action):
+    """Represent a ballkick"""
+
 
     def is_possible(self,game):
-        case1=game.selected_case1
-        case2=game.selected_case2
-        if case1.player is not None:
-            if case1.ball==True:
-                    if abs(case1.y-case2.y)<=3:
-                        if (case2.x > case1.x and case2.x<=3 +case1.x  and case1.player.team=="red") or (case1.x > case2.x and case1.x<=3+case2.x and case2.player.team=='blue'):
-                            return True
+        square1=game.board(self.position1)
+        player=square1.player
+        if square1.player is not None and square1.ball:
+            if player.team==game.team_playing:
+                if abs(self.position2[1]-self.position1[1])<=3:
+                    if (self.position2[0]-self.position1[0])*front(player.team) <=3 and (self.position2[0]-self.position1[0])*front(player.team) >=1:
+                        return True
         return False
 
     def play(self,game):
         game.board.move_ball(self.position1[0],self.position1[1],self.position2[0],self.position2[1])
 
-    pass
 
 class Plaquage(Action):
 
@@ -441,9 +458,11 @@ def accessibles_cases(path_length,team,board,position1):
         for case in acc_cases:
             for n_case in neighbours(case):
                 if inbound(board,n_case):
+
                     player=board(n_case).player
                     if player is None or player.team == team or player.has_just_lost():
                         new_cases.append(n_case)
+    return acc_cases
 
 
 def path_exists(path_length,team,board,position1,position2):
@@ -484,11 +503,9 @@ class Actions:
             self.possible_moves[self.action_names[index]] = [[[] for i in range(self.length)] for j in range(self.width)]
             for i1 in range(self.length):
                 for j1 in range(self.width):
-                    for i2 in range(self.length):
-                        for j2 in range(self.width):
-                            for action in self.All_moves[str(key)][j1][i1]:
-                                if action.is_possible():
-                                    self.possible_moves[self.action_names[index]][j1][i1].append(action)
+                    for action in self.All_moves[str(key)][j1][i1]:
+                        if action.is_possible():
+                            self.possible_moves[self.action_names[index]][j1][i1].append(action)
 
 
 def init_actions(length,width):
@@ -515,7 +532,7 @@ class Game:
         self.selected_case1=None #could represent the rugby player who throws the ball
         self.selected_case2=None
 
-        self.input_placing()
+        self.random_placing()
 
         self.teams={'red':Team('red'), 'blue':Team('blue')}
         self.team_playing='red'
@@ -607,7 +624,7 @@ class Game:
         #...
         win=False
         actions=Actions(self.board.length,self.board.width)
-        while win==False:
+        while win is False:
             for nb_actions in range(2):
                 actions.update()
                 #choose move
@@ -616,8 +633,30 @@ class Game:
             self.team_playing=defender(self.team_playing)
 
 
+    def toJSON(self):
+        res={}
+        res['team_playing']=self.team_playing
+        res['board']=[]
+        
+        for square in self.board.squares:
+            res['board'].append({'player':str(square.player),'ball':square.ball})
+        return res
 
-        pass
+    def saveJSON(self,name):
+        with open(name, 'w') as json_file:
+            json.dump(self.toJSON(), json_file)
+
+    def loadJSON(self,path):
+        data = json.load(path)
+        n_board=Board()
+        for x in range(n_board.length):
+            for y in range(n_board.width):
+                player=None
+                if data['board'] is not 'None':
+                    str_player=data['board'][x+ n_board.length*y]['player']
+                    #traduire str_player
+                n_board.put_player(player,x,y)
+                #n_board.square(x,y).has_ball === data['board'][x+ n_board.length()*y]['ball']
 
 
 
@@ -635,7 +674,7 @@ def test_placing():
         for x in range(game.board.length):
             res += str(game.board([x, y]))
         print(res)
-
+    game.saveJSON("testj")
     pass
 
 test_placing()
