@@ -2,6 +2,7 @@ import constants as cst
 
 import random as rd
 
+
 class RugbyPlayer:
     """
     Contain different properties of a rugby player:
@@ -11,7 +12,7 @@ class RugbyPlayer:
     """
 
     def __init__(self, team, max_move, att_bonus, def_bonus):
-        assert (team == 'red' or team == 'blue'), f'{team} is not a correct team color.'
+        assert team == "red" or team == "blue", f"{team} is not a correct team color."
         self._team = team
         self._stunned = False
         self._max_move = max_move
@@ -59,7 +60,9 @@ class RugbyPlayer:
 
     def move(self, n):
         """Reduce _available_moves of n moves."""
-        assert n <= self.available_moves, 'The player has not enough available moves to go that far.'
+        assert (
+            n <= self.available_moves
+        ), "The player has not enough available moves to go that far."
         self._available_moves -= n
 
     def reset_moves(self):
@@ -76,14 +79,21 @@ class Ordinaire(RugbyPlayer):
     """Define an 'ordinaire' player with its characteristics."""
 
     def __init__(self, team):
-        super().__init__(team, cst.ORDINAIRE_MAX_MOVE, cst.ORDINAIRE_ATT_BONUS, cst.ORDINAIRE_DEF_BONUS)
+        super().__init__(
+            team,
+            cst.ORDINAIRE_MAX_MOVE,
+            cst.ORDINAIRE_ATT_BONUS,
+            cst.ORDINAIRE_DEF_BONUS,
+        )
 
 
 class Costaud(RugbyPlayer):
     """Define a 'costaud' player with its characteristics."""
 
     def __init__(self, team):
-        super().__init__(team, cst.COSTAUD_MAX_MOVE, cst.COSTAUD_ATT_BONUS, cst.COSTAUD_DEF_BONUS)
+        super().__init__(
+            team, cst.COSTAUD_MAX_MOVE, cst.COSTAUD_ATT_BONUS, cst.COSTAUD_DEF_BONUS
+        )
 
 
 class Dur(RugbyPlayer):
@@ -97,14 +107,18 @@ class Rapide(RugbyPlayer):
     """Define a 'rapide' player with its characteristics."""
 
     def __init__(self, team):
-        super().__init__(team, cst.RAPIDE_MAX_MOVE, cst.RAPIDE_ATT_BONUS, cst.RAPIDE_DEF_BONUS)
+        super().__init__(
+            team, cst.RAPIDE_MAX_MOVE, cst.RAPIDE_ATT_BONUS, cst.RAPIDE_DEF_BONUS
+        )
 
 
 class Fute(RugbyPlayer):
     """Define a 'fute' player with its characteristics."""
 
     def __init__(self, team):
-        super().__init__(team, cst.FUTE_MAX_MOVE, cst.FUTE_ATT_BONUS, cst.FUTE_DEF_BONUS)
+        super().__init__(
+            team, cst.FUTE_MAX_MOVE, cst.FUTE_ATT_BONUS, cst.FUTE_DEF_BONUS
+        )
 
 
 class Square:
@@ -183,9 +197,9 @@ class Board:
     def square(self, x, y):
         """Return the square of coordinates x and y."""
         return self._squares[self.length * y + x]
-    def __call__(self,p):
-        return self.square(p[0],p[1])
 
+    def __call__(self, p):
+        return self.square(p[0], p[1])
 
     def put_ball(self, x, y):
         """Put the ball in the (x,y) square."""
@@ -202,233 +216,260 @@ class Board:
 
     def move_player(self, x1, y1, x2, y2):
         """Move the player from (x1,y1) to (x2,y2)."""
-        self._squares[self.length * y2 + x2].has_player(self._squares[self.length * y1 + x1].has_not_player())
+        self._squares[self.length * y2 + x2].has_player(
+            self._squares[self.length * y1 + x1].has_not_player()
+        )
 
 
 class Action:
-    def __init__(self,p1,p2):
-        self._p1=p1
-        self._p2=p2
+    def __init__(self, p1, p2):
+        self._p1 = p1
+        self._p2 = p2
 
     @property
     def p1(self):
         return self._p1
+
     @property
     def p2(self):
         return self._p2
 
 
-#-Déplacement -Passe -> interception => Duel -coup de pied à suivre -Marquer un essai -Plaquage (parfait) => Duel -Forcer le passage => Duel
+# -Déplacement -Passe -> interception => Duel -coup de pied à suivre -Marquer un essai -Plaquage (parfait) => Duel -Forcer le passage => Duel
 # red à gauche blue à droite #
 def front(team):
-    if team=='red':
+    if team == "red":
         return 1
     else:
         return -1
 
-class Pass(Action):
 
-    def is_possible(self,game):
-        case1=game.board(self.p1)
-        case2=game.board(self.p2)
+class Pass(Action):
+    def is_possible(self, game):
+        case1 = game.board(self.p1)
+        case2 = game.board(self.p2)
         if case1.player is not None and case2.player is not None:
-            if case1.ball==True:
-                if case1.player.team==case2.player.team:
-                    if abs(case1.y-case2.y)<3:
-                        if (case2.x < case1.x and case1.x-case2.x<=2  and case1.player.team=="red") or (case1.x < case2.x and case2.x-case1.x<=2 and case2.player.team=='blue'):
+            if case1.ball == True:
+                if case1.player.team == case2.player.team:
+                    if abs(case1.y - case2.y) < 3:
+                        if (
+                            case2.x < case1.x
+                            and case1.x - case2.x <= 2
+                            and case1.player.team == "red"
+                        ) or (
+                            case1.x < case2.x
+                            and case2.x - case1.x <= 2
+                            and case2.player.team == "blue"
+                        ):
                             return True
         return False
 
-    def play(self,game):
-        #if not(is_possible(game)) : raise Exception("can't throw")
-        #if truc : interception
-        game.board.move_ball(self.p1[0],self.p1[1],self.p2[0],self.p2[1])
+    def play(self, game):
+        # if not(is_possible(game)) : raise Exception("can't throw")
+        # if truc : interception
+        game.board.move_ball(self.p1[0], self.p1[1], self.p2[0], self.p2[1])
+
 
 def defender(attacker):
-    if attacker=='red':
-        return 'blue'
-    elif attacker=='blue':
-        return 'red'
+    if attacker == "red":
+        return "blue"
+    elif attacker == "blue":
+        return "red"
     else:
-        return 'error'
-def Duell(game,attacker,AskPlayer=False):
-    nbr_cards=len(game.Teams[0].Cards)
-    if AskPlayer:
-        choix1,choix2=1,1
-    else:
-        choix1,choix2=rd.choices(list(range(nbr_cards)))
-    carte1,carte2=game.Teams[0].Cards.pop(choix1),game.Teams[1].Cards.pop(choix2)
-    if carte1>carte2:
-        return 'red'
-    else:
-        return 'blue'
+        return "error"
 
+
+def Duell(game, attacker, AskPlayer=False):
+    nbr_cards = len(game.Teams[0].Cards)
+    if AskPlayer:
+        choix1, choix2 = 1, 1
+    else:
+        choix1, choix2 = rd.choices(list(range(nbr_cards)))
+    carte1, carte2 = game.Teams[0].Cards.pop(choix1), game.Teams[1].Cards.pop(choix2)
+    if carte1 > carte2:
+        return "red"
+    else:
+        return "blue"
 
 
 class Duel(Action):
-
-
-    def play(self,game,step=0):
-        attacker=game.board(self.p1).player.team
-        assert(attacker == game.team_playing)
+    def play(self, game, step=0):
+        attacker = game.board(self.p1).player.team
+        assert attacker == game.team_playing
 
         nbr_cards = len(game.Teams[0].Cards)
-        AskPlayer=False
+        AskPlayer = False
         if AskPlayer:
             choix1, choix2 = 1, 1
         else:
             choix1, choix2 = rd.choices(list(range(nbr_cards)))
-        carte1, carte2 = game.Teams[attacker].Cards.pop(choix1), game.Teams[defender(attacker)].Cards.pop(choix2)
-        player1=game.board(self.p1).player
+        carte1, carte2 = game.Teams[attacker].Cards.pop(choix1), game.Teams[
+            defender(attacker)
+        ].Cards.pop(choix2)
+        player1 = game.board(self.p1).player
         player2 = game.board(self.p2).player
-        score_att=carte1 + player1.att_bonus
-        score_def=carte2 + player2.def_bonus
-        if score_att>score_def:
-            return (attacker,score_att,score_def)
-        elif score_def>score_def:
-            return (defender(attacker),score_def,score_att)
+        score_att = carte1 + player1.att_bonus
+        score_def = carte2 + player2.def_bonus
+        if score_att > score_def:
+            return (attacker, score_att, score_def)
+        elif score_def > score_def:
+            return (defender(attacker), score_def, score_att)
         else:
-            if step>=0:
-                self.play(game,-1)
+            if step >= 0:
+                self.play(game, -1)
             else:
-                return (defender(attacker),score_def,score_att)
+                return (defender(attacker), score_def, score_att)
 
     pass
-class BallKick(Action):
 
-    def is_possible(self,game):
-        case1=game.selected_case1
-        case2=game.selected_case2
+
+class BallKick(Action):
+    def is_possible(self, game):
+        case1 = game.selected_case1
+        case2 = game.selected_case2
         if case1.player is not None:
-            if case1.ball==True:
-                    if abs(case1.y-case2.y)<=3:
-                        if (case2.x > case1.x and case2.x<=3 +case1.x  and case1.player.team=="red") or (case1.x > case2.x and case1.x<=3+case2.x and case2.player.team=='blue'):
-                            return True
+            if case1.ball == True:
+                if abs(case1.y - case2.y) <= 3:
+                    if (
+                        case2.x > case1.x
+                        and case2.x <= 3 + case1.x
+                        and case1.player.team == "red"
+                    ) or (
+                        case1.x > case2.x
+                        and case1.x <= 3 + case2.x
+                        and case2.player.team == "blue"
+                    ):
+                        return True
         return False
 
-    def play(self,game):
+    def play(self, game):
         game.selected_case1.ball = False
         game.selected_case2.ball = True
+
     pass
 
+
 class Plaquage(Action):
+    def play(self, game):
 
-
-    def play(self,game):
-
-        duel=Duel(self.p1,self.p2)
-        res=duel.play(game)
-        attacker=game.team_playing
-        if res[0]==attacker:
-            if res[1]-res[2]>=2:
-                p_ball=self.p1
+        duel = Duel(self.p1, self.p2)
+        res = duel.play(game)
+        attacker = game.team_playing
+        if res[0] == attacker:
+            if res[1] - res[2] >= 2:
+                p_ball = self.p1
             else:
-                p_ball=[self.p2[0]+front(attacker),self.p2[1]]
-                if p_ball[0]<0 or p_ball[0]>game.board.length:
-                    delta_y=self.p2[0]-self.p1[0]
-                    if delta_y!=0:
-                        if p_ball[1]+delta_y<game.board.width and p_ball[1]+delta_y>=0:
-                            p_ball[1]+=delta_y
+                p_ball = [self.p2[0] + front(attacker), self.p2[1]]
+                if p_ball[0] < 0 or p_ball[0] > game.board.length:
+                    delta_y = self.p2[0] - self.p1[0]
+                    if delta_y != 0:
+                        if (
+                            p_ball[1] + delta_y < game.board.width
+                            and p_ball[1] + delta_y >= 0
+                        ):
+                            p_ball[1] += delta_y
                         else:
-                            p_ball[0]-=2*front(attacker)
+                            p_ball[0] -= 2 * front(attacker)
                     else:
-                        #choice
-                        Lp=[[self.p2[0],self.p2[1]+1],[self.p2[0],self.p2[1]-1]]
-                        Lp=[p for p in Lp if p[1]>=0 and p[1]<game.board.width]
-                        p_ball=rd.choice(Lp)
+                        # choice
+                        Lp = [
+                            [self.p2[0], self.p2[1] + 1],
+                            [self.p2[0], self.p2[1] - 1],
+                        ]
+                        Lp = [p for p in Lp if p[1] >= 0 and p[1] < game.board.width]
+                        p_ball = rd.choice(Lp)
             game.board.move_ball(self.p2[0], self.p2[1], p_ball[0], p_ball[1])
             game.board(self.p2).player.is_stunned()
         else:
             game.board(self.p1).player.is_stunned()
 
 
+# essai
 
-
-
-
-#essai
 
 class Team:
-    def __init__(self,name):
-        self._name=name
-        self.Cards=list (range(1,6+1))
+    def __init__(self, name):
+        self._name = name
+        self.Cards = list(range(1, 6 + 1))
+
 
 class Actions:
-    def __init__(self,length,width):
-        self.All_moves=Init_Actions(length,width)
-        self.length=length
-        self.width=width
+    def __init__(self, length, width):
+        self.All_moves = Init_Actions(length, width)
+        self.length = length
+        self.width = width
         self.List_actions = [Plaquage, Pass, BallKick]
-        self.List_actions_names=['plaquages','passes','ballkicks','moves']
-        self.possible_moves=self.All_moves
+        self.List_actions_names = ["plaquages", "passes", "ballkicks", "moves"]
+        self.possible_moves = self.All_moves
 
     def update(self):
 
-        for index,key in enumerate(self.List_actions):
-            self.possible_moves[self.List_actions_names[index]] = [[[] for i in range(self.length)] for j in range(self.width)]
+        for index, key in enumerate(self.List_actions):
+            self.possible_moves[self.List_actions_names[index]] = [
+                [[] for i in range(self.length)] for j in range(self.width)
+            ]
             for i1 in range(self.length):
                 for j1 in range(self.width):
                     for i2 in range(self.length):
                         for j2 in range(self.width):
                             for action in self.All_moves[str(key)][j1][i1]:
                                 if action.is_possible():
-                                    self.possible_moves[self.List_actions_names[index]][j1][i1].append(action)
+                                    self.possible_moves[self.List_actions_names[index]][
+                                        j1
+                                    ][i1].append(action)
 
 
-def Init_Actions(length,width):
-    moves_dict={}
-    List_actions=[Plaquage,Pass,BallKick]
-    list_action_names=['plaquages','passes','ballkicks','moves']
-    for index,key in enumerate(List_actions):
-        moves_dict[list_action_names[index]]=[[[] for i in range(length)] for j in range(width)]
+def Init_Actions(length, width):
+    moves_dict = {}
+    List_actions = [Plaquage, Pass, BallKick]
+    list_action_names = ["plaquages", "passes", "ballkicks", "moves"]
+    for index, key in enumerate(List_actions):
+        moves_dict[list_action_names[index]] = [
+            [[] for i in range(length)] for j in range(width)
+        ]
 
         for i1 in range(length):
             for j1 in range(width):
                 for i2 in range(length):
                     for j2 in range(width):
-                        moves_dict[list_action_names[index]][j1][i1].append(key([i1,j1],[i2,j2]))
+                        moves_dict[list_action_names[index]][j1][i1].append(
+                            key([i1, j1], [i2, j2])
+                        )
     return moves_dict
-
-
-
 
 
 class Game:
     def __init__(self):
-        self._board=Board()
-        self.selected_case1=None #could represent the rugby player who throws the ball
-        self.selected_case2=None
-        self.Teams={'red':Team('red'), 'blue':Team('blue')}
-        self.team_playing='red'
+        self._board = Board()
+        self.selected_case1 = (
+            None  # could represent the rugby player who throws the ball
+        )
+        self.selected_case2 = None
+        self.Teams = {"red": Team("red"), "blue": Team("blue")}
+        self.team_playing = "red"
 
     @property
     def board(self):
         return self._board
 
     def play(self):
-        #initialisation
-        #...
-        win=False
-        actions=Actions(self.board.length,self.board.width)
-        while win==False:
+        # initialisation
+        # ...
+        win = False
+        actions = Actions(self.board.length, self.board.width)
+        while win == False:
             for nb_actions in range(2):
                 actions.update()
-                #choose move
-                #make_move
+                # choose move
+                # make_move
 
-            self.team_playing=defender(self.team_playing)
-
-
+            self.team_playing = defender(self.team_playing)
 
         pass
 
 
-
-
-
-
 def test():
-    player = Fute('red')
+    player = Fute("red")
     board = Board()
     x = 6
     y = 2
@@ -442,16 +483,10 @@ def test():
     if board.square(x, y).player is not None:
         print(board.square(x, y).player.def_bonus)
     else:
-        print('no player')
+        print("no player")
     print(board.square(x2, y2).player.def_bonus)
 
     pass
 
+
 test()
-
-
-
-
-
-
-
