@@ -2,6 +2,7 @@ import constants as cst
 import random as rd
 import controller
 
+
 class RugbyPlayer:
     """
     Contain different properties of a rugby player:1
@@ -11,7 +12,7 @@ class RugbyPlayer:
     """
 
     def __init__(self, team, max_move, att_bonus, def_bonus):
-        assert (team == 'red' or team == 'blue'), f'{team} is not a correct team color.'
+        assert team == "red" or team == "blue", f"{team} is not a correct team color."
         self._team = team
         self._stunned = False
         self._max_move = max_move
@@ -60,7 +61,9 @@ class RugbyPlayer:
 
     def move(self, n):
         """Reduce _available_moves of n moves."""
-        assert n <= self.available_moves, 'The player has not enough available moves to go that far.'
+        assert (
+            n <= self.available_moves
+        ), "The player has not enough available moves to go that far."
         self._available_moves -= n
 
     def reset_moves(self):
@@ -84,7 +87,12 @@ class Ordinaire(RugbyPlayer):
     """Define an 'ordinaire' player with its characteristics."""
 
     def __init__(self, team):
-        super().__init__(team, cst.ORDINAIRE_MAX_MOVE, cst.ORDINAIRE_ATT_BONUS, cst.ORDINAIRE_DEF_BONUS)
+        super().__init__(
+            team,
+            cst.ORDINAIRE_MAX_MOVE,
+            cst.ORDINAIRE_ATT_BONUS,
+            cst.ORDINAIRE_DEF_BONUS,
+        )
 
     def __str__(self):
         return f' {self.team[0]} Ord '
@@ -94,7 +102,9 @@ class Costaud(RugbyPlayer):
     """Define a 'costaud' player with its characteristics."""
 
     def __init__(self, team):
-        super().__init__(team, cst.COSTAUD_MAX_MOVE, cst.COSTAUD_ATT_BONUS, cst.COSTAUD_DEF_BONUS)
+        super().__init__(
+            team, cst.COSTAUD_MAX_MOVE, cst.COSTAUD_ATT_BONUS, cst.COSTAUD_DEF_BONUS
+        )
 
     def __str__(self):
         return f' {self.team[0]} Cos '
@@ -114,7 +124,9 @@ class Rapide(RugbyPlayer):
     """Define a 'rapide' player with its characteristics."""
 
     def __init__(self, team):
-        super().__init__(team, cst.RAPIDE_MAX_MOVE, cst.RAPIDE_ATT_BONUS, cst.RAPIDE_DEF_BONUS)
+        super().__init__(
+            team, cst.RAPIDE_MAX_MOVE, cst.RAPIDE_ATT_BONUS, cst.RAPIDE_DEF_BONUS
+        )
 
     def __str__(self):
         return f' {self.team[0]} Rap '
@@ -124,7 +136,9 @@ class Fute(RugbyPlayer):
     """Define a 'fute' player with its characteristics."""
 
     def __init__(self, team):
-        super().__init__(team, cst.FUTE_MAX_MOVE, cst.FUTE_ATT_BONUS, cst.FUTE_DEF_BONUS)
+        super().__init__(
+            team, cst.FUTE_MAX_MOVE, cst.FUTE_ATT_BONUS, cst.FUTE_DEF_BONUS
+        )
 
     def __str__(self):
         return f' {self.team[0]} Fut '
@@ -230,7 +244,9 @@ class Board:
 
     def move_player(self, x1, y1, x2, y2):
         """Move the player from (x1,y1) to (x2,y2)."""
-        self._squares[self.length * y2 + x2].has_player(self._squares[self.length * y1 + x1].has_not_player())
+        self._squares[self.length * y2 + x2].has_player(
+            self._squares[self.length * y1 + x1].has_not_player()
+        )
 
 
 class Action:
@@ -246,17 +262,16 @@ class Action:
         return self._position2
 
 
-#-Déplacement -Passe -> interception => Duel -coup de pied à suivre -Marquer un essai -Plaquage (parfait) => Duel -Forcer le passage => Duel
+# -Déplacement -Passe -> interception => Duel -coup de pied à suivre -Marquer un essai -Plaquage (parfait) => Duel -Forcer le passage => Duel
 # red à gauche blue à droite #
 
 #other file ?
 def front(team):
-    if team=='red':
+    if team == "red":
         return 1
     else:
         return -1
 
-class Pass(Action):
 
     def is_possible(self,game):
         case1=game.board(self.position1)
@@ -286,10 +301,10 @@ class Pass(Action):
 
 #other file ? in game class ?
 def defender(attacker):
-    if attacker=='red':
-        return 'blue'
-    elif attacker=='blue':
-        return 'red'
+    if attacker == "red":
+        return "blue"
+    elif attacker == "blue":
+        return "red"
     else:
         return 'error'
 
@@ -303,7 +318,7 @@ class Duel(Action):
         assert(attacker == game.team_playing)
 
         nbr_cards = len(game.Teams[0].Cards)
-        AskPlayer=False
+        AskPlayer = False
         if AskPlayer:
             (choix1,choix2)=game.controller.get_cards()
         else:
@@ -318,23 +333,31 @@ class Duel(Action):
         elif score_def>score_def:
             return (defender(attacker),score_def,score_att)
         else:
-            if step>=0:
-                self.play(game,-1)
+            if step >= 0:
+                self.play(game, -1)
             else:
-                return (defender(attacker),score_def,score_att)
+                return (defender(attacker), score_def, score_att)
 
     pass
 
-class BallKick(Action):
 
-    def is_possible(self,game):
-        case1=game.selected_case1
-        case2=game.selected_case2
+class BallKick(Action):
+    def is_possible(self, game):
+        case1 = game.selected_case1
+        case2 = game.selected_case2
         if case1.player is not None:
-            if case1.ball==True:
-                    if abs(case1.y-case2.y)<=3:
-                        if (case2.x > case1.x and case2.x<=3 +case1.x  and case1.player.team=="red") or (case1.x > case2.x and case1.x<=3+case2.x and case2.player.team=='blue'):
-                            return True
+            if case1.ball == True:
+                if abs(case1.y - case2.y) <= 3:
+                    if (
+                        case2.x > case1.x
+                        and case2.x <= 3 + case1.x
+                        and case1.player.team == "red"
+                    ) or (
+                        case1.x > case2.x
+                        and case1.x <= 3 + case2.x
+                        and case2.player.team == "blue"
+                    ):
+                        return True
         return False
 
     def play(self,game):
@@ -354,7 +377,7 @@ class Plaquage(Action):
         return False
 
     def play(self,game):
-
+        
         duel=Duel(self.position1,self.position2)
         res=duel.play(game)
         attacker=game.team_playing
@@ -369,7 +392,7 @@ class Plaquage(Action):
                         if p_ball[1]+delta_y<game.board.width and p_ball[1]+delta_y>=0:
                             p_ball[1]+=delta_y
                         else:
-                            p_ball[0]-=2*front(attacker)
+                            p_ball[0] -= 2 * front(attacker)
                     else:
                         #choice
                         Lp=[[self.position2[0],self.position2[1]+1],[self.position2[0],self.position2[1]-1]]
@@ -424,6 +447,7 @@ class Move(Action):
 def inbound(board,pos):
     return 0 <= pos[0] and pos[0] < board.length and 0 <= pos[1] and pos[1] <board.width
 
+<<<<<<< HEAD
 def neighbours(case):
     res=[]
     for delta0 in [-1,1]:
@@ -448,18 +472,19 @@ def accessibles_cases(path_length,team,board,position1):
 
 def path_exists(path_length,team,board,position1,position2):
     return position2 in accessibles_cases(path_length,team,board,position1)
+=======
+# essai
+>>>>>>> Attempt at fixing format with black
 
-
-
-
-#essai
 
 class Team:
-    def __init__(self,name):
-        self._name=name
-        self.Cards=list (range(1,6+1))
+    def __init__(self, name):
+        self._name = name
+        self.Cards = list(range(1, 6 + 1))
+
 
 class Actions:
+<<<<<<< HEAD
     def __init__(self,length,width):
         self.All_moves={}
 
@@ -482,12 +507,29 @@ class Actions:
 
         for index,key in enumerate(self.actions):
             self.possible_moves[self.action_names[index]] = [[[] for i in range(self.length)] for j in range(self.width)]
+=======
+    def __init__(self, length, width):
+        self.All_moves = Init_Actions(length, width)
+        self.length = length
+        self.width = width
+        self.List_actions = [Plaquage, Pass, BallKick]
+        self.List_actions_names = ["plaquages", "passes", "ballkicks", "moves"]
+        self.possible_moves = self.All_moves
+
+    def update(self):
+
+        for index, key in enumerate(self.List_actions):
+            self.possible_moves[self.List_actions_names[index]] = [
+                [[] for i in range(self.length)] for j in range(self.width)
+            ]
+>>>>>>> Attempt at fixing format with black
             for i1 in range(self.length):
                 for j1 in range(self.width):
                     for i2 in range(self.length):
                         for j2 in range(self.width):
                             for action in self.All_moves[str(key)][j1][i1]:
                                 if action.is_possible():
+<<<<<<< HEAD
                                     self.possible_moves[self.action_names[index]][j1][i1].append(action)
 
 
@@ -497,20 +539,35 @@ def init_actions(length,width):
     list_action_names=['plaquages','passes','ballkicks','moves']
     for index,key in enumerate(list_actions):
         moves_dict[list_action_names[index]]=[[[] for i in range(length)] for j in range(width)]
+=======
+                                    self.possible_moves[self.List_actions_names[index]][
+                                        j1
+                                    ][i1].append(action)
+
+
+def Init_Actions(length, width):
+    moves_dict = {}
+    List_actions = [Plaquage, Pass, BallKick]
+    list_action_names = ["plaquages", "passes", "ballkicks", "moves"]
+    for index, key in enumerate(List_actions):
+        moves_dict[list_action_names[index]] = [
+            [[] for i in range(length)] for j in range(width)
+        ]
+>>>>>>> Attempt at fixing format with black
 
         for i1 in range(length):
             for j1 in range(width):
                 for i2 in range(length):
                     for j2 in range(width):
-                        moves_dict[list_action_names[index]][j1][i1].append(key([i1,j1],[i2,j2]))
+                        moves_dict[list_action_names[index]][j1][i1].append(
+                            key([i1, j1], [i2, j2])
+                        )
     return moves_dict
-
-
-
 
 
 class Game:
     def __init__(self):
+<<<<<<< HEAD
         self._board=Board()
         self.selected_case1=None #could represent the rugby player who throws the ball
         self.selected_case2=None
@@ -519,6 +576,15 @@ class Game:
 
         self.teams={'red':Team('red'), 'blue':Team('blue')}
         self.team_playing='red'
+=======
+        self._board = Board()
+        self.selected_case1 = (
+            None  # could represent the rugby player who throws the ball
+        )
+        self.selected_case2 = None
+        self.Teams = {"red": Team("red"), "blue": Team("blue")}
+        self.team_playing = "red"
+>>>>>>> Attempt at fixing format with black
 
         self.controller=controller.Console()
 
@@ -603,23 +669,22 @@ class Game:
                 print('Unavailable placement.')
 
     def play(self):
-        #initialisation
-        #...
-        win=False
-        actions=Actions(self.board.length,self.board.width)
-        while win==False:
+        # initialisation
+        # ...
+        win = False
+        actions = Actions(self.board.length, self.board.width)
+        while win == False:
             for nb_actions in range(2):
                 actions.update()
-                #choose move
-                #make_move
+                # choose move
+                # make_move
 
-            self.team_playing=defender(self.team_playing)
-
-
+            self.team_playing = defender(self.team_playing)
 
         pass
 
 
+<<<<<<< HEAD
 
 
 
@@ -642,6 +707,10 @@ test_placing()
 
 def test_move_player():
     player = Fute('red')
+=======
+def test():
+    player = Fute("red")
+>>>>>>> Attempt at fixing format with black
     board = Board()
     x = 6
     y = 2
@@ -655,9 +724,10 @@ def test_move_player():
     if board.square(x, y).player is not None:
         print(board.square(x, y).player.def_bonus)
     else:
-        print('no player')
+        print("no player")
     print(board.square(x2, y2).player.def_bonus)
 
     pass
 
 
+test()

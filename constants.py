@@ -1,5 +1,3 @@
-
-
 # Board characteristics
 BOARD_LENGTH = 13
 BOARD_WIDTH = 8
