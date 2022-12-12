@@ -1,5 +1,4 @@
 from flask import Blueprint, render_template, redirect, request
-from flask_socketio import send
 import re
 import random
 

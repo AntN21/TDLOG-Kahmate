@@ -48,5 +48,6 @@ function updateChips(chips) {
 }
 
 socket.on("updateChips", function (data) {
+    console.log("UPDATES CHIPS");
     updateChips(data.chips);
 });    
