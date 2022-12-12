@@ -1,39 +1,80 @@
 {% extends "base.html" %}
 {% block content %}
-<script type="text/javascript" src="../static/board_actions.js"></script>
-<div class="field">
-    <form action="{{ url_for('views.game') }}" method="POST">
-        <div class="board" id="board">
-            {% for row in range(8) %}
-            {% for col in range(11) %}
-            {% set color = "white" if (col + row)%2==0 else "black" %}
-            <button class="{{color}}" id="{{row,col}}" name="next" value="{{row,col}}">
-                {% if 'c' in chips[row][col] %}
-                <image src="../static/clever.png" draggable="false" style="width: 40px; height: 40px;"/>
-                {% endif %}
-                {% if 'f' in chips[row][col] %}
-                <image src="../static/fast.png" draggable="false" style="width: 40px; height: 40px;"/>
-                {% endif %}
-                {% if 'o' in chips[row][col] %}
-                <image src="../static/ordinary.png" draggable="false" style="width: 40px; height: 40px;"/>
-                {% endif %}
-                {% if 's' in chips[row][col] %}
-                <image src="../static/strong.png" draggable="false" style="width: 40px; height: 40px;"/>
-                {% endif %}
-                {% if 't' in chips[row][col] %}
-                <image src="../static/tough.png" draggable="false" style="width: 40px; height: 40px;"/>
-                {% endif %}
-                {% if 'x' in chips[row][col] %}
-                <image src="../static/ko.png" draggable="false" style="width: 40px; height: 40px;"/>
-                {% endif %}
-                {% if 'b' in chips[row][col] %}
-                <image src="../static/ball.png" draggable="false" style="top: 20px;
-                left: 20px; position: absolute; width: 40px;  height: 40px;"/>
-                {% endif %}
-            </button>
-            {% endfor %}
-            {% endfor %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.4/socket.io.js"></script>
+<script type="text/javascript" src="../static/js/board_updater.js"></script>
+<form action="{{ url_for('views.' + player) }}" method="POST")">
+    <div style="display: flex; flex-direction: row;">
+        <div style="display: flex; flex-direction:column; margin: 20px; align-items: center;">
+            <div style="display:flex; flex-direction:row; margin: 10px;">
+                <div class="card" style="background:rgb(0, 30, 255)">
+                    <a style="color: rgb(255, 255, 255); font-size: medium; font-family: Arial; margin: 5px;
+                    text-align: center; padding-left:10px; padding-right: 10px;">{{player_name_1}}</a>
+                </div>  
+                <div class="card" style="background:rgb(255, 0, 0)">
+                    <a style="color: rgb(255, 255, 255); font-size: medium; font-family: Arial; margin: 5px;
+                    text-align: center; padding-left:10px; padding-right: 10px;">{{player_name_2}}</a>
+                </div>
+            </div>
+            <div class="card" style="display: flex; flex-direction: column; justify-content: flex-start; height:auto; padding: 10px;">
+                <a class="team_text" style="color: rgb(255, 255, 255);">{{player}}</a>
+                <div style="display: flex; flex-direction: column;">
+                    <a style="color: rgb(255, 255, 255); font-size: medium; font-family: Arial;">Moves left: 2</a>
+                    <a style="color: rgb(255, 255, 255); font-size: medium; font-family: Arial;">Moves done: 0</a>
+                    <a style="color: rgb(255, 255, 255); font-size: medium; font-family: Arial;">Cards left: 6</a>
+                </div>
+            </div>
         </div>
-    </form>
-</div>
+        <div class="field">
+                <div class="board" id="board">
+                    {% for row in range(8) %}
+                    {% for col in range(11) %}
+                    {% set color = "white" if (col + row)%2==0 else "black" %}
+                    <button class="{{color}}" id="{{row,col}}" name="next" value="{{row,col}}">
+                        {% if "clever_red" in chips[row][col] %}
+                        <image src="../static/images/clever_red.png" draggable="false" style="width: 40px; height: 40px;"/>
+                        {% endif %}
+                        {% if "fast_red" in chips[row][col] %}
+                        <image src="../static/images/fast_red.png" draggable="false" style="width: 40px; height: 40px;"/>
+                        {% endif %}
+                        {% if "ordinary_red" in chips[row][col] %}
+                        <image src="../static/images/ordinary_red.png" draggable="false" style="width: 40px; height: 40px;"/>
+                        {% endif %}
+                        {% if "strong_red" in chips[row][col] %}
+                        <image src="../static/images/strong_red.png" draggable="false" style="width: 40px; height: 40px;"/>
+                        {% endif %}
+                        {% if "tough_red" in chips[row][col] %}
+                        <image src="../static/images/tough_red.png" draggable="false" style="width: 40px; height: 40px;"/>
+                        {% endif %}
+                        {% if "ko_red" in chips[row][col] %}
+                        <image src="../static/images/ko_red.png" draggable="false" style="width: 40px; height: 40px;"/>
+                        {% endif %}
+                        {% if "clever_blue" in chips[row][col] %}
+                        <image src="../static/images/clever_blue.png" draggable="false" style="width: 40px; height: 40px;"/>
+                        {% endif %}
+                        {% if "fast_blue" in chips[row][col] %}
+                        <image src="../static/images/fast_blue.png" draggable="false" style="width: 40px; height: 40px;"/>
+                        {% endif %}
+                        {% if "ordinary_blue" in chips[row][col] %}
+                        <image src="../static/images/ordinary_blue.png" draggable="false" style="width: 40px; height: 40px;"/>
+                        {% endif %}
+                        {% if "strong_blue" in chips[row][col] %}
+                        <image src="../static/images/strong_blue.png" draggable="false" style="width: 40px; height: 40px;"/>
+                        {% endif %}
+                        {% if "tough_blue" in chips[row][col] %}
+                        <image src="../static/images/tough_blue.png" draggable="false" style="width: 40px; height: 40px;"/>
+                        {% endif %}
+                        {% if "ko_blue" in chips[row][col] %}
+                        <image src="../static/images/ko_blue.png" draggable="false" style="width: 40px; height: 40px;"/>
+                        {% endif %}
+                        {% if 'b' in chips[row][col] %}
+                        <image src="../static/images/ball.png" draggable="false" style="top: 20px;
+                        left: 20px; position: absolute; width: 40px;  height: 40px;"/>
+                        {% endif %}
+                    </button>
+                    {% endfor %}
+                    {% endfor %}
+                </div>
+        </div>
+    </div>
+</form>
 {% endblock %}
