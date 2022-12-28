@@ -1,20 +1,25 @@
-from flask import Blueprint, render_template, redirect, request
+"""
+Provides the routing mechanisms
+"""
 import re
+import json
 import random
+from constants import MOVE, PASS, PLACKAGE, FORCED_PASSAGE, BALL_KICK
+from flask import Blueprint, render_template, redirect, request
+import game
+from game import Ordinary
 
 from . import socket
 
 views = Blueprint("views", __name__)
 chips = [["" for x in range(11)] for y in range(8)]
+current_game = game.Game()
 
-player_name_1 = ""
-player_name_2 = ""
+
+PLAYER_NAME_1 = ""
+PLAYER_NAME_2 = ""
 cards_1 = [1, 2, 3, 4, 5, 6]
 cards_2 = [1, 2, 3, 4, 5, 6]
-movements_done_1 = 0
-movements_done_2 = 0
-movements_left_1 = 0
-movements_left_2 = 0
 
 blue_chips = [
     "clever_blue",
@@ -33,53 +38,71 @@ red_chips = [
     "ko_red",
 ]
 
+def player_json(player):
+    return json.loads("{\"team\": \"" + player + "\"}")
 
 def render_game(player):
     return render_template(
         "game.html",
-        chips=chips,
-        player=player,
-        player_name_1=player_name_1,
-        player_name_2=player_name_2,
+        current_game = current_game.to_json(),
+        player_name = player,
+        player_json = player_json(player),
+        player_cards = current_game.teams[player],
+        player_name_1=PLAYER_NAME_1,
+        player_name_2=PLAYER_NAME_2,
     )
 
 
-def game(player, option_chips, request):
+def game_view(player, option_chips, request):
     if request.method == "POST":
         if "next" in request.form:
             position = re.sub(r"[() ]", "", request.form["next"]).split(",")
-            chips[int(position[0])][int(position[1])] = random.choice(option_chips)
-            if random.randint(0, 2) == 1:
-                chips[int(position[0])][int(position[1])] += "ball"
-            socket.emit("updateChips", {"chips": chips})
+            current_game.select_square(position[1], position[0], player)
         if "instructions" in request.form:
             return render_template("instructions.html")
         if "back" in request.form:
             render_game(player)
+        if "next_turn" in request.form:
+            if current_game.team_playing == player:
+                current_game.pass_turn()
+                socket.emit("updateMenu", {"current_game": current_game.to_json()})
+        if "ball_kick" in request.form:
+            current_game.select_action(BALL_KICK, player)
+        if "plackage" in request.form:
+            current_game.select_action(PLACKAGE, player)
+        if "forced_passage" in request.form:
+            current_game.select_action(FORCED_PASSAGE, player)
+        if "move" in request.form:
+            current_game.select_action(MOVE, player)
+        if "pass" in request.form:
+            current_game.select_action(PASS, player)
+
+        socket.emit("updateBoard", {"current_game": current_game.to_json()})
+
     return render_game(player)
 
 
-@views.route("/player_1", methods=["POST", "GET"])
-def player_1():
-    return game("player_1", blue_chips, request)
+@views.route("/red", methods=["POST", "GET"])
+def red():
+    return game_view("red", blue_chips, request)
 
 
-@views.route("/player_2", methods=["POST", "GET"])
-def player_2():
-    return game("player_2", red_chips, request)
+@views.route("/blue", methods=["POST", "GET"])
+def blue():
+    return game_view("blue", red_chips, request)
 
 
 @views.route("/", methods=["POST", "GET"])
 def player_selection():
     if request.method == "POST":
         if "start_game" in request.form:
-            global player_name_1, player_name_2
-            if player_name_1 == "":
-                player_name_1 = request.form["player_name"]
-                return redirect("/player_1")
-            elif player_name_2 == "":
-                player_name_2 = request.form["player_name"]
-                return redirect("/player_2")
+            global PLAYER_NAME_1, PLAYER_NAME_2
+            if PLAYER_NAME_1 == "":
+                PLAYER_NAME_1 = request.form["player_name"]
+                return redirect("/red")
+            if PLAYER_NAME_2 == "":
+                PLAYER_NAME_2 = request.form["player_name"]
+                return redirect("/blue")
         if "instructions" in request.form:
             return render_template("instructions.html")
         if "back" in request.form:

@@ -2,7 +2,7 @@ import game
 
 
 def test_move_player():
-    player = game.Fute('red')
+    player = game.Clever("red")
     board = game.Board()
     x = 6
     y = 2
@@ -13,16 +13,16 @@ def test_move_player():
     board.move_player(x, y, x2, y2)
 
     assert board.square(x, y).player is None
-    assert isinstance(board.square(x2, y2).player, game.Fute)
+    assert isinstance(board.square(x2, y2).player, game.Clever)
 
 
 # Not a good test
 def test_board_str():
     game_test = game.Game(random=True)
 
-    x_ball, y_ball = (game_test.board.length//2, 0)
+    x_ball, y_ball = (game_test.board.width // 2, 0)
     x_player, y_player = (0, 0)
-    for y in range(game_test.board.width):
+    for y in range(game_test.board.height):
         if game_test.board([x_ball, y]).ball:
             y_ball = y
         if game_test.board([1, y]).player is not None:
@@ -35,13 +35,3 @@ def test_board_str():
     game_test.board.move_ball(x_ball, y_ball, x_player, y_player)
 
     print(game_test.board)
-
-
-
-
-
-
-
-
-
-
