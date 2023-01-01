@@ -2,7 +2,7 @@
 {% block content %}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.4/socket.io.js"></script>
 <script language="JavaScript" type="text/javascript" src="../static/js/board_updater.js"></script>
-<form action="{{ url_for('views.' + player_name) }}" method="POST")">
+<form action="{{ url_for('views.' + team) }}" method="POST")">
     <body onload="updateGame({{current_game}}, {{player_json}})">
         <div style="display: flex; flex-direction: row;">
             <div style="display: flex; flex-direction:column; margin: 20px; align-items: center;">
@@ -19,18 +19,24 @@
                 <div class="card" id="player_info_card" style="display: flex; flex-direction: column; justify-content: flex-start; height:auto; padding: 10px;">
                     <a class="team_text" style="color: rgb(255, 255, 255);">{{player_name}}</a>
                     <div style="display: flex; flex-direction: column;">
-                        <a style="color: rgb(255, 255, 255); font-size: medium; font-family: Arial;">Moves left: 2</a>
-                        <a style="color: rgb(255, 255, 255); font-size: medium; font-family: Arial;">Moves done: 0</a>
-                        <a style="color: rgb(255, 255, 255); font-size: medium; font-family: Arial;">Cards left: 6</a>
+                        <a style="color: rgb(255, 255, 255); font-size: medium; font-family: Arial;">Player's moves left:</a>
+                        <a style="color: rgb(255, 255, 255); font-size: medium; font-family: Arial;">Players moved:</a>
+                        <a style="color: rgb(255, 255, 255); font-size: medium; font-family: Arial;">Cards left: []</a>
                     </div>
                 </div>
+                <button class="card" id= "card_1" name="card_1">card 1</button>
+                <button class="card" id= "card_2" name="card_2">card 2</button>
+                <button class="card" id= "card_3" name="card_3">card 3</button>
+                <button class="card" id= "card_4" name="card_4">card 4</button>
+                <button class="card" id= "card_5" name="card_5">card 5</button>
+                <button class="card" id= "card_6" name="card_6">card 6</button>
             </div>
             <div class="field">
                     <div class="board" id="board">
                         {% for row in range(8) %}
                         {% for col in range(11) %}
                         {% set color = "white" if (col + row)%2==0 else "black" %}
-                        <button class="{{color}}" id="{{row,col}}" name="next" value="{{row,col}}"></button>
+                        <button class="{{color}}" id="{{row,col}}" name="square" value="{{row,col}}"></button>
                         {% endfor %}
                         {% endfor %}
                     </div>

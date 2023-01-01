@@ -1,3 +1,7 @@
+"""
+    game contains all game information, it also handles the main functions needed
+    to play the game.
+"""
 import json
 from constants import MOVE, FORCED_PASSAGE, BALL_KICK, PASS, PLACKAGE , BLUE_TEAM, RED_TEAM
 from board import Board
@@ -6,7 +10,7 @@ from players.clever import Clever
 from players.fast import Fast
 from players.strong import Strong
 from players.tough import Tough
-from Actions import accessibles_cases, execute_action
+from actions import accessibles_cases, execute_action
 
 class Team:
     def __init__(self, name):
@@ -61,7 +65,7 @@ class Game:
         return self._board
 
     def initial_placing(self):
-        """Place the players in selected cases"""
+        """Place the players in an initial configuration"""
         height = 0
         for player in self._red_players:
             self._board.put_player(player, 0, height)
@@ -72,6 +76,10 @@ class Game:
             height += 1
 
     def get_availables(self):
+        """
+            This method should return all the available squares when a player and an
+            action are selected.
+        """
         availables = []
         if self._selected_action == MOVE:
             if not self._started:
@@ -80,20 +88,32 @@ class Game:
                     for col in cols:
                         availables.append((col, row))
             if self._started:
-                availables = accessibles_cases(self.selected_case.player.available_moves, self.team_playing, self.board, self.selected_case.get_position())
+                availables = accessibles_cases(self.selected_case.player.available_moves,
+                                               self.team_playing,
+                                               self.board,
+                                               self.selected_case.get_position())
         return availables
 
     def select_square(self, x, y, team):
+        """
+            Selects a square. If a player and an action are already selected it executes the action,
+            if not, it can select a player or diselect the old one.
+            This method updates the selected case (marked with red)
+        """
         if team != self.team_playing:
             return
         self.board.clear_selected()
         selected_case = self.board.square(int(x), int(y))
         if self.selected_case is not None:
             if selected_case.available:
-                duel, selected_case, self._selected_case = execute_action(self._started, self.selected_case, selected_case, self._selected_action)
+                duel, selected_case, self._selected_case = execute_action(self._started,
+                                                                          self.selected_case,
+                                                                          selected_case,
+                                                                          self._selected_action)
                 if duel:
                     self._duel_player_1 = self.selected_case.player
                     self._duel_player_2 = selected_case.player
+                    self._duel = True
             self._selected_case = None
             self.board.clear_selected()
         else:
@@ -103,6 +123,10 @@ class Game:
         self.board.clear_available()
 
     def select_action(self, action, team):
+        """
+            Selects the action that the current team playing takes. Updates the board
+            accordingly showing all available squares.
+        """
         if team != self.team_playing or self._selected_case is None or self._selected_case.player is None:
             return
         self._selected_action = action
@@ -110,14 +134,9 @@ class Game:
         availables = self.get_availables()
         for available in availables:
             self.board.square(available[0], available[1]).set_available(True)
-        return
-
-    def get_status_message(self):
-        if self.team_playing == "starting":
-            return "Move your players in the initial position and then finish your turn"
-        return "It is " + self.team_playing + " player's turn"
 
     def pass_turn(self):
+        """ Finishes a player's turn """
         self._turn += 1
         if self._turn > 1:
             self._started = True
@@ -129,8 +148,7 @@ class Game:
         self.board.clear_available()
         self.board.clear_selected()
         self.team_playing = BLUE_TEAM if self.team_playing == RED_TEAM else RED_TEAM
-        
 
     def to_json(self):
-        self._message = self.get_status_message()
+        """ Converts game to JSON """
         return json.dumps(self, indent=4, default=lambda o: o.__dict__)

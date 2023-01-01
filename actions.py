@@ -361,7 +361,5 @@ def execute_action(started, from_case, to_case, selected_action):
                 from_case.player.move(from_case.l1_distance(to_case))
             to_case.set_player(from_case.player)
             from_case.set_player(None)
-    if selected_action == FORCED_PASSAGE:
-        duel = True
 
     return duel, from_case, to_case

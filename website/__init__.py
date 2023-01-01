@@ -1,14 +1,18 @@
+"""
+Web application initialization file
+"""
 from flask import Flask
 from flask_socketio import SocketIO
 
-socket = None
-
+SOCKET = None
 
 def create_app():
+    """ Creates the app to be used and initiates its socket"""
+
     app = Flask(__name__)
     app.config["SECRET_KEY"] = ""
-    global socket
-    socket = SocketIO(app, cors_allowed_origins="*")
+    global SOCKET
+    SOCKET = SocketIO(app, cors_allowed_origins="*")
 
     from .views import views
 
@@ -17,4 +21,6 @@ def create_app():
 
 
 def run_app(app):
-    socket.run(app, debug=True)
+    """Starts the game application via its socket"""
+
+    SOCKET.run(app, debug=True)
