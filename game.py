@@ -48,9 +48,9 @@ class Game:
     def selected_case(self):
         return self._selected_case
 
-    @property
-    def duel(self):
-        return self._duel
+    #@property
+    #def duel(self):
+    #    return self._duel
 
     @property
     def duel_palayer_1(self):
@@ -134,6 +134,13 @@ class Game:
         availables = self.get_availables()
         for available in availables:
             self.board.square(available[0], available[1]).set_available(True)
+
+    def select_duel_card(self, card, team):
+        """
+            Selects the team's card for a duel, if both players have already selected a card
+            it should resolve the duel and resume the game.
+        """
+        return
 
     def pass_turn(self):
         """ Finishes a player's turn """
