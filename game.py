@@ -66,13 +66,13 @@ class Game:
 
     def initial_placing(self):
         """Place the players in an initial configuration"""
-        height = 0
+        height = 1
         for player in self._red_players:
-            self._board.put_player(player, 0, height)
+            self._board.put_player(player, 4, height)
             height += 1
-        height = 0
+        height = 1
         for player in self._blue_players:
-            self._board.put_player(player, 10, height)
+            self._board.put_player(player, 6, height)
             height += 1
 
     def get_availables(self):

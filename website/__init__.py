@@ -23,4 +23,4 @@ def create_app():
 def run_app(app):
     """Starts the game application via its socket"""
 
-    SOCKET.run(app, debug=True)
+    SOCKET.run(app, debug=True, allow_unsafe_werkzeug=True)
