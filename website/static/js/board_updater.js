@@ -13,16 +13,17 @@ function updateBoard(board) {
     /**
      *   Updates the board squares from a board json object.
      */
-    for (let row = 0; row < board._height; row++) {
-        for (let col = 0; col < board._width; col++) {
+
+    for (let row = 0; row < 8; row++) {
+        for (let col = 0; col < 11; col++) {
             var selected_square_element = document.getElementById('('+String(row)+', '+String(col) + ')')
-            var selected_square_json = board._squares[row * board._width + col]
+            var selected_square_json = board[row * 11 + col]
             var child = selected_square_element.lastElementChild; 
             while (child) {
                 selected_square_element.removeChild(child);
                 child = selected_square_element.lastElementChild;
             }
-            if(selected_square_json._ball) {
+            if(selected_square_json.ball) {
                 var image = document.createElement("img");
                 image.src = get_src("ball");
                 image.draggable = false;
@@ -33,20 +34,19 @@ function updateBoard(board) {
                 image.style.width = "40px";
                 selected_chip.appendChild(image);
             }
-            if(selected_square_json._player) {
+            if(selected_square_json.player) {
                 var image = document.createElement("img");
-                var player_type = selected_square_json._player._type
-                var player_team = selected_square_json._player._team
-                image.src = get_src(player_type+"_"+player_team);
+                var player = selected_square_json.player
+                image.src = get_src(player);
                 image.draggable = false;
                 image.style.width = "40px";
                 image.style.width = "40px";
                 selected_square_element.appendChild(image);
             }
-            if(selected_square_json._available || selected_square_json._selected) {
-                if(selected_square_json._available)
+            if(selected_square_json.available || selected_square_json.selected) {
+                if(selected_square_json.available)
                     selected_square_element.style.borderColor = "white"
-                if(selected_square_json._selected){
+                if(selected_square_json.selected){
                     selected_square_element.style.borderColor = "red"
                 }
             } else {
@@ -80,13 +80,13 @@ function updateMenu(current_game, team) {
     /**
      *   Show all menu buttons that are available in the current game for the designated team
      */
-    console.log(current_game)
     document.getElementById("turn_card").style.backgroundColor = current_game.team_playing;
     document.getElementById("turn_text").innerHTML = "It is " + current_game.team_playing + "'s turn";
     clearMenu()
     if(current_game.team_playing == team.team) {
         document.getElementById("next_turn").style.display = "inline";
 
+        console.log(current_game.actions)
 
         //Check if there is a selected case
         if(current_game._selected_case != null) {
@@ -131,14 +131,14 @@ function updateGameInfo(current_game, player) {
 }
 
 function updateGame(current_game, team) {
-    updateBoard(current_game._board)
+    updateBoard(current_game.board)
     updateGameInfo(current_game, team)
     updateMenu(current_game, team)
 }
 
 socket.on("updateBoard", function (data) {
     this.current_game = JSON.parse(data.current_game);
-    updateBoard(this.current_game._board);
+    updateBoard(this.current_game.board);
 });
 
 socket.on("updateMenu", function (data) {

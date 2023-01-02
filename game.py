@@ -10,7 +10,7 @@ from players.clever import Clever
 from players.fast import Fast
 from players.strong import Strong
 from players.tough import Tough
-from actions import accessibles_cases, execute_action
+from actions import accessibles_cases, execute_action, Actions
 
 class Team:
     def __init__(self, name):
@@ -28,6 +28,9 @@ class Game:
                    Tough(RED_TEAM), Fast(RED_TEAM), Clever(RED_TEAM)]
         self._blue_players = [Ordinary(BLUE_TEAM), Ordinary(BLUE_TEAM), Strong(BLUE_TEAM),
                    Tough(BLUE_TEAM), Fast(BLUE_TEAM), Clever(BLUE_TEAM)]
+
+        self._action_class = Actions(8, 11)
+        self._action_class.update(self)
         self.initial_placing()
         self._started = False
         self._duel = False
@@ -144,6 +147,7 @@ class Game:
 
     def pass_turn(self):
         """ Finishes a player's turn """
+        self._action_class.update(self)
         self._turn += 1
         if self._turn > 1:
             self._started = True
@@ -158,4 +162,17 @@ class Game:
 
     def to_json(self):
         """ Converts game to JSON """
+        
         return json.dumps(self, indent=4, default=lambda o: o.__dict__)
+
+    def toJSON(self):
+        res={}
+        res['team_playing']=self.team_playing
+        res['board']=[]
+        for square in self.board.squares:
+            res['board'].append({'player':None if square.player is None else str(square.player),
+                                'ball':square.ball,
+                                'available':square.available,
+                                'selected':square.selected})
+        res['actions'] = self._action_class.possible_moves
+        return json.dumps(res)
