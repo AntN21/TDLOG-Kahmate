@@ -87,36 +87,38 @@ function updateMenu(current_game, team) {
     if(current_game.team_playing == team.team) {
         document.getElementById("next_turn").style.display = "inline";
 
-        //Check if the selected player can move
-        if(current_game._selected_case._player._available_moves > 0) {
-            document.getElementById("move").style.display = "inline";
-        }
 
-        //Check if the selected player can force its passage
-        if(false/* It has an opposite team player next to itself and move > 1*/) {
-            document.getElementById("forced_passage").style.display = "inline";
-        }
+        //Check if there is a selected case
+        if(current_game._selected_case != null) {
 
-        //Check if the selected player can pass or kick the ball
-        if(current_game._selected_case._ball) {
-            document.getElementById("pass").style.display = "inline";
-
-            if(true/* If it is the most advanced player */)
-                document.getElementById("ball_kick").style.display = "inline";
-        }
-
-        if(current_game._duel) {
-            document.getElementById("card_1").style.display = "inline";
-            document.getElementById("card_2").style.display = "inline";
-            document.getElementById("card_3").style.display = "inline";
-            document.getElementById("card_4").style.display = "inline";
-            document.getElementById("card_5").style.display = "inline";
-            document.getElementById("card_6").style.display = "inline";
+            //Check if the selected player can move
+            if(current_game._selected_case._player._available_moves > 0) {
+                document.getElementById("move").style.display = "inline";
+            }
+    
+            //Check if the selected player can force its passage
+            if(false/* It has an opposite team player next to itself and move > 1*/) {
+                document.getElementById("forced_passage").style.display = "inline";
+            }
+    
+            //Check if the selected player can pass or kick the ball
+            if(current_game._selected_case._ball) {
+                document.getElementById("pass").style.display = "inline";
+    
+                if(true/* If it is the most advanced player */)
+                    document.getElementById("ball_kick").style.display = "inline";
+            }
         }
     }
 
     if(current_game._duel) {
-
+        //Here it should only show the available cards for X team
+        document.getElementById("card_1").style.display = "inline";
+        document.getElementById("card_2").style.display = "inline";
+        document.getElementById("card_3").style.display = "inline";
+        document.getElementById("card_4").style.display = "inline";
+        document.getElementById("card_5").style.display = "inline";
+        document.getElementById("card_6").style.display = "inline";
     }
     //if(current_game._selected_case._player)
 }

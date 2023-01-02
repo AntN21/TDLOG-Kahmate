@@ -43,6 +43,18 @@ def game_view(team, request):
         if "square" in request.form:
             position = re.sub(r"[() ]", "", request.form["square"]).split(",")
             current_game.select_square(position[1], position[0], team)
+        if "card_1" in request.form:
+            current_game.select_duel_card(1, team)
+        if "card_2" in request.form:
+            current_game.select_duel_card(2, team)
+        if "card_3" in request.form:
+            current_game.select_duel_card(3, team)
+        if "card_4" in request.form:
+            current_game.select_duel_card(4, team)
+        if "card_5" in request.form:
+            current_game.select_duel_card(5, team)
+        if "card_6" in request.form:
+            current_game.select_duel_card(6, team)
         if "instructions" in request.form:
             return render_template("instructions.html")
         if "back" in request.form:
