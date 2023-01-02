@@ -1,11 +1,16 @@
-import constants as cst
 import random as rd
+import json
+""""
+Definition of constants
+"""
 
-import random as rd
+import constants as cst
+
+import controller
 
 class RugbyPlayer:
     """
-    Contain different properties of a rugby player:
+    Contain different properties of a rugby player:1
         - if he is stunt or not (bool stunt);
         - his number of maximum movements (int max_move);
         - his bonuses for attack (int att_bonus) and defence (int def_bonus);
@@ -190,8 +195,8 @@ class Board:
         self._length = cst.BOARD_LENGTH
         self._width = cst.BOARD_WIDTH
         self._squares = []
-        for y in range(self.width):
-            for x in range(self.length):
+        for _ in range(self.width):
+            for _ in range(self.length):
                 self._squares.append(Square())
 
     @property
@@ -235,20 +240,31 @@ class Board:
 
 
 class Action:
-    def __init__(self,p1,p2):
-        self._p1=p1
-        self._p2=p2
+    """
+    Represent th differents actions.
+    It has two parameters which are lists of 2 ints representing squares:
+        -position1 represents the square from which the action is done
+        -position2 represents the square targeted by the action
+    """
+
+    def __init__(self,position1,position2):
+        self._position1=position1
+        self._position2=position2
 
     @property
-    def p1(self):
-        return self._p1
+    def position1(self):
+        """Return the position of origin """
+        return self._position1
     @property
-    def p2(self):
-        return self._p2
+    def position2(self):
+        """Return the targeted position"""
+        return self._position2
 
 
 #-Déplacement -Passe -> interception => Duel -coup de pied à suivre -Marquer un essai -Plaquage (parfait) => Duel -Forcer le passage => Duel
 # red à gauche blue à droite #
+
+#other file ?
 def front(team):
     if team=='red':
         return 1
@@ -256,10 +272,11 @@ def front(team):
         return -1
 
 class Pass(Action):
+    """ Represent the action of pass."""
 
     def is_possible(self,game):
-        case1=game.board(self.p1)
-        case2=game.board(self.p2)
+        case1=game.board(self.position1)
+        case2=game.board(self.position2)
         if case1.player is not None and case2.player is not None:
             if case1.ball==True:
                 if case1.player.team==case2.player.team and case1.player.team==game.team_playing:
@@ -271,18 +288,19 @@ class Pass(Action):
     def play(self,game):
         if not(self.is_possible(game)) : raise Exception("can't throw")
         #if truc : interception
-        if min(abs(self.p1[0]-self.p2[0]),abs(self.p1[1]-self.p2[1]))>1:
-            inbetween=[self.p1[0]+(self.p1[0]-self.p2[0])/abs(self.p1[0]-self.p2[0]),self.p1[1]+(self.p1[1]-self.p2[1])/abs(self.p1[1]-self.p2[1])]
+        if min(abs(self.position1[0]-self.position2[0]),abs(self.position1[1]-self.position2[1]))>1:
+            inbetween=[self.position1[0]+(self.position1[0]-self.position2[0])/abs(self.position1[0]-self.position2[0]),self.position1[1]+(self.position1[1]-self.position2[1])/abs(self.position1[1]-self.position2[1])]
             if game.board(inbetween).player.team!=game.team_playing:
-                duel=Duel(self.p1,inbetween)
+                duel=Duel(self.position1,inbetween)
                 winner=duel.play(game)[0]
                 if winner!=game.team_playing:
-                    game.board.move_ball(self.p1[0], self.p1[1], inbetween[0], inbetween[1])
+                    game.board.move_ball(self.position1[0], self.position1[1], inbetween[0], inbetween[1])
                     return "interception"
 
 
-        game.board.move_ball(self.p1[0],self.p1[1],self.p2[0],self.p2[1])
+        game.board.move_ball(self.position1[0],self.position1[1],self.position2[0],self.position2[1])
 
+#other file ? in game class ?
 def defender(attacker):
     if attacker=='red':
         return 'blue'
@@ -290,36 +308,26 @@ def defender(attacker):
         return 'red'
     else:
         return 'error'
-def Duell(game,attacker,AskPlayer=False):
-    nbr_cards=len(game.Teams[0].Cards)
-    if AskPlayer:
-        choix1,choix2=1,1
-    else:
-        choix1,choix2=rd.choices(list(range(nbr_cards)))
-    carte1,carte2=game.Teams[0].Cards.pop(choix1),game.Teams[1].Cards.pop(choix2)
-    if carte1>carte2:
-        return 'red'
-    else:
-        return 'blue'
 
 
 
 class Duel(Action):
+    """Represent a duel"""
 
 
     def play(self,game,step=0):
-        attacker=game.board(self.p1).player.team
+        attacker=game.board(self.position1).player.team
         assert(attacker == game.team_playing)
 
         nbr_cards = len(game.Teams[0].Cards)
         AskPlayer=False
         if AskPlayer:
-            choix1, choix2 = 1, 1
+            (choix1,choix2)=game.controller.get_cards()
         else:
             choix1, choix2 = rd.choices(list(range(nbr_cards)))
         carte1, carte2 = game.Teams[attacker].Cards.pop(choix1), game.Teams[defender(attacker)].Cards.pop(choix2)
-        player1=game.board(self.p1).player
-        player2 = game.board(self.p2).player
+        player1=game.board(self.position1).player
+        player2 = game.board(self.position2).player
         score_att=carte1 + player1.att_bonus
         score_def=carte2 + player2.def_bonus
         if score_att>score_def:
@@ -332,47 +340,48 @@ class Duel(Action):
             else:
                 return (defender(attacker),score_def,score_att)
 
-    pass
+
 class BallKick(Action):
+    """Represent a ballkick"""
+
 
     def is_possible(self,game):
-        case1=game.selected_case1
-        case2=game.selected_case2
-        if case1.player is not None:
-            if case1.ball==True:
-                    if abs(case1.y-case2.y)<=3:
-                        if (case2.x > case1.x and case2.x<=3 +case1.x  and case1.player.team=="red") or (case1.x > case2.x and case1.x<=3+case2.x and case2.player.team=='blue'):
-                            return True
+        square1=game.board(self.position1)
+        player=square1.player
+        if square1.player is not None and square1.ball:
+            if player.team==game.team_playing:
+                if abs(self.position2[1]-self.position1[1])<=3:
+                    if (self.position2[0]-self.position1[0])*front(player.team) <=3 and (self.position2[0]-self.position1[0])*front(player.team) >=1:
+                        return True
         return False
 
     def play(self,game):
-        game.board.move_ball(self.p1[0],self.p1[1],self.p2[0],self.p2[1])
+        game.board.move_ball(self.position1[0],self.position1[1],self.position2[0],self.position2[1])
 
-    pass
 
 class Plaquage(Action):
 
     def is_possible(self,game):
-        if game.board(self.p1).player is not None and game.board(self.p2).player:
-            player1=game.board(self.p1).player
-            player2=game.board(self.p2).player
+        if game.board(self.position1).player is not None and game.board(self.position2).player:
+            player1=game.board(self.position1).player
+            player2=game.board(self.position2).player
             if player1.team!=player2.team:
-                if path_exists(player1.available_moves,player1.team,game.board,self.p1,self.p2):
+                if path_exists(player1.available_moves,player1.team,game.board,self.position1,self.position2):
                     return True
         return False
 
     def play(self,game):
 
-        duel=Duel(self.p1,self.p2)
+        duel=Duel(self.position1,self.position2)
         res=duel.play(game)
         attacker=game.team_playing
         if res[0]==attacker:
             if res[1]-res[2]>=2:
-                p_ball=self.p1
+                p_ball=self.position1
             else:
-                p_ball=[self.p2[0]+front(attacker),self.p2[1]]
+                p_ball=[self.position2[0]+front(attacker),self.position2[1]]
                 if p_ball[0]<0 or p_ball[0]>game.board.length:
-                    delta_y=self.p2[0]-self.p1[0]
+                    delta_y=self.position2[0]-self.position1[0]
                     if delta_y!=0:
                         if p_ball[1]+delta_y<game.board.width and p_ball[1]+delta_y>=0:
                             p_ball[1]+=delta_y
@@ -380,62 +389,62 @@ class Plaquage(Action):
                             p_ball[0]-=2*front(attacker)
                     else:
                         #choice
-                        Lp=[[self.p2[0],self.p2[1]+1],[self.p2[0],self.p2[1]-1]]
+                        Lp=[[self.position2[0],self.position2[1]+1],[self.position2[0],self.position2[1]-1]]
                         Lp=[p for p in Lp if p[1]>=0 and p[1]<game.board.width]
                         p_ball=rd.choice(Lp)
-            game.board.move_ball(self.p2[0], self.p2[1], p_ball[0], p_ball[1])
-            game.board(self.p2).player.is_stunned()
+            game.board.move_ball(self.position2[0], self.position2[1], p_ball[0], p_ball[1])
+            game.board(self.position2).player.is_stunned()
         else:
-            game.board(self.p1).player.is_stunned()
+            game.board(self.position1).player.is_stunned()
 
+#In English
 class PassageEnForce(Action):
     def is_possible(self,game):
-        if game.board(self.p1).player is not None and game.board(self.p2).player:
-            player1=game.board(self.p1).player
-            player2=game.board(self.p2).player
+        if game.board(self.position1).player is not None and game.board(self.position2).player:
+            player1=game.board(self.position1).player
+            player2=game.board(self.position2).player
             if player1.team!=player2.team:
-                if path_exists(player1.available_moves-1,player1.team,game.board,self.p1,self.p2):
+                if path_exists(player1.available_moves-1,player1.team,game.board,self.position1,self.position2):
                     return True
         return False
 
     def play(self,game):
-        duel = Duel(self.p1, self.p2)
+        duel = Duel(self.position1, self.position2)
         winner = duel.play(game)[0]
         attacker = game.team_playing
         if winner == attacker:
-            game.board(self.p2).player.is_stunned()
-            game.board(self.p2).player.lost()
+            game.board(self.position2).player.is_stunned()
+            game.board(self.position2).player.lost()
         else:
-            game.board(self.p1).player.is_stunned()
+            game.board(self.position1).player.is_stunned()
 
 
 
 
 class Move(Action):
     def play(self,game):
-        if game.board(self.p1).ball:
-            game.board.move_ball(self.p1[0],self.p1[1],self.p2[0],self.p2[1])
-        game.board.move_player(self.p1[0],self.p1[1],self.p2[0],self.p2[1])
+        if game.board(self.position1).ball:
+            game.board.move_ball(self.position1[0],self.position1[1],self.position2[0],self.position2[1])
+        game.board.move_player(self.position1[0],self.position1[1],self.position2[0],self.position2[1])
 
     def is_possible(self,game):
-        player=game.board(self.p1).player
+        player=game.board(self.position1).player
         if player is not None:
             if player.team == game.team_playing:
-                if path_exists(player.available_moves,player.team,game.board,self.p1,self.p2):
-                    if game.board(self.p2).player is None:
+                if path_exists(player.available_moves,player.team,game.board,self.position1,self.position2):
+                    if game.board(self.position2).player is None:
                         return True
         return False
 
 
-
+#functions to put in an other file
 def inbound(board,pos):
     return 0 <= pos[0] and pos[0] < board.length and 0 <= pos[1] and pos[1] <board.width
 
 def neighbours(case):
     res=[]
-    for delta0 in [-1,1]:
-        for delta1 in [-1,1]:
-            res.append([case[0]+delta0,case[1]+delta1])
+    for delta in [[0,1],[0,-1],[1,0],[-1,0]]:
+        res.append([case[0]+delta[0],case[1]+delta[1]])
     return res
 
 def accessibles_cases(path_length,team,board,position1):
@@ -448,9 +457,11 @@ def accessibles_cases(path_length,team,board,position1):
         for case in acc_cases:
             for n_case in neighbours(case):
                 if inbound(board,n_case):
+
                     player=board(n_case).player
                     if player is None or player.team == team or player.has_just_lost():
                         new_cases.append(n_case)
+    return acc_cases
 
 
 def path_exists(path_length,team,board,position1,position2):
@@ -485,17 +496,15 @@ class Actions:
                             self.All_moves[self.action_names[index]][j1][i1].append(key([i1, j1], [i2, j2]))
         self.possible_moves=self.All_moves
 
-    def update(self):
+    def update(self,game):
 
         for index,key in enumerate(self.actions):
             self.possible_moves[self.action_names[index]] = [[[] for i in range(self.length)] for j in range(self.width)]
             for i1 in range(self.length):
                 for j1 in range(self.width):
-                    for i2 in range(self.length):
-                        for j2 in range(self.width):
-                            for action in self.All_moves[str(key)][j1][i1]:
-                                if action.is_possible():
-                                    self.possible_moves[self.action_names[index]][j1][i1].append(action)
+                    for action in self.All_moves[str(key)][j1][i1]:
+                        if action.is_possible(game):
+                            self.possible_moves[self.action_names[index]][j1][i1].append(action)
 
 
 def init_actions(length,width):
@@ -522,10 +531,12 @@ class Game:
         self.selected_case1=None #could represent the rugby player who throws the ball
         self.selected_case2=None
 
-        self.input_placing()
+        self.random_placing()
 
         self.teams={'red':Team('red'), 'blue':Team('blue')}
         self.team_playing='red'
+        self.Actions=Actions(self._board.length,self._board.width)
+        self.controller=controller.Console()
 
 
     @property
@@ -612,7 +623,7 @@ class Game:
         #...
         win=False
         actions=Actions(self.board.length,self.board.width)
-        while win==False:
+        while win is False:
             for nb_actions in range(2):
                 actions.update()
                 #choose move
@@ -621,8 +632,30 @@ class Game:
             self.team_playing=defender(self.team_playing)
 
 
+    def toJSON(self):
+        res={}
+        res['team_playing']=self.team_playing
+        res['board']=[]
+        
+        for square in self.board.squares:
+            res['board'].append({'player':str(square.player),'ball':square.ball})
+        return res
 
-        pass
+    def saveJSON(self,name):
+        with open(name, 'w') as json_file:
+            json.dump(self.toJSON(), json_file)
+
+    def loadJSON(self,path):
+        data = json.load(path)
+        n_board=Board()
+        for x in range(n_board.length):
+            for y in range(n_board.width):
+                player=None
+                if data['board'] != 'None':
+                    str_player=data['board'][x+ n_board.length*y]['player']
+                    #traduire str_player
+                n_board.put_player(player,x,y)
+                #n_board.square(x,y).has_ball === data['board'][x+ n_board.length()*y]['ball']
 
 
 
@@ -640,7 +673,7 @@ def test_placing():
         for x in range(game.board.length):
             res += str(game.board([x, y]))
         print(res)
-
+    game.saveJSON("testj")
     pass
 
 test_placing()
@@ -664,21 +697,3 @@ def test_move_player():
     print(board.square(x2, y2).player.def_bonus)
 
     pass
-
-
-
-
-class Controller:
-    def __init__(self):
-        pass
-    def get_case(self):
-
-        return 1,1
-        pass
-
-    def get_card(self):
-
-        return 1
-        pass
-
-
