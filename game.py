@@ -560,6 +560,7 @@ class Game:
                     self._board.put_player(Fute('blue'), x, y)
                 n -= 1
 
+
     def input_placing(self):
         """Place the players according to the inputs."""
 
