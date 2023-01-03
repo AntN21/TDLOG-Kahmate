@@ -1,5 +1,8 @@
 import random as rd
 import json
+import utils
+import game
+
 """"
 Definition of constants
 """
@@ -279,9 +282,9 @@ class Pass(Action):
         case2=game.board(self.position2)
         if case1.player is not None and case2.player is not None:
             if case1.ball==True:
-                if case1.player.team==case2.player.team and case1.player.team==game.team_playing:
-                    if abs(case1.y-case2.y)<3:
-                        if 0< front(game.team_playing)*(case1.x - case2.x) and front(game.team_playint)*(case1.x-case2.x-2)<=0:
+                if case1.player.team==case2.player.team and case1.player.team == game.team_playing:
+                    if abs(self.position1[1]-self.position2[1])<3:
+                        if 0< front(game.team_playing)*(self.position1[0] - self.position2[0]) and front(game.team_playing)*(self.position1[0]-self.position2[0]-2)<=0:
                             return True
         return False
 
@@ -447,25 +450,10 @@ def neighbours(case):
         res.append([case[0]+delta[0],case[1]+delta[1]])
     return res
 
-def accessibles_cases(path_length,team,board,position1):
-    acc_cases=set(position1)
-    new_cases=[]
-    for iter in range(path_length):
-        for new_case in new_cases:
-            acc_cases.add(new_case)
-        new_cases = []
-        for case in acc_cases:
-            for n_case in neighbours(case):
-                if inbound(board,n_case):
-
-                    player=board(n_case).player
-                    if player is None or player.team == team or player.has_just_lost():
-                        new_cases.append(n_case)
-    return acc_cases
 
 
 def path_exists(path_length,team,board,position1,position2):
-    return position2 in accessibles_cases(path_length,team,board,position1)
+    return tuple(position2) in utils.accessibles_cases(path_length,team,board,position1)
 
 
 
@@ -487,7 +475,7 @@ class Actions:
         self.action_names=['plaquages','passes','ballkicks','moves']
 
         for index, key in enumerate(self.actions):
-            self.All_actions[self.action_names[index]] = [[[] for i in range(length)] for j in range(width)]
+            self.all_actions[self.action_names[index]] = [[[] for i in range(length)] for j in range(width)]
 
             for i1 in range(length):
                 for j1 in range(width):
@@ -531,7 +519,8 @@ class Game:
     def board(self):
         return self._board
 
-
+    def update_actions(self):
+        self.actions.update(self)
     def random_placing(self):
         """Place the players randomly in the legal cases."""
 
@@ -649,7 +638,18 @@ class Game:
 
 
 
+def test():
+    game=Game()
+    #game.random_placing()
+    for y in range(game.board.width - 1, -1, -1):
+        res = ''
+        for x in range(game.board.length):
+            res += str(game.board([x, y]))
+        print(res)
+    game.update_actions()
+    a=2
 
+test()
 
 
 
@@ -662,7 +662,6 @@ def test_placing():
             res += str(game.board([x, y]))
         print(res)
     game.saveJSON("testj")
-    game.update()
 
     pass
 
