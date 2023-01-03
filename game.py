@@ -479,47 +479,35 @@ class Team:
 
 class Actions:
     def __init__(self,length,width):
-        self.All_moves={}
+        self.all_actions={}
 
         self.length=length
         self.width=width
-        self.actions = [Plaquage, Pass, BallKick]
+        self.actions = [Plaquage, Pass, BallKick,Move]
         self.action_names=['plaquages','passes','ballkicks','moves']
 
         for index, key in enumerate(self.actions):
-            self.All_moves[self.action_names[index]] = [[[] for i in range(length)] for j in range(width)]
+            self.All_actions[self.action_names[index]] = [[[] for i in range(length)] for j in range(width)]
 
             for i1 in range(length):
                 for j1 in range(width):
                     for i2 in range(length):
                         for j2 in range(width):
-                            self.All_moves[self.action_names[index]][j1][i1].append(key([i1, j1], [i2, j2]))
-        self.possible_moves=self.All_moves
+                            self.all_actions[self.action_names[index]][j1][i1].append(key([i1, j1], [i2, j2]))
+        self.possible_actions = {}
 
     def update(self,game):
 
         for index,key in enumerate(self.actions):
-            self.possible_moves[self.action_names[index]] = [[[] for i in range(self.length)] for j in range(self.width)]
+            self.possible_actions[self.action_names[index]] = [[[] for i in range(self.length)] for j in range(self.width)]
             for i1 in range(self.length):
                 for j1 in range(self.width):
-                    for action in self.All_moves[str(key)][j1][i1]:
+                    for action in self.all_actions[self.action_names[index]][j1][i1]:
                         if action.is_possible(game):
-                            self.possible_moves[self.action_names[index]][j1][i1].append(action)
+                            self.possible_actions[self.action_names[index]][j1][i1].append(action)
 
 
-def init_actions(length,width):
-    moves_dict={}
-    list_actions=[Plaquage,Pass,BallKick]
-    list_action_names=['plaquages','passes','ballkicks','moves']
-    for index,key in enumerate(list_actions):
-        moves_dict[list_action_names[index]]=[[[] for i in range(length)] for j in range(width)]
 
-        for i1 in range(length):
-            for j1 in range(width):
-                for i2 in range(length):
-                    for j2 in range(width):
-                        moves_dict[list_action_names[index]][j1][i1].append(key([i1,j1],[i2,j2]))
-    return moves_dict
 
 
 
@@ -535,7 +523,7 @@ class Game:
 
         self.teams={'red':Team('red'), 'blue':Team('blue')}
         self.team_playing='red'
-        self.Actions=Actions(self._board.length,self._board.width)
+        self.actions=Actions(self._board.length,self._board.width)
         self.controller=controller.Console()
 
 
@@ -674,6 +662,8 @@ def test_placing():
             res += str(game.board([x, y]))
         print(res)
     game.saveJSON("testj")
+    game.update()
+
     pass
 
 test_placing()
