@@ -1,5 +1,6 @@
 import math
 import random as rd
+import copy
 from constants import MOVE, PASS, PLACKAGE, FORCED_PASSAGE, BALL_KICK
 
 
@@ -202,7 +203,7 @@ class Move(Action):
 
 
 def path_exists(path_length,team,board,position1,position2):
-    return position2 in accessibles_cases(path_length,team,board,position1)
+    return tuple(position2) in accessibles_cases(path_length,team,board,position1)
 
 def inbound(board, pos):
     return (0 <= pos[0] < board.width and 0 <= pos[1] < board.height)
@@ -210,7 +211,7 @@ def inbound(board, pos):
 
 class Actions:
     def __init__(self,length,width):
-        self.All_moves={}
+        self.all_moves={}
 
         self.length=length
         self.width=width
@@ -218,21 +219,21 @@ class Actions:
         self.action_names=['plaquages','passes','ballkicks','moves']
 
         for index, key in enumerate(self.actions):
-            self.All_moves[self.action_names[index]] = [[[] for i in range(length)] for j in range(width)]
-
+            self.all_moves[self.action_names[index]] = [[[] for i in range(length)] for j in range(width)]
             for i1 in range(length):
                 for j1 in range(width):
                     for i2 in range(length):
                         for j2 in range(width):
-                            self.All_moves[self.action_names[index]][j1][i1].append(key([i1, j1], [i2, j2]))
-        self.possible_moves=self.All_moves
+                            self.all_moves[self.action_names[index]][j1][i1].append(key([i1, j1], [i2, j2]))
+        self.possible_moves = copy.copy(self.all_moves)
 
     def update(self, game):
-        for index,key in enumerate(self.actions):
+        print("IS POSSIBLE???")
+        for index, key in enumerate(self.actions):
             self.possible_moves[self.action_names[index]] = [[[] for i in range(self.length)] for j in range(self.width)]
             for i1 in range(self.length):
                 for j1 in range(self.width):
-                    for action in self.All_moves[self.action_names[index]][j1][i1]:
+                    for action in self.all_moves[self.action_names[index]][j1][i1]:
                         if action.is_possible(game):
                             self.possible_moves[self.action_names[index]][j1][i1].append(action)
 

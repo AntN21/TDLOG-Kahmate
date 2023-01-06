@@ -29,7 +29,7 @@ class Game:
         self._blue_players = [Ordinary(BLUE_TEAM), Ordinary(BLUE_TEAM), Strong(BLUE_TEAM),
                    Tough(BLUE_TEAM), Fast(BLUE_TEAM), Clever(BLUE_TEAM)]
 
-        self._action_class = Actions(8, 11)
+        self._action_class = Actions(self._board.width, self._board.height)
         self._action_class.update(self)
         self.initial_placing()
         self._started = False
