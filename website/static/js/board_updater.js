@@ -86,7 +86,26 @@ function updateMenu(current_game, team) {
     if(current_game.team_playing == team.team) {
         document.getElementById("next_turn").style.display = "inline";
 
-        console.log(current_game.actions)
+        console.log(current_game.actions);
+        console.log(current_game.selected_case);
+        var selected_case = current_game.selected_case;
+        if(selected_case != undefined) {
+            for(i in current_game.actions) {
+                action = current_game.actions[i]
+                if(action.position_1[0] == selected_case[0] &&
+                    action.position_1[1] == selected_case[1])
+                        if(action.type == "Move")
+                            document.getElementById("move").style.display = "inline";
+                        if(action.type == "Pass")
+                            document.getElementById("pass").style.display = "inline";
+                        if(action.type == "BallKick")
+                            document.getElementById("ball_kick").style.display = "inline";
+                        if(action.type == "Plackage")
+                            document.getElementById("plackage").style.display = "inline";
+
+            }
+        }
+        
 
         //Check if there is a selected case
         if(current_game._selected_case != null) {

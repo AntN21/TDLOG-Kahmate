@@ -29,8 +29,6 @@ class Game:
         self._blue_players = [Ordinary(BLUE_TEAM), Ordinary(BLUE_TEAM), Strong(BLUE_TEAM),
                    Tough(BLUE_TEAM), Fast(BLUE_TEAM), Clever(BLUE_TEAM)]
 
-        self._action_class = Actions(self._board.width, self._board.height)
-        self._action_class.update(self)
         self.initial_placing()
         self._started = False
         self._duel = False
@@ -38,6 +36,8 @@ class Game:
         self._duel_player_2 = None
         self.teams = {RED_TEAM: Team(RED_TEAM), BLUE_TEAM: Team(BLUE_TEAM)}
         self.team_playing = RED_TEAM
+        self._action_class = Actions(self._board.width, self._board.height)
+        self._action_class.update(self)
 
     @property
     def turn(self):
@@ -109,6 +109,16 @@ class Game:
         selected_case = self.board.square(int(x), int(y))
         if self.selected_case is not None:
             if selected_case.available:
+                #for action_type  in self._action_class.possible_moves:
+                #    for initial_line in self._action_class.possible_moves[action_type]:
+                #        for initial_square in initial_line:
+                #            for possible_action in initial_square:
+                #                action_json = {}
+                #                action_json['type'] = action_type
+                #                action_json['position_1'] = possible_action.position1
+                #                action_json['position_2'] = possible_action.position2
+                #                possible_moves.append(action_json)
+
                 duel, selected_case, self._selected_case = execute_action(self._started,
                                                                           self.selected_case,
                                                                           selected_case,
@@ -134,9 +144,16 @@ class Game:
             return
         self._selected_action = action
         self.board.clear_available()
-        availables = self.get_availables()
-        for available in availables:
-            self.board.square(available[0], available[1]).set_available(True)
+        #availables = self.get_availables()
+        #for available in availables:
+        #    self.board.square(available[0], available[1]).set_available(True)
+        for initial_line in self._action_class.possible_moves[action]:
+            for initial_square in initial_line:
+                for possible_action in initial_square:
+                    print(possible_action.position1, self.selected_case.x)
+                    if possible_action.position1[0] == self.selected_case.x and possible_action.position1[1] == self.selected_case.y:
+                        self.board.square(possible_action.position2[0], possible_action.position2[1]).set_available(True)
+
 
     def select_duel_card(self, card, team):
         """
@@ -147,7 +164,6 @@ class Game:
 
     def pass_turn(self):
         """ Finishes a player's turn """
-        self._action_class.update(self)
         self._turn += 1
         if self._turn > 1:
             self._started = True
@@ -159,6 +175,7 @@ class Game:
         self.board.clear_available()
         self.board.clear_selected()
         self.team_playing = BLUE_TEAM if self.team_playing == RED_TEAM else RED_TEAM
+        self._action_class.update(self)
 
     def to_json(self):
         """ Converts game to JSON """
@@ -174,5 +191,22 @@ class Game:
                                 'ball':square.ball,
                                 'available':square.available,
                                 'selected':square.selected})
-        res['actions'] = self._action_class.possible_moves
+        
+        if self.selected_case is not None:
+            selected_case = [self.selected_case.x, self.selected_case.y]
+            res["selected_case"] = selected_case
+        else:
+            res["selected_case"] = None
+
+        possible_moves = []
+        for action_type  in self._action_class.possible_moves:
+            for initial_line in self._action_class.possible_moves[action_type]:
+                for initial_square in initial_line:
+                    for possible_action in initial_square:
+                        action_json = {}
+                        action_json['type'] = action_type
+                        action_json['position_1'] = possible_action.position1
+                        action_json['position_2'] = possible_action.position2
+                        possible_moves.append(action_json)
+        res['actions'] = possible_moves
         return json.dumps(res)

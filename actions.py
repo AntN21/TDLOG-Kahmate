@@ -25,6 +25,12 @@ class Action:
         """Return the targeted position"""
         return self._position2
 
+    def toJSON(self):
+        res={}
+        res['position_1'] = self.position1
+        res['position_2'] = self.position2
+        return res
+
 
 #-Déplacement -Passe -> interception => Duel -coup de pied à suivre -Marquer un essai -Plaquage (parfait) => Duel -Forcer le passage => Duel
 # red à gauche blue à droite #
@@ -216,7 +222,7 @@ class Actions:
         self.length=length
         self.width=width
         self.actions = [Plaquage, Pass, BallKick, Move]
-        self.action_names=['plaquages','passes','ballkicks','moves']
+        self.action_names=[PLACKAGE,PASS,BALL_KICK,MOVE]
 
         for index, key in enumerate(self.actions):
             self.all_moves[self.action_names[index]] = [[[] for i in range(length)] for j in range(width)]
@@ -228,7 +234,6 @@ class Actions:
         self.possible_moves = copy.copy(self.all_moves)
 
     def update(self, game):
-        print("IS POSSIBLE???")
         for index, key in enumerate(self.actions):
             self.possible_moves[self.action_names[index]] = [[[] for i in range(self.length)] for j in range(self.width)]
             for i1 in range(self.length):
@@ -246,9 +251,9 @@ def neighbours(case):
 
 
 def accessibles_cases(path_length, team, board, position1):
-    print(position1)
+    #print(position1)
     acc_cases = set(tuple(i) for i in [position1])
-    print(acc_cases)
+    #print(acc_cases)
     new_cases = []
     for iter in range(path_length):
         for new_case in new_cases:
