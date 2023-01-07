@@ -8,6 +8,3 @@ class Fast(RugbyPlayer):
         super().__init__(
             "fast", team, FAST_MAX_MOVE, FAST_ATT_BONUS, FAST_DEF_BONUS
         )
-
-    def __str__(self):
-        return f"fast_{self.team}"

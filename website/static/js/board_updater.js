@@ -32,7 +32,7 @@ function updateBoard(board) {
                 image.style.position = "absolute";
                 image.style.width = "40px";
                 image.style.width = "40px";
-                selected_chip.appendChild(image);
+                selected_square_element.appendChild(image);
             }
             if(selected_square_json.player) {
                 var image = document.createElement("img");
@@ -129,9 +129,12 @@ function updateMenu(current_game, team) {
             }
         }
     }
+    console.log(current_game);
 
-    if(current_game._duel) {
+    if(current_game.duel != null) {
+        console.log("VISIBLE");
         //Here it should only show the available cards for X team
+        clearMenu();
         document.getElementById("card_1").style.display = "inline";
         document.getElementById("card_2").style.display = "inline";
         document.getElementById("card_3").style.display = "inline";

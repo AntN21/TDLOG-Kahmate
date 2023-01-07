@@ -89,4 +89,6 @@ class RugbyPlayer:
         self.reset_lost()
 
     def __str__(self):
+        if self.stunned:
+            return f"ko_{self.team}"
         return f"{self.type}_{self.team}"

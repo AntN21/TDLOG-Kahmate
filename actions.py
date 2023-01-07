@@ -37,10 +37,7 @@ class Action:
 
 #other file ?
 def front(team):
-    if team=='red':
-        return 1
-    else:
-        return -1
+    return 1 if team=='red' else -1
 
 class Pass(Action):
     """ Represent the action of pass."""
@@ -48,28 +45,25 @@ class Pass(Action):
     def is_possible(self,game):
         case1=game.board(self.position1)
         case2=game.board(self.position2)
-        if case1.player is not None and case2.player is not None:
-            if case1.ball==True:
-                if case1.player.team==case2.player.team and case1.player.team==game.team_playing:
-                    if abs(case1.y-case2.y)<3:
-                        if 0< front(game.team_playing)*(case1.x - case2.x) and front(game.team_playint)*(case1.x-case2.x-2)<=0:
-                            return True
+        if case1.ball and case1.player is not None and case2.player is not None:
+            if case1.player.team == case2.player.team and case1.player.team==game.team_playing:
+                if abs(case1.y-case2.y) < 3 and 0 < front(game.team_playing)*(case1.x - case2.x) <= 2:
+                    return True
         return False
 
     def play(self,game):
         if not(self.is_possible(game)) : raise Exception("can't throw")
         #if truc : interception
-        if min(abs(self.position1[0]-self.position2[0]),abs(self.position1[1]-self.position2[1]))>1:
-            inbetween=[self.position1[0]+(self.position1[0]-self.position2[0])/abs(self.position1[0]-self.position2[0]),self.position1[1]+(self.position1[1]-self.position2[1])/abs(self.position1[1]-self.position2[1])]
-            if game.board(inbetween).player.team!=game.team_playing:
-                duel=Duel(self.position1,inbetween)
-                winner=duel.play(game)[0]
-                if winner!=game.team_playing:
-                    game.board.move_ball(self.position1[0], self.position1[1], inbetween[0], inbetween[1])
-                    return "interception"
-
-
+        #if min(abs(self.position1[0]-self.position2[0]),abs(self.position1[1]-self.position2[1]))>1:
+        #    inbetween=[self.position1[0]+(self.position1[0]-self.position2[0])/abs(self.position1[0]-self.position2[0]),self.position1[1]+(self.position1[1]-self.position2[1])/abs(self.position1[1]-self.position2[1])]
+        #    if game.board(inbetween).player.team != game.team_playing:
+        #        duel=Duel(self.position1,inbetween)
+        #        winner=duel.play(game)[0]
+        #        if winner!=game.team_playing:
+        #            game.board.move_ball(self.position1[0], self.position1[1], inbetween[0], inbetween[1])
+        #            return "interception"
         game.board.move_ball(self.position1[0],self.position1[1],self.position2[0],self.position2[1])
+        return game.board
 
 #other file ? in game class ?
 def defender(attacker):
@@ -80,33 +74,38 @@ def defender(attacker):
     else:
         return 'error'
 
-
-
 class Duel(Action):
     """Represent a duel"""
 
+    def __init__(self, position1, position2):
+        super().__init__(position1, position2)
+        self.attacker_choice = None
+        self.defender_choice = None
 
-    def play(self,game,step=0):
+    def choose_card(self, game, card, team):
+        if team == game.board(self.position1).player.team:
+            self.attacker_choice = card
+        else:
+            self.defender_choice = card
+
+    def is_ready(self):
+        return self.attacker_choice is not None and self.defender_choice is not None
+
+    def play(self, game, step=0):
+        # TODO: HERE MAKING "POP" is not correct, you empty the list. Fix this bug
         attacker=game.board(self.position1).player.team
         assert(attacker == game.team_playing)
-
-        nbr_cards = len(game.Teams[0].Cards)
-        AskPlayer=False
-        if AskPlayer:
-            (choix1,choix2)=game.controller.get_cards()
-        else:
-            choix1, choix2 = rd.choices(list(range(nbr_cards)))
-        carte1, carte2 = game.Teams[attacker].Cards.pop(choix1), game.Teams[defender(attacker)].Cards.pop(choix2)
+        carte1, carte2 = game.teams[attacker].cards.pop(self.attacker_choice - 1), game.teams[defender(attacker)].cards.pop(self.defender_choice - 1)
         player1=game.board(self.position1).player
         player2 = game.board(self.position2).player
         score_att=carte1 + player1.att_bonus
         score_def=carte2 + player2.def_bonus
-        if score_att>score_def:
-            return (attacker,score_att,score_def)
-        elif score_def>score_def:
+        if score_att > score_def:
+            return (attacker, score_att, score_def)
+        elif score_def > score_att:
             return (defender(attacker),score_def,score_att)
         else:
-            if step>=0:
+            if step >= 0:
                 self.play(game,-1)
             else:
                 return (defender(attacker),score_def,score_att)
@@ -115,58 +114,60 @@ class Duel(Action):
 class BallKick(Action):
     """Represent a ballkick"""
 
-
     def is_possible(self,game):
         square1=game.board(self.position1)
         player=square1.player
-        if square1.player is not None and square1.ball:
-            if player.team==game.team_playing:
-                if abs(self.position2[1]-self.position1[1])<=3:
-                    if (self.position2[0]-self.position1[0])*front(player.team) <=3 and (self.position2[0]-self.position1[0])*front(player.team) >=1:
-                        return True
-        return False
-
-    def play(self,game):
-        game.board.move_ball(self.position1[0],self.position1[1],self.position2[0],self.position2[1])
-
-
-class Plaquage(Action):
-
-    def is_possible(self,game):
-        if game.board(self.position1).player is not None and game.board(self.position2).player:
-            player1=game.board(self.position1).player
-            player2=game.board(self.position2).player
-            if player1.team!=player2.team:
-                if path_exists(player1.available_moves,player1.team,game.board,self.position1,self.position2):
+        if square1.player is not None and square1.ball and player.team==game.team_playing:
+            #TODO: We need to check that he is the player in front!!!
+            if abs(self.position2[1]-self.position1[1]) <= 3:
+                if (self.position2[0]-self.position1[0])*front(player.team) <=3 and (self.position2[0]-self.position1[0])*front(player.team) >=1:
                     return True
         return False
 
     def play(self,game):
+        game.board.move_ball(self.position1[0],self.position1[1],self.position2[0],self.position2[1])
+        return game.board
 
-        duel=Duel(self.position1,self.position2)
-        res=duel.play(game)
+class Plaquage(Action):
+
+    def is_possible(self,game):
+        #TODO: You can only plackage a player that has the ball!!!
+        if game.board(self.position1).player is not None and game.board(self.position2).player is not None:
+            player1=game.board(self.position1).player
+            player2=game.board(self.position2).player
+            if game.board(self.position2).ball and player1.team != player2.team:
+                if duel_exists(player1.available_moves, player1.team, game.board, self.position1, self.position2):
+                    return True
+        return False
+
+    def play(self, game):
+        if game.duel is None:
+            return Duel(self.position1,self.position2)
+        res = game.duel.play(game)
         attacker=game.team_playing
         if res[0]==attacker:
             if res[1]-res[2]>=2:
                 p_ball=self.position1
             else:
                 p_ball=[self.position2[0]+front(attacker),self.position2[1]]
-                if p_ball[0]<0 or p_ball[0]>game.board.length:
+                if p_ball[0]<0 or p_ball[0]>game.board.width:
                     delta_y=self.position2[0]-self.position1[0]
                     if delta_y!=0:
-                        if p_ball[1]+delta_y<game.board.width and p_ball[1]+delta_y>=0:
+                        if p_ball[1]+delta_y<game.board.height and p_ball[1]+delta_y>=0:
                             p_ball[1]+=delta_y
                         else:
                             p_ball[0]-=2*front(attacker)
                     else:
                         #choice
                         Lp=[[self.position2[0],self.position2[1]+1],[self.position2[0],self.position2[1]-1]]
-                        Lp=[p for p in Lp if p[1]>=0 and p[1]<game.board.width]
+                        Lp=[p for p in Lp if p[1]>=0 and p[1]<game.board.height]
                         p_ball=rd.choice(Lp)
             game.board.move_ball(self.position2[0], self.position2[1], p_ball[0], p_ball[1])
             game.board(self.position2).player.is_stunned()
         else:
             game.board(self.position1).player.is_stunned()
+
+        return game.board
 
 #In English
 class PassageEnForce(Action):
@@ -188,15 +189,20 @@ class PassageEnForce(Action):
             game.board(self.position2).player.lost()
         else:
             game.board(self.position1).player.is_stunned()
+        return game.board
 
 
 
 
 class Move(Action):
+    # TODO: It should diminish the player's available moves, and check if it is stunned and can move
+    # (Fix this for all actions, because there is no check for stunned players, and add the 2 moves per
+    # turn)
     def play(self,game):
         if game.board(self.position1).ball:
             game.board.move_ball(self.position1[0],self.position1[1],self.position2[0],self.position2[1])
         game.board.move_player(self.position1[0],self.position1[1],self.position2[0],self.position2[1])
+        return game.board
 
     def is_possible(self,game):
         player=game.board(self.position1).player
@@ -207,6 +213,11 @@ class Move(Action):
                         return True
         return False
 
+def duel_exists(path_length, team, board, position1, position2):
+    for pos in accessibles_cases(path_length - 1,team,board,position1):
+        if position2 in neighbours(pos):
+            return True
+    return False
 
 def path_exists(path_length,team,board,position1,position2):
     return tuple(position2) in accessibles_cases(path_length,team,board,position1)
@@ -251,9 +262,8 @@ def neighbours(case):
 
 
 def accessibles_cases(path_length, team, board, position1):
-    #print(position1)
+    # TODO: This function does not work correctly some times, find the bugs
     acc_cases = set(tuple(i) for i in [position1])
-    #print(acc_cases)
     new_cases = []
     for iter in range(path_length):
         for new_case in new_cases:
