@@ -139,8 +139,9 @@ class Plaquage(Action):
             player1=game.board(self.position1).player
             player2=game.board(self.position2).player
             if game.board(self.position2).ball and player1.team != player2.team:
-                if duel_exists(player1.available_moves, player1.team, game.board, self.position1, self.position2):
-                    return True
+                if game.board(self.position2).ball:
+                    if duel_exists(player1.available_moves, player1.team, game.board, self.position1, self.position2):
+                        return True
         return False
 
     def play(self, game):
