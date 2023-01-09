@@ -53,6 +53,12 @@ class RugbyPlayer:
     def available_moves(self):
         """Return the number of available moves of the player."""
         return self._available_moves
+
+    @available_moves.setter
+    def available_moves(self,avail_moves):
+        """Return the number of available moves of the player."""
+        self._available_moves=avail_moves
+
     def reduce_moves(self,steps):
         self._available_moves -= steps
     def is_stunned(self):
