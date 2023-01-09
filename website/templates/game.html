@@ -2,9 +2,14 @@
 {% block content %}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.4/socket.io.js"></script>
 <script language="JavaScript" type="text/javascript" src="../static/js/board_updater.js"></script>
-<form action="{{ url_for('views.' + team) }}" method="POST")">
-    <body onload="updateGame({{current_game}}, {{player_json}})">
-        <div style="display: flex; flex-direction: row;">
+<script>
+    function update() {
+        updateGame({{current_game|tojson|safe}}, "{{client_team}}");
+    }
+</script>
+<form action="{{ url_for('views.' + client_team) }}" method="POST")">
+    <body onload="update()">
+        <div id="all" style="display: none; flex-direction: row;">
             <div style="display: flex; flex-direction:column; margin: 20px; align-items: center;">
                 <div style="display:flex; flex-direction:row; margin: 10px;">
                     <div class="card" style="background:rgb(255, 0,0)">
@@ -19,9 +24,9 @@
                 <div class="card" id="player_info_card" style="display: flex; flex-direction: column; justify-content: flex-start; height:auto; padding: 10px;">
                     <a class="team_text" style="color: rgb(255, 255, 255);">{{player_name}}</a>
                     <div style="display: flex; flex-direction: column;">
-                        <a style="color: rgb(255, 255, 255); font-size: medium; font-family: Arial;">Player's moves left:</a>
-                        <a style="color: rgb(255, 255, 255); font-size: medium; font-family: Arial;">Players moved:</a>
-                        <a style="color: rgb(255, 255, 255); font-size: medium; font-family: Arial;">Cards left: []</a>
+                        <a id="player_moves_left" style="color: rgb(255, 255, 255); font-size: medium; font-family: Arial;">Player's moves left:</a>
+                        <a id="team_moves_left" style="color: rgb(255, 255, 255); font-size: medium; font-family: Arial;">Players moved:</a>
+                        <a id="cards_left" style="color: rgb(255, 255, 255); font-size: medium; font-family: Arial;">Cards left: []</a>
                     </div>
                 </div>
                 <button class="card" id= "card_1" name="card_1" style="display:none">card 1</button>
@@ -34,8 +39,8 @@
             <div class="field">
                     <div class="board" id="board">
                         {% for row in range(8) %}
-                        {% for col in range(11) %}
-                        {% set color = "white" if (col + row)%2==0 else "black" %}
+                        {% for col in range(13) %}
+                        {% set color = "border" if col > 11 or col == 0 else ("white" if (col + row)%2==0 else "black") %}
                         <button class="{{color}}" id="{{row,col}}" name="square" value="{{row,col}}"></button>
                         {% endfor %}
                         {% endfor %}

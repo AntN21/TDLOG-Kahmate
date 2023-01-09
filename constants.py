@@ -1,7 +1,7 @@
 from enum import Enum
 
 # Board characteristics
-BOARD_WIDTH = 11
+BOARD_WIDTH = 13
 BOARD_HEIGHT = 8
 
 # 'ordinary' player characteristics

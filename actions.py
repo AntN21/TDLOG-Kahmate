@@ -134,14 +134,12 @@ class BallKick(Action):
 class Plaquage(Action):
 
     def is_possible(self,game):
-        #TODO: You can only plackage a player that has the ball!!!
         if game.board(self.position1).player is not None and game.board(self.position2).player is not None:
             player1=game.board(self.position1).player
             player2=game.board(self.position2).player
-            if game.board(self.position2).ball and player1.team != player2.team:
-                if game.board(self.position2).ball:
-                    if duel_exists(player1.available_moves, player1.team, game.board, self.position1, self.position2):
-                        return True
+            if game.board(self.position2).ball and not player1.stunned and player1.team != player2.team:
+                if self.position2 in neighbours(self.position1):
+                    return True
         return False
 
     def play(self, game):
@@ -228,12 +226,6 @@ class Move(Action):
                             if game.board(self.position2).player is None:
                                 return True
         return False
-
-def duel_exists(path_length, team, board, position1, position2):
-    for pos in accessibles_cases(path_length - 1,team,board,position1):
-        if position2 in neighbours(pos):
-            return True
-    return False
 
 def path_exists(path_length,team,board,position1,position2):
     return tuple(position2) in accessibles_cases(path_length,team,board,position1)

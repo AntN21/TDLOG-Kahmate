@@ -20,6 +20,13 @@ class Team:
         self.custom_name = custom_name
         self.cards = list(range(1, 6 + 1))
 
+    def to_dict(self):
+        team_json = {}
+        team_json["custom_name"] = self.custom_name
+        team_json["moves_left"] = self.moves
+        team_json["cards"] = self.cards
+        return team_json
+
 class Game:
     def __init__(self):
         self._board = Board()
@@ -61,14 +68,14 @@ class Game:
         height = 0
         for player in [Ordinary(RED_TEAM), Ordinary(RED_TEAM), Strong(RED_TEAM),
                    Tough(RED_TEAM), Fast(RED_TEAM), Clever(RED_TEAM)]:
-            self._board.put_player(player, 0, height)
+            self._board.put_player(player, 1, height)
             height += 1
         height = 0
         for player in [Ordinary(BLUE_TEAM), Ordinary(BLUE_TEAM), Strong(BLUE_TEAM),
                    Tough(BLUE_TEAM), Fast(BLUE_TEAM), Clever(BLUE_TEAM)]:
-            self._board.put_player(player, 10, height)
+            self._board.put_player(player, 11, height)
             height += 1
-        self._board.put_ball(5,rd.randint(1,6))
+        self._board.put_ball(6,rd.randint(1,6))
 
     def set_custom_name(self, team, custom_name):
         self.teams[team].custom_name = custom_name
@@ -115,15 +122,6 @@ class Game:
                     self._board = result
                 else:
                     self._duel = result
-
-                #duel, selected_case, self._selected_case = execute_action(self._started,
-                #                                                          self.selected_case,
-                #                                                          selected_case,
-                #                                                          self._selected_action)
-                #if duel:
-                #    self._duel_player_1 = self.selected_case.player
-                #    self._duel_player_2 = selected_case.player
-                #    self._duel = True
                 self._action_class.update(self)
             self._selected_case = None
             self.board.clear_selected()
@@ -163,13 +161,17 @@ class Game:
             if isinstance(result, Board):
                 self._board = result
                 self._duel = None
-                self.pass_turn()
+                self.pass_turn(self.team_playing)
             else:
                 self._duel = result
         return
 
-    def pass_turn(self):
+    def pass_turn(self, team):
         """ Finishes a player's turn """
+
+        if team != self.team_playing:
+            return
+
         self._turn += 1
         if self._turn > 1:
             self._started = True
@@ -180,23 +182,16 @@ class Game:
         self.team_playing = BLUE_TEAM if self.team_playing == RED_TEAM else RED_TEAM
         self._action_class.update(self)
 
-        # TODO: FIX this. It should diminish the number of "stunned", because
-        # a player can be stunned in both the playing team turn and the opposite team turn
+
         for square in self.board.squares:
             if square.player is not None:
+                square.player.reset_moves()
                 if square.player.team == self.team_playing:
-                    square.player.full_reset()
-
-    def to_json(self):
-        """ Converts game to JSON """
-        
-        return json.dumps(self, indent=4, default=lambda o: o.__dict__)
+                    square.player.recover()
 
     def toJSON(self):
         res={}
         res['team_playing']=self.team_playing
-        res['red_player_name'] = self.teams['red'].custom_name
-        res['blue_player_name'] = self.teams['blue'].custom_name
         res['board']=[]
         for square in self.board.squares:
             res['board'].append({'player': None if square.player is None else str(square.player),
@@ -222,6 +217,12 @@ class Game:
                         possible_moves.append(action_json)
         res['actions'] = possible_moves
 
+
+        team_red = self.teams['red'].to_dict()
+        team_blue = self.teams['blue'].to_dict()
+
+        res["team_red"] = team_red
+        res["team_blue"] = team_blue
 
         if self.duel is not None:
             duel = {}

@@ -16,8 +16,6 @@ current_game = game.Game()
 PLAYER_NAME_1 = ""
 PLAYER_NAME_2 = ""
 
-def player_json(team):
-    return json.loads("{\"team\": \"" + team + "\"}")
 
 def render_game(team):
     """
@@ -28,8 +26,7 @@ def render_game(team):
     return render_template(
         "game.html",
         current_game = current_game.toJSON(),
-        team = team,
-        player_json = player_json(team),
+        client_team = team,
         player_name_1=PLAYER_NAME_1,
         player_name_2=PLAYER_NAME_2,
     )
@@ -45,28 +42,34 @@ def game_view(team, request):
             current_game.select_square(position[1], position[0], team)
         if "card_1" in request.form:
             current_game.select_duel_card(1, team)
+            SOCKET.emit("updateMenu", {"current_game": current_game.toJSON()})
         if "card_2" in request.form:
             current_game.select_duel_card(2, team)
+            SOCKET.emit("updateMenu", {"current_game": current_game.toJSON()})
         if "card_3" in request.form:
             current_game.select_duel_card(3, team)
+            SOCKET.emit("updateMenu", {"current_game": current_game.toJSON()})
         if "card_4" in request.form:
             current_game.select_duel_card(4, team)
+            SOCKET.emit("updateMenu", {"current_game": current_game.toJSON()})
         if "card_5" in request.form:
             current_game.select_duel_card(5, team)
+            SOCKET.emit("updateMenu", {"current_game": current_game.toJSON()})
         if "card_6" in request.form:
             current_game.select_duel_card(6, team)
+            SOCKET.emit("updateMenu", {"current_game": current_game.toJSON()})
         if "instructions" in request.form:
             return render_template("instructions.html")
         if "back" in request.form:
             render_game(team)
         if "next_turn" in request.form:
-            if current_game.team_playing == team:
-                current_game.pass_turn()
-                SOCKET.emit("updateMenu", {"current_game": current_game.toJSON()})
+            current_game.pass_turn(team)
+            SOCKET.emit("updateMenu", {"current_game": current_game.toJSON()})
         if "ball_kick" in request.form:
             current_game.select_action(BALL_KICK, team)
         if "plackage" in request.form:
             current_game.select_action(PLACKAGE, team)
+            SOCKET.emit("updateMenu", {"current_game": current_game.toJSON()})
         if "forced_passage" in request.form:
             current_game.select_action(FORCED_PASSAGE, team)
         if "move" in request.form:
