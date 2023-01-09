@@ -199,6 +199,7 @@ class Move(Action):
     # (Fix this for all actions, because there is no check for stunned players, and add the 2 moves per
     # turn)
     def play(self,game):
+
         game.board.square(self.position1[0], self.position1[1]).player.reduce_moves(
             abs(self.position1[0] - self.position2[0]) + abs(self.position1[1]-self.position2[1]))
 
