@@ -199,18 +199,24 @@ class Move(Action):
     # (Fix this for all actions, because there is no check for stunned players, and add the 2 moves per
     # turn)
     def play(self,game):
+
+        game.board.square(self.position1[0], self.position1[1]).player.reduce_moves(
+            abs(self.position1[0] - self.position2[0]) + abs(self.position1[1]-self.position2[1]))
+
         if game.board(self.position1).ball:
             game.board.move_ball(self.position1[0],self.position1[1],self.position2[0],self.position2[1])
         game.board.move_player(self.position1[0],self.position1[1],self.position2[0],self.position2[1])
+
         return game.board
 
     def is_possible(self,game):
-        player=game.board(self.position1).player
+        player = game.board(self.position1).player
         if player is not None:
             if player.team == game.team_playing:
-                if path_exists(player.available_moves,player.team,game.board,self.position1,self.position2):
-                    if game.board(self.position2).player is None:
-                        return True
+                if not(player.is_stunned()):
+                    if path_exists(player.available_moves,player.team,game.board,self.position1,self.position2):
+                        if game.board(self.position2).player is None:
+                            return True
         return False
 
 def duel_exists(path_length, team, board, position1, position2):
