@@ -135,13 +135,16 @@ function updateMenu(current_game, team) {
         console.log("VISIBLE");
         //Here it should only show the available cards for X team
         clearMenu();
-        document.getElementById("card_1").style.display = "inline";
-        document.getElementById("card_2").style.display = "inline";
-        document.getElementById("card_3").style.display = "inline";
-        document.getElementById("card_4").style.display = "inline";
-        document.getElementById("card_5").style.display = "inline";
-        document.getElementById("card_6").style.display = "inline";
-    }
+        var cards = current_game.team_playing == team.team ? 
+                    current_game.duel.player_1_cards :
+                    current_game.duel.player_2_cards;
+
+        console.log("Cards:", cards, cards.length)
+        for(let i = 0; i < cards.length; i++) {
+            console.log(i, "card_" + cards[i], cards[i])
+            document.getElementById("card_" + cards[i]).style.display = "inline";
+        }
+}
     //if(current_game._selected_case._player)
 }
 
@@ -150,6 +153,9 @@ function updateGameInfo(current_game, player) {
      *   Updates all game info shown (current player's turn, available moves, available cards)
      */
     document.getElementById("player_info_card").style.backgroundColor = player.team;
+    document.getElementById("player_red_custom_name").innerHTML = current_game.red_player_name;
+    document.getElementById("player_blue_custom_name").innerHTML = current_game.blue_player_name;
+
 }
 
 function updateGame(current_game, team) {
@@ -161,9 +167,11 @@ function updateGame(current_game, team) {
 socket.on("updateBoard", function (data) {
     this.current_game = JSON.parse(data.current_game);
     updateBoard(this.current_game.board);
+    updateGameInfo(this.current_game, this.current_game.team_playing)
 });
 
 socket.on("updateMenu", function (data) {
     this.current_game = JSON.parse(data.current_game);
     updateMenu(this.current_game, this.current_game.team_playing);
+    updateGameInfo(this.current_game, this.current_game.team_playing)
 });
