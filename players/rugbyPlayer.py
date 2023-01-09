@@ -53,7 +53,8 @@ class RugbyPlayer:
     def available_moves(self):
         """Return the number of available moves of the player."""
         return self._available_moves
-
+    def reduce_moves(self,steps):
+        self._available_moves -= steps
     def is_stunned(self):
         """Turn the player stunning state into True."""
         self._stunned = True
