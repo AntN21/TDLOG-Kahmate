@@ -14,14 +14,16 @@ from players.tough import Tough
 from actions import accessibles_cases, execute_action, Actions
 
 class Team:
-    def __init__(self, name):
+    def __init__(self, name, custom_name = ""):
         self._name = name
+        self.moves = 2
+        self.custom_name = custom_name
         self.cards = list(range(1, 6 + 1))
 
 class Game:
     def __init__(self):
         self._board = Board()
-        self._turn = 0 
+        self._turn = 0
         self._message = "Starts"
         self._selected_case = None
         self._selected_action = "starting"
@@ -67,6 +69,9 @@ class Game:
             self._board.put_player(player, 10, height)
             height += 1
         self._board.put_ball(5,rd.randint(1,6))
+
+    def set_custom_name(self, team, custom_name):
+        self.teams[team].custom_name = custom_name
 
     def get_availables(self):
         """
@@ -168,18 +173,19 @@ class Game:
         self._turn += 1
         if self._turn > 1:
             self._started = True
-        
+
+        self._selected_case = None
+        self.board.clear_available()
+        self.board.clear_selected()
+        self.team_playing = BLUE_TEAM if self.team_playing == RED_TEAM else RED_TEAM
+        self._action_class.update(self)
+
         # TODO: FIX this. It should diminish the number of "stunned", because
         # a player can be stunned in both the playing team turn and the opposite team turn
         for square in self.board.squares:
             if square.player is not None:
                 if square.player.team == self.team_playing:
                     square.player.full_reset()
-        self._selected_case = None
-        self.board.clear_available()
-        self.board.clear_selected()
-        self.team_playing = BLUE_TEAM if self.team_playing == RED_TEAM else RED_TEAM
-        self._action_class.update(self)
 
     def to_json(self):
         """ Converts game to JSON """
@@ -189,6 +195,8 @@ class Game:
     def toJSON(self):
         res={}
         res['team_playing']=self.team_playing
+        res['red_player_name'] = self.teams['red'].custom_name
+        res['blue_player_name'] = self.teams['blue'].custom_name
         res['board']=[]
         for square in self.board.squares:
             res['board'].append({'player': None if square.player is None else str(square.player),

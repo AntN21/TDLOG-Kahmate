@@ -102,9 +102,13 @@ def player_selection():
             global PLAYER_NAME_1, PLAYER_NAME_2
             if PLAYER_NAME_1 == "":
                 PLAYER_NAME_1 = request.form["player_name"]
+                current_game.set_custom_name("red", PLAYER_NAME_1)
+                SOCKET.emit("updateMenu", {"current_game": current_game.toJSON()})
                 return redirect("/red")
             if PLAYER_NAME_2 == "":
                 PLAYER_NAME_2 = request.form["player_name"]
+                current_game.set_custom_name("blue", PLAYER_NAME_2)
+                SOCKET.emit("updateMenu", {"current_game": current_game.toJSON()})
                 return redirect("/blue")
         if "instructions" in request.form:
             return render_template("instructions.html")

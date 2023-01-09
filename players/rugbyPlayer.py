@@ -12,7 +12,7 @@ class RugbyPlayer:
         assert team == RED_TEAM or team == BLUE_TEAM, f"{team} is not a correct team color."
         self._type = type
         self._team = team
-        self._stunned = False
+        self._stunned_state = 0
         self._max_move = max_move
         self._att_bonus = att_bonus
         self._def_bonus = def_bonus
@@ -32,7 +32,7 @@ class RugbyPlayer:
     @property
     def stunned(self):
         """Return the stunning state of the player."""
-        return self._stunned
+        return self._stunned_state > 0
 
     @property
     def max_move(self):
@@ -54,17 +54,21 @@ class RugbyPlayer:
         """Return the number of available moves of the player."""
         return self._available_moves
 
-    def reduce_moves(self,steps):
-        """Reduce the number of available moves of the player"""
-        self._available_moves -= steps
+    @available_moves.setter
+    def available_moves(self,avail_moves):
+        """Return the number of available moves of the player."""
+        self._available_moves=avail_moves
 
+    def reduce_moves(self,steps):
+        self._available_moves -= steps
     def is_stunned(self):
         """Turn the player stunning state into True."""
-        self._stunned = True
+        self._stunned_state = 2
 
-    def is_not_stunned(self):
-        """Turn the player stunning state into False."""
-        self._stunned = False
+    def recover(self):
+        """Decrease the stunned state of the player."""
+        if self._stunned_state > 0:
+            self._stunned_state -= 1
 
     def move(self, n):
         """Reduce _available_moves of n moves."""
@@ -88,7 +92,7 @@ class RugbyPlayer:
 
     def full_reset(self):
         """Reset the state of the player : stunning state and available moves."""
-        self.is_not_stunned()
+        self.recover()
         self.reset_moves()
         self.reset_lost()
 

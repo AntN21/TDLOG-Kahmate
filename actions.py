@@ -55,14 +55,14 @@ class Pass(Action):
     def play(self,game):
         if not(self.is_possible(game)) : raise Exception("can't throw")
         #if truc : interception
-        #if min(abs(self.position1[0]-self.position2[0]),abs(self.position1[1]-self.position2[1]))>1:
-        #    inbetween=[self.position1[0]+(self.position1[0]-self.position2[0])/abs(self.position1[0]-self.position2[0]),self.position1[1]+(self.position1[1]-self.position2[1])/abs(self.position1[1]-self.position2[1])]
-        #    if game.board(inbetween).player.team != game.team_playing:
-        #        duel=Duel(self.position1,inbetween)
-        #        winner=duel.play(game)[0]
-        #        if winner!=game.team_playing:
-        #            game.board.move_ball(self.position1[0], self.position1[1], inbetween[0], inbetween[1])
-        #            return "interception"
+        if min(abs(self.position1[0]-self.position2[0]),abs(self.position1[1]-self.position2[1]))>1:
+            inbetween=[self.position1[0]+(self.position1[0]-self.position2[0])/abs(self.position1[0]-self.position2[0]),self.position1[1]+(self.position1[1]-self.position2[1])/abs(self.position1[1]-self.position2[1])]
+            if game.board(inbetween).player.team != game.team_playing:
+                duel=Duel(self.position1,inbetween)
+                winner=duel.play(game)[0]
+                if winner!=game.team_playing:
+                    game.board.move_ball(self.position1[0], self.position1[1], inbetween[0], inbetween[1])
+                    return game.board
         game.board.move_ball(self.position1[0],self.position1[1],self.position2[0],self.position2[1])
         return game.board
 
@@ -96,11 +96,13 @@ class Duel(Action):
         # TODO: HERE MAKING "POP" is not correct, you empty the list. Fix this bug
         attacker=game.board(self.position1).player.team
         assert(attacker == game.team_playing)
-        carte1, carte2 = game.teams[attacker].cards.pop(self.attacker_choice - 1), game.teams[defender(attacker)].cards.pop(self.defender_choice - 1)
+        card1, card2 = self.attacker_choice, self.defender_choice
+        game.teams[attacker].cards.remove(self.attacker_choice)
+        game.teams[defender(attacker)].cards.remove(self.defender_choice)
         player1=game.board(self.position1).player
         player2 = game.board(self.position2).player
-        score_att=carte1 + player1.att_bonus
-        score_def=carte2 + player2.def_bonus
+        score_att=card1 + player1.att_bonus
+        score_def=card2 + player2.def_bonus
         if score_att > score_def:
             return (attacker, score_att, score_def)
         elif score_def > score_att:
@@ -200,14 +202,18 @@ class Move(Action):
     # (Fix this for all actions, because there is no check for stunned players, and add the 2 moves per
     # turn)
     def play(self,game):
-
-        game.board.square(self.position1[0], self.position1[1]).player.reduce_moves(
-            abs(self.position1[0] - self.position2[0]) + abs(self.position1[1]-self.position2[1]))
+        player=game.board.square(self.position1[0], self.position1[1]).player
+        if (player.available_moves<player.max_move):
+            player.available_moves= 0
+        else:
+            player.available_moves -=(abs(self.position1[0] - self.position2[0]) + abs(self.position1[1]-self.position2[1]))
+            game.teams[game.team_playing].moves -= 1
 
         if game.board(self.position1).ball:
             game.board.move_ball(self.position1[0],self.position1[1],self.position2[0],self.position2[1])
         game.board.move_player(self.position1[0],self.position1[1],self.position2[0],self.position2[1])
 
+        game.teams[game.team_playing].moves-=1
         return game.board
 
     def is_possible(self,game):
