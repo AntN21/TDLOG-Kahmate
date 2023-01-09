@@ -43,12 +43,13 @@ class Pass(Action):
     """ Represent the action of pass."""
 
     def is_possible(self,game):
-        case1=game.board(self.position1)
-        case2=game.board(self.position2)
+        case1 = game.board(self.position1)
+        case2 = game.board(self.position2)
         if case1.ball and case1.player is not None and case2.player is not None:
-            if case1.player.team == case2.player.team and case1.player.team==game.team_playing:
-                if abs(case1.y-case2.y) < 3 and 0 < front(game.team_playing)*(case1.x - case2.x) <= 2:
+            if case1.player.team == case2.player.team and case1.player.team == game.team_playing:
+                if abs(case1.y - case2.y) < 3 and 0 < front(game.team_playing) * (case1.x - case2.x) <= 2:
                     return True
+
         return False
 
     def play(self,game):
@@ -211,12 +212,14 @@ class Move(Action):
 
     def is_possible(self,game):
         player = game.board(self.position1).player
-        if player is not None:
-            if player.team == game.team_playing:
-                if not(player.is_stunned()):
-                    if path_exists(player.available_moves,player.team,game.board,self.position1,self.position2):
-                        if game.board(self.position2).player is None:
-                            return True
+
+        if game.teams[game.team_playing].moves > 0:
+            if player is not None:
+                if player.team == game.team_playing:
+                    if not(player.is_stunned()):
+                        if path_exists(player.available_moves,player.team,game.board,self.position1,self.position2):
+                            if game.board(self.position2).player is None:
+                                return True
         return False
 
 def duel_exists(path_length, team, board, position1, position2):
