@@ -3,6 +3,7 @@
     to play the game.
 """
 import json
+import random as rd
 from constants import MOVE, FORCED_PASSAGE, BALL_KICK, PASS, PLACKAGE , BLUE_TEAM, RED_TEAM
 from board import Board
 from players.ordinary import Ordinary
@@ -10,12 +11,12 @@ from players.clever import Clever
 from players.fast import Fast
 from players.strong import Strong
 from players.tough import Tough
-from actions import accessibles_cases, execute_action
+from actions import accessibles_cases, execute_action, Actions
 
 class Team:
     def __init__(self, name):
         self._name = name
-        self.Cards = list(range(1, 6 + 1))
+        self.cards = list(range(1, 6 + 1))
 
 class Game:
     def __init__(self):
@@ -24,17 +25,14 @@ class Game:
         self._message = "Starts"
         self._selected_case = None
         self._selected_action = "starting"
-        self._red_players = [Ordinary(RED_TEAM), Ordinary(RED_TEAM), Strong(RED_TEAM),
-                   Tough(RED_TEAM), Fast(RED_TEAM), Clever(RED_TEAM)]
-        self._blue_players = [Ordinary(BLUE_TEAM), Ordinary(BLUE_TEAM), Strong(BLUE_TEAM),
-                   Tough(BLUE_TEAM), Fast(BLUE_TEAM), Clever(BLUE_TEAM)]
+
         self.initial_placing()
         self._started = False
-        self._duel = False
-        self._duel_player_1 = None
-        self._duel_player_2 = None
+        self._duel = None
         self.teams = {RED_TEAM: Team(RED_TEAM), BLUE_TEAM: Team(BLUE_TEAM)}
         self.team_playing = RED_TEAM
+        self._action_class = Actions(self._board.width, self._board.height)
+        self._action_class.update(self)
 
     @property
     def turn(self):
@@ -48,17 +46,9 @@ class Game:
     def selected_case(self):
         return self._selected_case
 
-    #@property
-    #def duel(self):
-    #    return self._duel
-
     @property
-    def duel_palayer_1(self):
-        return self._duel_player_1
-
-    @property
-    def duel_palayer_2(self):
-        return self._duel_player_2
+    def duel(self):
+        return self._duel
 
     @property
     def board(self):
@@ -67,13 +57,16 @@ class Game:
     def initial_placing(self):
         """Place the players in an initial configuration"""
         height = 1
-        for player in self._red_players:
+        for player in [Ordinary(RED_TEAM), Ordinary(RED_TEAM), Strong(RED_TEAM),
+                   Tough(RED_TEAM), Fast(RED_TEAM), Clever(RED_TEAM)]:
             self._board.put_player(player, 4, height)
             height += 1
         height = 1
-        for player in self._blue_players:
+        for player in [Ordinary(BLUE_TEAM), Ordinary(BLUE_TEAM), Strong(BLUE_TEAM),
+                   Tough(BLUE_TEAM), Fast(BLUE_TEAM), Clever(BLUE_TEAM)]:
             self._board.put_player(player, 6, height)
             height += 1
+        self._board.put_ball(5,rd.randint(1,6))
 
     def get_availables(self):
         """
@@ -100,20 +93,33 @@ class Game:
             if not, it can select a player or diselect the old one.
             This method updates the selected case (marked with red)
         """
-        if team != self.team_playing:
+        if team != self.team_playing or self.duel is not None:
             return
         self.board.clear_selected()
         selected_case = self.board.square(int(x), int(y))
         if self.selected_case is not None:
             if selected_case.available:
-                duel, selected_case, self._selected_case = execute_action(self._started,
-                                                                          self.selected_case,
-                                                                          selected_case,
-                                                                          self._selected_action)
-                if duel:
-                    self._duel_player_1 = self.selected_case.player
-                    self._duel_player_2 = selected_case.player
-                    self._duel = True
+                result = None
+                for possible_actions in self._action_class.possible_moves[self._selected_action][self.selected_case.y][self.selected_case.x]:
+                    if possible_actions.position2[0] == selected_case.x and possible_actions.position2[1] == selected_case.y:
+                        result = possible_actions.play(self)
+                    #if possible_action.position1[0] == self.selected_case.x and possible_action.position1[1] == self.selected_case.y:
+                    #    self.board.square(possible_action.position2[0], possible_action.position2[1]).set_available(True)
+
+                if isinstance(result, Board):
+                    self._board = result
+                else:
+                    self._duel = result
+
+                #duel, selected_case, self._selected_case = execute_action(self._started,
+                #                                                          self.selected_case,
+                #                                                          selected_case,
+                #                                                          self._selected_action)
+                #if duel:
+                #    self._duel_player_1 = self.selected_case.player
+                #    self._duel_player_2 = selected_case.player
+                #    self._duel = True
+                self._action_class.update(self)
             self._selected_case = None
             self.board.clear_selected()
         else:
@@ -127,19 +133,34 @@ class Game:
             Selects the action that the current team playing takes. Updates the board
             accordingly showing all available squares.
         """
-        if team != self.team_playing or self._selected_case is None or self._selected_case.player is None:
+        if team != self.team_playing or self._selected_case is None or self._selected_case.player is None or self.duel is not None:
             return
         self._selected_action = action
         self.board.clear_available()
-        availables = self.get_availables()
-        for available in availables:
-            self.board.square(available[0], available[1]).set_available(True)
+        for initial_line in self._action_class.possible_moves[action]:
+            for initial_square in initial_line:
+                for possible_action in initial_square:
+                    if possible_action.position1[0] == self.selected_case.x and possible_action.position1[1] == self.selected_case.y:
+                        self.board.square(possible_action.position2[0], possible_action.position2[1]).set_available(True)
+
 
     def select_duel_card(self, card, team):
         """
             Selects the team's card for a duel, if both players have already selected a card
             it should resolve the duel and resume the game.
         """
+        self.duel.choose_card(self, card, team)
+        if self.duel.is_ready():
+            result = None
+            for possible_actions in self._action_class.possible_moves[self._selected_action][self.duel.position1[1]][self.duel.position1[0]]:
+                if possible_actions.position2[0] == self.duel.position2[0] and possible_actions.position2[1] == self.duel.position2[1]:
+                    result = possible_actions.play(self)
+            if isinstance(result, Board):
+                self._board = result
+                self._duel = None
+                self.pass_turn()
+            else:
+                self._duel = result
         return
 
     def pass_turn(self):
@@ -147,15 +168,59 @@ class Game:
         self._turn += 1
         if self._turn > 1:
             self._started = True
-        for player in self._red_players:
-            player.full_reset()
-        for player in self._blue_players:
-            player.full_reset()
+
+        # TODO: FIX this. It should diminish the number of "stunned", because
+        # a player can be stunned in both the playing team turn and the opposite team turn
+        for square in self.board.squares:
+            if square.player is not None:
+                if square.player.team == self.team_playing:
+                    square.player.full_reset()
         self._selected_case = None
         self.board.clear_available()
         self.board.clear_selected()
         self.team_playing = BLUE_TEAM if self.team_playing == RED_TEAM else RED_TEAM
+        self._action_class.update(self)
 
     def to_json(self):
         """ Converts game to JSON """
+
         return json.dumps(self, indent=4, default=lambda o: o.__dict__)
+
+    def toJSON(self):
+        res={}
+        res['team_playing']=self.team_playing
+        res['board']=[]
+        for square in self.board.squares:
+            res['board'].append({'player': None if square.player is None else str(square.player),
+                                'ball':square.ball,
+                                'available':square.available,
+                                'selected':square.selected})
+
+        if self.selected_case is not None:
+            selected_case = [self.selected_case.x, self.selected_case.y]
+            res["selected_case"] = selected_case
+        else:
+            res["selected_case"] = None
+
+        possible_moves = []
+        for action_type  in self._action_class.possible_moves:
+            for initial_line in self._action_class.possible_moves[action_type]:
+                for initial_square in initial_line:
+                    for possible_action in initial_square:
+                        action_json = {}
+                        action_json['type'] = action_type
+                        action_json['position_1'] = possible_action.position1
+                        action_json['position_2'] = possible_action.position2
+                        possible_moves.append(action_json)
+        res['actions'] = possible_moves
+
+
+        if self.duel is not None:
+            duel = {}
+            duel['player_1_cards'] = self.teams[RED_TEAM].cards
+            duel['player_2_cards'] = self.teams[BLUE_TEAM].cards
+            res['duel'] = duel
+        else:
+            res['duel'] = None
+
+        return json.dumps(res)

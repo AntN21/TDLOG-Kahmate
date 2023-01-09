@@ -8,6 +8,3 @@ class Clever(RugbyPlayer):
         super().__init__(
             "clever", team, CLEVER_MAX_MOVE, CLEVER_ATT_BONUS, CLEVER_DEF_BONUS
         )
-
-    def __str__(self):
-        return f"clever_{self.team}"

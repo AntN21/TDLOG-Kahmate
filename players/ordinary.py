@@ -8,7 +8,4 @@ class Ordinary(RugbyPlayer):
         super().__init__(
             "ordinary", team, ORDINARY_MAX_MOVE, ORDINARY_ATT_BONUS, ORDINARY_DEF_BONUS,
         )
-
-    def __str__(self):
-        return f"ordinary_{self.team}"
         

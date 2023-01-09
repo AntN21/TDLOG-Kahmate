@@ -6,6 +6,3 @@ class Tough(RugbyPlayer):
 
     def __init__(self, team):
         super().__init__("tough", team, TOUGH_MAX_MOVE, TOUGH_ATT_BONUS, TOUGH_DEF_BONUS)
-
-    def __str__(self):
-        return f"tough_{self.team}"
