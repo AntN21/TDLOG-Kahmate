@@ -1,7 +1,7 @@
 import math
 import random as rd
 import copy
-from constants import MOVE, PASS, PLACKAGE, FORCED_PASSAGE, BALL_KICK
+from constants import MOVE, PASS, PLACKAGE, FORCED_PASSAGE, BALL_KICK, RED_TEAM, BLUE_TEAM
 
 
 class Action:
@@ -198,6 +198,7 @@ class Move(Action):
     # TODO: It should diminish the player's available moves, and check if it is stunned and can move
     # (Fix this for all actions, because there is no check for stunned players, and add the 2 moves per
     # turn)
+
     def play(self,game):
         if game.board(self.position1).ball:
             game.board.move_ball(self.position1[0],self.position1[1],self.position2[0],self.position2[1])
@@ -208,8 +209,12 @@ class Move(Action):
         player=game.board(self.position1).player
         if player is not None:
             if player.team == game.team_playing:
-                if path_exists(player.available_moves,player.team,game.board,self.position1,self.position2):
-                    if game.board(self.position2).player is None:
+                if game._started:
+                    if path_exists(player.available_moves,player.team,game.board,self.position1,self.position2):
+                        if game.board(self.position2).player is None:
+                            return True
+                else:       # Initial positioning
+                    if (player.team == RED_TEAM and self.position2[0] in [0,1]) or (player.team == BLUE_TEAM and self.position2[0] in [9,10]):
                         return True
         return False
 

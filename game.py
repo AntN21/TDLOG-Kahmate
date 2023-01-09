@@ -30,7 +30,7 @@ class Game:
         self._started = False
         self._duel = None
         self.teams = {RED_TEAM: Team(RED_TEAM), BLUE_TEAM: Team(BLUE_TEAM)}
-        self.team_playing = RED_TEAM
+        self.team_playing = RED_TEAM if rd.randint(0,1) == 0 else BLUE_TEAM
         self._action_class = Actions(self._board.width, self._board.height)
         self._action_class.update(self)
 
@@ -166,7 +166,7 @@ class Game:
     def pass_turn(self):
         """ Finishes a player's turn """
         self._turn += 1
-        if self._turn > 1:
+        if self._turn > 11:
             self._started = True
 
         # TODO: FIX this. It should diminish the number of "stunned", because
