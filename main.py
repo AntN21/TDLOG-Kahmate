@@ -1,3 +1,6 @@
+"""
+Main of the game
+"""
 from website import create_app, run_app
 
 
