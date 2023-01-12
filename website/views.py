@@ -69,7 +69,6 @@ def game_view(team, request):
             current_game.select_action(BALL_KICK, team)
         if "plackage" in request.form:
             current_game.select_action(PLACKAGE, team)
-            SOCKET.emit("updateMenu", {"current_game": current_game.toJSON()})
         if "forced_passage" in request.form:
             current_game.select_action(FORCED_PASSAGE, team)
         if "move" in request.form:
