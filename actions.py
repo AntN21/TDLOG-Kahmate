@@ -78,10 +78,11 @@ def defender(attacker):
 class Duel(Action):
     """Represent a duel"""
 
-    def __init__(self, position1, position2):
+    def __init__(self, position1, position2, step=0):
         super().__init__(position1, position2)
         self.attacker_choice = None
         self.defender_choice = None
+        self.step = step
 
     def choose_card(self, game, card, team):
         if team == game.board(self.position1).player.team:
@@ -92,11 +93,13 @@ class Duel(Action):
     def is_ready(self):
         return self.attacker_choice is not None and self.defender_choice is not None
 
-    def play(self, game, step=0):
+    def play(self, game):
         # TODO: HERE MAKING "POP" is not correct, you empty the list. Fix this bug
         attacker=game.board(self.position1).player.team
         assert(attacker == game.team_playing)
         card1, card2 = self.attacker_choice, self.defender_choice
+        print("Card chosen attacker:", self.attacker_choice, "All cards:",  game.teams[attacker].cards)
+        print("Card chosen attacker:", self.attacker_choice, "All cards:",  game.teams[attacker].cards)
         game.teams[attacker].cards.remove(self.attacker_choice)
         game.teams[defender(attacker)].cards.remove(self.defender_choice)
         player1=game.board(self.position1).player
@@ -108,8 +111,8 @@ class Duel(Action):
         elif score_def > score_att:
             return (defender(attacker),score_def,score_att)
         else:
-            if step >= 0:
-                self.play(game,-1)
+            if self.step >= 0:
+                return None
             else:
                 return (defender(attacker),score_def,score_att)
 
@@ -146,6 +149,8 @@ class Plaquage(Action):
         if game.duel is None:
             return Duel(self.position1,self.position2)
         res = game.duel.play(game)
+        if res is None:
+            return Duel(self.position1, self.position2, -1)
         attacker=game.team_playing
         if res[0]==attacker:
             if res[1]-res[2]>=2:
@@ -165,9 +170,9 @@ class Plaquage(Action):
                         Lp=[p for p in Lp if p[1]>=0 and p[1]<game.board.height]
                         p_ball=rd.choice(Lp)
             game.board.move_ball(self.position2[0], self.position2[1], p_ball[0], p_ball[1])
-            game.board(self.position2).player.is_stunned()
+            game.board(self.position2).player.set_stunned()
         else:
-            game.board(self.position1).player.is_stunned()
+            game.board(self.position1).player.set_stunned()
 
         return game.board
 
@@ -183,14 +188,18 @@ class PassageEnForce(Action):
         return False
 
     def play(self,game):
-        duel = Duel(self.position1, self.position2)
-        winner = duel.play(game)[0]
+        if game.duel is None:
+            return Duel(self.position1,self.position2)
+        res = game.duel.play(game)
+        if res is None:
+            return Duel(self.position1, self.position2, -1)
+        winner = res[0]
         attacker = game.team_playing
         if winner == attacker:
-            game.board(self.position2).player.is_stunned()
+            game.board(self.position2).player.set_stunned()
             game.board(self.position2).player.lost()
         else:
-            game.board(self.position1).player.is_stunned()
+            game.board(self.position1).player.set_stunned()
         return game.board
 
 
@@ -221,7 +230,7 @@ class Move(Action):
         if game.teams[game.team_playing].moves > 0:
             if player is not None:
                 if player.team == game.team_playing:
-                    if not(player.is_stunned()):
+                    if not(player.stunned):
                         if path_exists(player.available_moves,player.team,game.board,self.position1,self.position2):
                             if game.board(self.position2).player is None:
                                 return True
@@ -284,18 +293,3 @@ def accessibles_cases(path_length, team, board, position1):
                     if player is None or player.has_just_lost():
                         new_cases.append(tuple(n_case))
     return new_cases
-
-
-def execute_duel(player_1, player_2, card_1, card_2):
-    return player_1, player_2
-
-def execute_action(started, from_case, to_case, selected_action):
-    duel = False
-    if selected_action == MOVE:
-        if to_case.player is None:
-            if started:
-                from_case.player.move(from_case.l1_distance(to_case))
-            to_case.set_player(from_case.player)
-            from_case.set_player(None)
-
-    return duel, from_case, to_case

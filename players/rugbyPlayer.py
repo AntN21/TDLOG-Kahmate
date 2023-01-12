@@ -62,7 +62,7 @@ class RugbyPlayer:
     def reduce_moves(self,steps):
         self._available_moves -= steps
 
-    def is_stunned(self):
+    def set_stunned(self):
         """Turn the player stunning state into True."""
         self._stunned_state = 2
 
@@ -98,7 +98,6 @@ class RugbyPlayer:
         self.reset_lost()
 
     def __str__(self):
-        print(self._stunned_state)
         if self.stunned:
             return f"ko_{self.team}"
         return f"{self.type}_{self.team}"

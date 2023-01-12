@@ -11,9 +11,10 @@ from players.clever import Clever
 from players.fast import Fast
 from players.strong import Strong
 from players.tough import Tough
-from actions import accessibles_cases, execute_action, Actions
+from actions import Actions
 
 class Team:
+
     def __init__(self, name, custom_name = ""):
         self._name = name
         self.moves = 2
@@ -79,25 +80,6 @@ class Game:
 
     def set_custom_name(self, team, custom_name):
         self.teams[team].custom_name = custom_name
-
-    def get_availables(self):
-        """
-            This method should return all the available squares when a player and an
-            action are selected.
-        """
-        availables = []
-        if self._selected_action == MOVE:
-            if not self._started:
-                cols = (0, 1) if self.team_playing==RED_TEAM else (9, 10)
-                for row in range(self.board.height):
-                    for col in cols:
-                        availables.append((col, row))
-            if self._started:
-                availables = accessibles_cases(self.selected_case.player.available_moves,
-                                               self.team_playing,
-                                               self.board,
-                                               self.selected_case.get_position())
-        return availables
 
     def select_square(self, x, y, team):
         """
@@ -180,6 +162,7 @@ class Game:
         self.board.clear_available()
         self.board.clear_selected()
         self.team_playing = BLUE_TEAM if self.team_playing == RED_TEAM else RED_TEAM
+        self.teams[self.team_playing].moves = 2
         self._action_class.update(self)
 
 
