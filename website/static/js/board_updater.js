@@ -84,7 +84,13 @@ function updateMenu(current_game, client_team) {
      *   Show all menu buttons that are available in the current game for the designated team
      */
     document.getElementById("turn_card").style.backgroundColor = current_game.team_playing;
-    document.getElementById("turn_text").innerHTML = "It is " + current_game.team_playing + "'s turn";
+    if(current_game.winner != null){
+        document.getElementById("turn_text").innerHTML = "PLAYER " + current_game.winner + " WON!";
+        clearMenu()
+        return
+    } else {
+        document.getElementById("turn_text").innerHTML = "It is " + current_game.team_playing + "'s turn";
+    }
     clearMenu()
     console.log(current_game);
     if(current_game.team_playing == client_team) {
@@ -97,8 +103,8 @@ function updateMenu(current_game, client_team) {
             for(i in current_game.actions) {
 
                 action = current_game.actions[i]
-                if(action.position_1[0] == selected_case[0] &&
-                    action.position_1[1] == selected_case[1]) {
+                if(action.position_1[0] == selected_case.position[0] &&
+                    action.position_1[1] == selected_case.position[1]) {
                     if(action.type == "Move")
                         document.getElementById("move").style.display = "inline";
                     if(action.type == "Pass")
@@ -108,29 +114,6 @@ function updateMenu(current_game, client_team) {
                     if(action.type == "Plackage")
                        document.getElementById("plackage").style.display = "inline";
                 }
-            }
-        }
-        
-
-        //Check if there is a selected case
-        if(current_game._selected_case != null) {
-
-            //Check if the selected player can move
-            if(current_game._selected_case._player._available_moves > 0) {
-                document.getElementById("move").style.display = "inline";
-            }
-    
-            //Check if the selected player can force its passage
-            if(false/* It has an opposite team player next to itself and move > 1*/) {
-                document.getElementById("forced_passage").style.display = "inline";
-            }
-    
-            //Check if the selected player can pass or kick the ball
-            if(current_game._selected_case._ball) {
-                document.getElementById("pass").style.display = "inline";
-    
-                if(true/* If it is the most advanced player */)
-                    document.getElementById("ball_kick").style.display = "inline";
             }
         }
     }
@@ -158,8 +141,13 @@ function updateGameInfo(current_game, client_team) {
     document.getElementById("player_red_custom_name").innerHTML = current_game.team_red.custom_name;
     document.getElementById("player_blue_custom_name").innerHTML = current_game.team_blue.custom_name;
     var team = client_team == "red" ? current_game.team_red : current_game.team_blue; 
-    document.getElementById("player_moves_left").innerHTML = "Selected?";
-    document.getElementById("team_moves_left").innerHTML = "Moves left: " + team.moves_left;
+    if(current_game.selected_case != null){
+        document.getElementById("player_moves_left").innerHTML = "Moves left: " + current_game.selected_case.movements_left;
+    } else {
+        document.getElementById("player_moves_left").innerHTML = "";
+    }
+    
+    document.getElementById("team_moves_left").innerHTML = "Moves left: " + (2-team.players_moved.length);
     document.getElementById("cards_left").innerHTML = "Cards left: " + team.cards;
     
 }

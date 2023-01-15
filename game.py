@@ -17,14 +17,14 @@ class Team:
 
     def __init__(self, name, custom_name = ""):
         self._name = name
-        self.moves = 2
+        self.players_moved = []
         self.custom_name = custom_name
         self.cards = list(range(1, 6 + 1))
 
     def to_dict(self):
         team_json = {}
         team_json["custom_name"] = self.custom_name
-        team_json["moves_left"] = self.moves
+        team_json["players_moved"] = [str(player) for player in self.players_moved]
         team_json["cards"] = self.cards
         return team_json
 
@@ -34,7 +34,7 @@ class Game:
         self._turn = 0
         self._selected_case = None
         self._selected_action = "starting"
-
+        self._winner = None
         self.initial_placing()
         self._started = False
         self._duel = None
@@ -54,6 +54,10 @@ class Game:
     @property
     def duel(self):
         return self._duel
+
+    @property
+    def winner(self):
+        return self._winner
 
     @property
     def board(self):
@@ -97,6 +101,9 @@ class Game:
 
                 if isinstance(result, Board):
                     self._board = result
+                    goal = 12 if self.team_playing == "red" else 0
+                    if selected_case.x == goal:
+                        self._winner = self.team_playing
                 else:
                     self._duel = result
                 self._action_class.update(self)
@@ -148,7 +155,8 @@ class Game:
 
         if team != self.team_playing:
             return
-
+        if self._winner is not None:
+            return
         self._turn += 1
         if self._turn > 1:
             self._started = True
@@ -157,7 +165,7 @@ class Game:
         self.board.clear_available()
         self.board.clear_selected()
         self.team_playing = BLUE_TEAM if self.team_playing == RED_TEAM else RED_TEAM
-        self.teams[self.team_playing].moves = 2
+        self.teams[self.team_playing].players_moved = []
         self._action_class.update(self)
 
 
@@ -178,7 +186,9 @@ class Game:
                                 'selected':square.selected})
         
         if self.selected_case is not None:
-            selected_case = [self.selected_case.x, self.selected_case.y]
+            selected_case = {}
+            selected_case["position"] = [self.selected_case.x, self.selected_case.y]
+            selected_case["movements_left"] = self.selected_case.player.available_moves
             res["selected_case"] = selected_case
         else:
             res["selected_case"] = None
@@ -211,5 +221,10 @@ class Game:
             res['duel'] = duel
         else:
             res['duel'] = None
+
+        if self.winner is not None:
+            res['winner'] = self.team_playing
+        else:
+            res['winner'] = None
 
         return json.dumps(res)

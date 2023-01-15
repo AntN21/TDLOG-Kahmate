@@ -98,8 +98,6 @@ class Duel(Action):
         attacker=game.board(self.position1).player.team
         assert(attacker == game.team_playing)
         card1, card2 = self.attacker_choice, self.defender_choice
-        print("Card chosen attacker:", self.attacker_choice, "All cards:",  game.teams[attacker].cards)
-        print("Card chosen attacker:", self.attacker_choice, "All cards:",  game.teams[attacker].cards)
         game.teams[attacker].cards.remove(self.attacker_choice)
         game.teams[defender(attacker)].cards.remove(self.defender_choice)
         if len(game.teams[attacker].cards) == 0:
@@ -213,29 +211,27 @@ class Move(Action):
     # (Fix this for all actions, because there is no check for stunned players, and add the 2 moves per
     # turn)
     def play(self,game):
-        player=game.board.square(self.position1[0], self.position1[1]).player
-        if (player.available_moves<player.max_move):
-            player.available_moves= 0
-        else:
-            player.available_moves -=(abs(self.position1[0] - self.position2[0]) + abs(self.position1[1]-self.position2[1]))
-            game.teams[game.team_playing].moves -= 1
+        player = game.board.square(self.position1[0], self.position1[1]).player
+        if player not in game.teams[game.team_playing].players_moved:
+            game.teams[game.team_playing].players_moved.append(player)
+        player.available_moves -=(abs(self.position1[0] - self.position2[0]) + abs(self.position1[1]-self.position2[1]))
 
         if game.board(self.position1).ball:
             game.board.move_ball(self.position1[0],self.position1[1],self.position2[0],self.position2[1])
         game.board.move_player(self.position1[0],self.position1[1],self.position2[0],self.position2[1])
 
-        game.teams[game.team_playing].moves-=1
         return game.board
 
     def is_possible(self,game):
         player = game.board(self.position1).player
-
-        if game.teams[game.team_playing].moves > 0:
-            if player is not None:
-                if player.team == game.team_playing:
-                    if not(player.stunned):
+        has_ball = game.board(self.position1).ball
+        if player is not None:
+            if player.team == game.team_playing:
+                if player in game.teams[game.team_playing].players_moved or len(game.teams[game.team_playing].players_moved) < 2:
+                    if not(player.stunned) and player.available_moves > 0:
                         if path_exists(player.available_moves,player.team,game.board,self.position1,self.position2):
-                            if game.board(self.position2).player is None:
+                            (goal, back) = (12, 0) if game.team_playing == "red" else (0, 12)
+                            if game.board(self.position2).player is None and not self.position2[0] == back and ((self.position2[0] == goal and has_ball) or not self.position2[0] == goal):
                                 return True
         return False
 

@@ -65,6 +65,7 @@ def game_view(team, request):
         if "next_turn" in request.form:
             current_game.pass_turn(team)
             SOCKET.emit("updateMenu", {"current_game": current_game.toJSON()})
+            SOCKET.emit("updateGameInfo", {"current_game": current_game.toJSON()})
         if "ball_kick" in request.form:
             current_game.select_action(BALL_KICK, team)
         if "plackage" in request.form:
@@ -78,6 +79,9 @@ def game_view(team, request):
 
         SOCKET.emit("updateBoard", {"current_game": current_game.toJSON()})
         if current_game.duel is not None:
+            SOCKET.emit("updateMenu", {"current_game": current_game.toJSON()})
+        if current_game.winner is not None:
+            SOCKET.emit("updateGameInfo", {"current_game": current_game.toJSON()})
             SOCKET.emit("updateMenu", {"current_game": current_game.toJSON()})
 
     return render_game(team)
