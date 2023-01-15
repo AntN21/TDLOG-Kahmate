@@ -32,7 +32,6 @@ class Game:
     def __init__(self):
         self._board = Board()
         self._turn = 0
-        self._message = "Starts"
         self._selected_case = None
         self._selected_action = "starting"
 
@@ -47,10 +46,6 @@ class Game:
     @property
     def turn(self):
         return self._turn
-
-    @property
-    def message(self):
-        return self._message
 
     @property
     def selected_case(self):
@@ -209,8 +204,10 @@ class Game:
 
         if self.duel is not None:
             duel = {}
-            duel['player_1_cards'] = self.teams[RED_TEAM].cards
-            duel['player_2_cards'] = self.teams[BLUE_TEAM].cards
+            duel['team_1_cards'] = self.teams[RED_TEAM].cards
+            duel['team_2_cards'] = self.teams[BLUE_TEAM].cards
+            duel['team_1_fighter'] = str(self.board.square(self._duel.position1[0], self._duel.position1[1]).player)
+            duel['team_2_fighter'] = str(self.board.square(self._duel.position2[0], self._duel.position2[1]).player)
             res['duel'] = duel
         else:
             res['duel'] = None

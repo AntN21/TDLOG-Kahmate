@@ -136,13 +136,17 @@ function updateMenu(current_game, client_team) {
     }
 
     if(current_game.duel != null) {
+        document.getElementById("duel_menu").style.display = "flex";
+        document.getElementById("duel_info").innerHTML = current_game.duel.team_1_fighter + " vs " + current_game.duel.team_2_fighter
         clearMenu();
         var cards = current_game.team_playing == client_team.team_json ? 
-                    current_game.duel.player_1_cards :
-                    current_game.duel.player_2_cards;
+                    current_game.duel.team_1_cards :
+                    current_game.duel.team_2_cards;
         for(let i = 0; i < cards.length; i++) {
             document.getElementById("card_" + cards[i]).style.display = "inline";
         }
+    } else {
+        document.getElementById("duel_menu").style.display = "None";
     }
 }
 

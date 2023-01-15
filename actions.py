@@ -102,6 +102,9 @@ class Duel(Action):
         print("Card chosen attacker:", self.attacker_choice, "All cards:",  game.teams[attacker].cards)
         game.teams[attacker].cards.remove(self.attacker_choice)
         game.teams[defender(attacker)].cards.remove(self.defender_choice)
+        if len(game.teams[attacker].cards) == 0:
+            game.teams[attacker].cards = list(range(1, 6 + 1))
+            game.teams[defender(attacker)].cards = list(range(1, 6 + 1))
         player1=game.board(self.position1).player
         player2 = game.board(self.position2).player
         score_att=card1 + player1.att_bonus
@@ -147,7 +150,7 @@ class Plaquage(Action):
 
     def play(self, game):
         if game.duel is None:
-            return Duel(self.position1,self.position2)
+            return Duel(self.position1, self.position2)
         res = game.duel.play(game)
         if res is None:
             return Duel(self.position1, self.position2, -1)

@@ -29,13 +29,20 @@
                         <a id="cards_left" style="color: rgb(255, 255, 255); font-size: medium; font-family: Arial;">Cards left: []</a>
                     </div>
                 </div>
-                <button class="card" id= "card_1" name="card_1" style="display:none">card 1</button>
-                <button class="card" id= "card_2" name="card_2" style="display:none">card 2</button>
-                <button class="card" id= "card_3" name="card_3" style="display:none">card 3</button>
-                <button class="card" id= "card_4" name="card_4" style="display:none">card 4</button>
-                <button class="card" id= "card_5" name="card_5" style="display:none">card 5</button>
-                <button class="card" id= "card_6" name="card_6" style="display:none">card 6</button>
-            </div>
+                <div id="duel_menu" style="display:none; flex-direction: column;flex:auto; padding: 10px;">
+                    <div class="card" style="flex-direction: column; justify-content: center">
+                        <a style="font-size: medium; font-family: Arial;">Duel!</a>
+                        <a id="duel_info" style="font-size: medium; font-family: Arial;">Player 1 plackaged player 2</a>
+                        <a style="font-size: medium; font-family: Arial;">Pick your card:</a>
+                    </div>
+                    <button class="card" id= "card_1" name="card_1" style="display:none">card 1</button>
+                    <button class="card" id= "card_2" name="card_2" style="display:none">card 2</button>
+                    <button class="card" id= "card_3" name="card_3" style="display:none">card 3</button>
+                    <button class="card" id= "card_4" name="card_4" style="display:none">card 4</button>
+                    <button class="card" id= "card_5" name="card_5" style="display:none">card 5</button>
+                    <button class="card" id= "card_6" name="card_6" style="display:none">card 6</button>
+                </div>
+                </div>
             <div class="field">
                     <div class="board" id="board">
                         {% for row in range(8) %}
@@ -49,7 +56,7 @@
             <div style="display: flex; flex-direction:column; margin: 20px; align-items: center;">
                 <div id="turn_card" class="card" style="display: flex; flex-direction: column; justify-content: flex-start; height:auto; padding: 10px;">
                     <a id="turn_text" class="team_text" style="color: rgb(255, 255, 255);"></a>
-                </div> 
+                </div>
                 <button class="card" id= "ball_kick" name="ball_kick" style="display:none">Ball kick</button>
                 <button class="card" id= "plackage" name="plackage" style="display:none">Plackage</button>
                 <button class="card" id= "forced_passage" name="forced_passage" style="display:none">Forced passage</button>
