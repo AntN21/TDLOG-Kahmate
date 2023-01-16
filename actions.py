@@ -141,7 +141,7 @@ class BallKick(Action):
         ):
             # TODO: We need to check that he is the player in front!!!
             if in_front(game.board,self.position1):
-                if abs(self.position2[1]-self.position1[1]) <= 3:
+                if abs(self.position2[1]-self.position1[1]) <= 3 and self.position2[0] < 12 and self.position2[0]>0:
                     if (self.position2[0]-self.position1[0])*front(player.team) <=3 and (self.position2[0]-self.position1[0])*front(player.team) >=1:
                         return True
         return False
@@ -177,6 +177,7 @@ class Plaquage(Action):
         if res is None:
             return Duel(self.position1, self.position2, -1)
         attacker = game.team_playing
+        game.board(self.position1).player.available_moves = 0
         if res[0] == attacker:
             if res[1] - res[2] >= 2:
                 p_ball = self.position1
