@@ -166,14 +166,12 @@ class Game:
         self.board.clear_selected()
         self.team_playing = BLUE_TEAM if self.team_playing == RED_TEAM else RED_TEAM
         self.teams[self.team_playing].players_moved = []
-        self._action_class.update(self)
-
-
         for square in self.board.squares:
             if square.player is not None:
                 square.player.reset_moves()
                 if square.player.team == self.team_playing:
                     square.player.recover()
+        self._action_class.update(self)
 
     def toJSON(self):
         res={}

@@ -1,23 +1,17 @@
 """
 Provides the routing mechanisms
 """
-import re
-import json
+from controller import Controller
 from flask import Blueprint, render_template, redirect, request
-from constants import MOVE, PASS, PLACKAGE, FORCED_PASSAGE, BALL_KICK
-import game
 from . import SOCKET
 
 views = Blueprint("views", __name__)
 chips = [["" for x in range(11)] for y in range(8)]
-current_game = game.Game()
+
+controller = Controller(SOCKET)
 
 
-PLAYER_NAME_1 = ""
-PLAYER_NAME_2 = ""
-
-
-def render_game(team):
+def render_game(team, current_game):
     """
     Draws the game template with the game json, team (red/blue), player json,
     and player names as the arguments.
@@ -25,10 +19,8 @@ def render_game(team):
 
     return render_template(
         "game.html",
-        current_game = current_game.toJSON(),
-        client_team = team,
-        player_name_1=PLAYER_NAME_1,
-        player_name_2=PLAYER_NAME_2,
+        current_game = current_game,
+        client_team = team
     )
 
 
@@ -36,55 +28,13 @@ def game_view(team, request):
     """
     Show a player's perspective. If a post has been made (any button click), it will handle it.
     """
+    current_game = controller.current_game
     if request.method == "POST":
-        if "square" in request.form:
-            position = re.sub(r"[() ]", "", request.form["square"]).split(",")
-            current_game.select_square(position[1], position[0], team)
-        if "card_1" in request.form:
-            current_game.select_duel_card(1, team)
-            SOCKET.emit("updateMenu", {"current_game": current_game.toJSON()})
-        if "card_2" in request.form:
-            current_game.select_duel_card(2, team)
-            SOCKET.emit("updateMenu", {"current_game": current_game.toJSON()})
-        if "card_3" in request.form:
-            current_game.select_duel_card(3, team)
-            SOCKET.emit("updateMenu", {"current_game": current_game.toJSON()})
-        if "card_4" in request.form:
-            current_game.select_duel_card(4, team)
-            SOCKET.emit("updateMenu", {"current_game": current_game.toJSON()})
-        if "card_5" in request.form:
-            current_game.select_duel_card(5, team)
-            SOCKET.emit("updateMenu", {"current_game": current_game.toJSON()})
-        if "card_6" in request.form:
-            current_game.select_duel_card(6, team)
-            SOCKET.emit("updateMenu", {"current_game": current_game.toJSON()})
         if "instructions" in request.form:
             return render_template("instructions.html")
-        if "back" in request.form:
-            render_game(team)
-        if "next_turn" in request.form:
-            current_game.pass_turn(team)
-            SOCKET.emit("updateMenu", {"current_game": current_game.toJSON()})
-            SOCKET.emit("updateGameInfo", {"current_game": current_game.toJSON()})
-        if "ball_kick" in request.form:
-            current_game.select_action(BALL_KICK, team)
-        if "plackage" in request.form:
-            current_game.select_action(PLACKAGE, team)
-        if "forced_passage" in request.form:
-            current_game.select_action(FORCED_PASSAGE, team)
-        if "move" in request.form:
-            current_game.select_action(MOVE, team)
-        if "pass" in request.form:
-            current_game.select_action(PASS, team)
+        controller.process(team, request.form)
 
-        SOCKET.emit("updateBoard", {"current_game": current_game.toJSON()})
-        if current_game.duel is not None:
-            SOCKET.emit("updateMenu", {"current_game": current_game.toJSON()})
-        if current_game.winner is not None:
-            SOCKET.emit("updateGameInfo", {"current_game": current_game.toJSON()})
-            SOCKET.emit("updateMenu", {"current_game": current_game.toJSON()})
-
-    return render_game(team)
+    return render_game(team, current_game.toJSON())
 
 
 @views.route("/red", methods=["POST", "GET"])
@@ -106,22 +56,5 @@ def player_selection():
     """
 
     if request.method == "POST":
-        if "start_game" in request.form:
-            global PLAYER_NAME_1, PLAYER_NAME_2
-            if PLAYER_NAME_1 == "":
-                PLAYER_NAME_1 = request.form["player_name"]
-                current_game.set_custom_name("red", PLAYER_NAME_1)
-                SOCKET.emit("updateMenu", {"current_game": current_game.toJSON()})
-                SOCKET.emit("updateGameInfo", {"current_game": current_game.toJSON()})
-                return redirect("/red")
-            if PLAYER_NAME_2 == "":
-                PLAYER_NAME_2 = request.form["player_name"]
-                current_game.set_custom_name("blue", PLAYER_NAME_2)
-                SOCKET.emit("updateMenu", {"current_game": current_game.toJSON()})
-                SOCKET.emit("updateGameInfo", {"current_game": current_game.toJSON()})
-                return redirect("/blue")
-        if "instructions" in request.form:
-            return render_template("instructions.html")
-        if "back" in request.form:
-            return render_template("player_selection.html")
+        return controller.process_player_selection(request.form)
     return render_template("player_selection.html")

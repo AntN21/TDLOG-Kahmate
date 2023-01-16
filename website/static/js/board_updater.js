@@ -95,9 +95,6 @@ function updateMenu(current_game, client_team) {
     console.log(current_game);
     if(current_game.team_playing == client_team) {
         document.getElementById("next_turn").style.display = "inline";
-
-        console.log(current_game.actions);
-        console.log("Selected case:", current_game.selected_case);
         var selected_case = current_game.selected_case;
         if(selected_case != null) {
             for(i in current_game.actions) {
@@ -146,10 +143,8 @@ function updateGameInfo(current_game, client_team) {
     } else {
         document.getElementById("player_moves_left").innerHTML = "";
     }
-    
     document.getElementById("team_moves_left").innerHTML = "Moves left: " + (2-team.players_moved.length);
     document.getElementById("cards_left").innerHTML = "Cards left: " + team.cards;
-    
 }
 
 function updateGame(current_game, team) {

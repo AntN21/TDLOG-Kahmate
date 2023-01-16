@@ -1,6 +1,7 @@
 from constants import BOARD_HEIGHT, BOARD_WIDTH
 from square import Square
 
+
 class Board:
     """
     Contain the structure of the field:
