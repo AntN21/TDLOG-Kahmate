@@ -32,6 +32,12 @@ CLEVER_DEF_BONUS = 1
 RED_TEAM = "red"
 BLUE_TEAM = "blue"
 
+def other(team):
+    if team == RED_TEAM:
+        return BLUE_TEAM
+    if team == BLUE_TEAM:
+        return RED_TEAM
+
 # Actions
 MOVE = "Move"
 PASS = "Pass"
