@@ -1,37 +1,46 @@
-
-
 # Board characteristics
-BOARD_LENGTH = 13
-BOARD_WIDTH = 8
+BOARD_WIDTH = 13
+BOARD_HEIGHT = 8
 
-# 'ordinaire' player characteristics
-ORDINAIRE_MAX_MOVE = 3
-ORDINAIRE_ATT_BONUS = 0
-ORDINAIRE_DEF_BONUS = 0
+# 'ordinary' player characteristics
+ORDINARY_MAX_MOVE = 3
+ORDINARY_ATT_BONUS = 0
+ORDINARY_DEF_BONUS = 0
 
-# 'costaud' player characteristics
-COSTAUD_MAX_MOVE = 2
-COSTAUD_ATT_BONUS = 2
-COSTAUD_DEF_BONUS = 1
+# 'strong' player characteristics
+STRONG_MAX_MOVE = 2
+STRONG_ATT_BONUS = 2
+STRONG_DEF_BONUS = 1
 
-# 'dur' player characteristics
-DUR_MAX_MOVE = 3
-DUR_ATT_BONUS = 1
-DUR_DEF_BONUS = 0
+# 'tough' player characteristics
+TOUGH_MAX_MOVE = 3
+TOUGH_ATT_BONUS = 1
+TOUGH_DEF_BONUS = 0
 
-# 'rapide' player characteristics
-RAPIDE_MAX_MOVE = 4
-RAPIDE_ATT_BONUS = -1
-RAPIDE_DEF_BONUS = -1
+# 'fast' player characteristics
+FAST_MAX_MOVE = 4
+FAST_ATT_BONUS = -1
+FAST_DEF_BONUS = -1
 
-# 'fute' player characteristics
-FUTE_MAX_MOVE = 3
-FUTE_ATT_BONUS = 0
-FUTE_DEF_BONUS = 1
+# 'clever' player characteristics
+CLEVER_MAX_MOVE = 3
+CLEVER_ATT_BONUS = 0
+CLEVER_DEF_BONUS = 1
 
-# players in the field
-PLAYERS_TYPES_LIST = ['ordinaire', 'ordinaire', 'costaud', 'dur', 'rapide', 'fute']
+
+# Teams
+RED_TEAM = "red"
+BLUE_TEAM = "blue"
+
+def other(team):
+    if team == RED_TEAM:
+        return BLUE_TEAM
+    if team == BLUE_TEAM:
+        return RED_TEAM
 
 # Actions
-
-ACTION_ORDER_LIST=["Move","Pass","BallKick","Plaquage","Passage en force"]
+MOVE = "Move"
+PASS = "Pass"
+BALL_KICK = "BallKick"
+PLACKAGE = "Plackage"
+FORCED_PASSAGE = "ForcedPassage"
