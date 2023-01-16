@@ -119,6 +119,14 @@ class Duel(Action):
             else:
                 return (defender(attacker), score_def, score_att)
 
+def in_front(board,position):
+    team=board(position).player.team
+    for x in range(position[0]+front(team),max(0,board.width*front(team)),front(team)):
+        for y in range(board.height):
+            if board.square(x,y).player is not None:
+                if board.square(x,y).player.team==team:
+                    return False
+    return True
 
 class BallKick(Action):
     """Represent a ballkick"""
@@ -132,13 +140,10 @@ class BallKick(Action):
             and player.team == game.team_playing
         ):
             # TODO: We need to check that he is the player in front!!!
-            if abs(self.position2[1] - self.position1[1]) <= 3:
-                if (self.position2[0] - self.position1[0]) * front(
-                    player.team
-                ) <= 3 and (self.position2[0] - self.position1[0]) * front(
-                    player.team
-                ) >= 1:
-                    return True
+            if in_front(game.board,self.position1):
+                if abs(self.position2[1]-self.position1[1]) <= 3:
+                    if (self.position2[0]-self.position1[0])*front(player.team) <=3 and (self.position2[0]-self.position1[0])*front(player.team) >=1:
+                        return True
         return False
 
     def play(self, game):
@@ -215,14 +220,9 @@ class PassageEnForce(Action):
             player1 = game.board(self.position1).player
             player2 = game.board(self.position2).player
             if player1.team != player2.team:
-                if path_exists(
-                    player1.available_moves - 1,
-                    player1.team,
-                    game.board,
-                    self.position1,
-                    self.position2,
-                ):
-                    return True
+                if player1.available_moves>1 and game.board(self.position1).ball:
+                    if self.position2 in neighbours(self.position1):
+                        return True
         return False
 
     def play(self, game):
@@ -238,6 +238,10 @@ class PassageEnForce(Action):
             game.board(self.position2).player.lost()
         else:
             game.board(self.position1).player.set_stunned()
+            p_ball = [self.position1[0] + front(defender), self.position1[1]]
+            game.board.move_ball(
+                self.position1[0], self.position1[1], p_ball[0], p_ball[1]
+            )
         return game.board
 
 
@@ -283,9 +287,7 @@ class Move(Action):
                             self.position1,
                             self.position2,
                         ):
-                            (goal, back) = (
-                                (12, 0) if game.team_playing == "red" else (0, 12)
-                            )
+                            (goal, back) = (game.board.width-1, 0) if game.team_playing == "red" else (0, game.board.width-1)
                             if (
                                 game.board(self.position2).player is None
                                 and not self.position2[0] == back
@@ -312,8 +314,8 @@ class Actions:
 
         self.length = length
         self.width = width
-        self.actions = [Plaquage, Pass, BallKick, Move]
-        self.action_names = [PLACKAGE, PASS, BALL_KICK, MOVE]
+        self.actions = [Plaquage, PassageEnForce, Pass, BallKick, Move]
+        self.action_names = [PLACKAGE, FORCED_PASSAGE, PASS, BALL_KICK, MOVE]
 
         for index, key in enumerate(self.actions):
             self.all_moves[self.action_names[index]] = [

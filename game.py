@@ -145,7 +145,10 @@ class Game:
             if isinstance(result, Board):
                 self._board = result
                 self._duel = None
-                self.pass_turn(self.team_playing)
+                if self._selected_action == PLACKAGE:
+                    self.pass_turn(self.team_playing)
+                else:
+                    self._action_class.update(self)
             else:
                 self._duel = result
         return

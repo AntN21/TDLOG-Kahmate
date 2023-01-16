@@ -68,6 +68,7 @@ class RugbyPlayer:
 
     def recover(self):
         """Decrease the stunned state of the player."""
+        self.reset_lost()
         if self._stunned_state > 0:
             self._stunned_state -= 1
 

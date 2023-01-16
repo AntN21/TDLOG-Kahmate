@@ -93,7 +93,9 @@ function updateMenu(current_game, client_team) {
     }
     clearMenu()
     console.log(current_game);
+    console.log(current_game.team_playing, client_team)
     if(current_game.team_playing == client_team) {
+        console.log("HE IS PLAYING!!!")
         document.getElementById("next_turn").style.display = "inline";
         var selected_case = current_game.selected_case;
         if(selected_case != null) {
@@ -104,6 +106,8 @@ function updateMenu(current_game, client_team) {
                     action.position_1[1] == selected_case.position[1]) {
                     if(action.type == "Move")
                         document.getElementById("move").style.display = "inline";
+                    if(action.type == "ForcedPassage")
+                        document.getElementById("forced_passage").style.display = "inline";
                     if(action.type == "Pass")
                         document.getElementById("pass").style.display = "inline";
                     if(action.type == "BallKick")
@@ -119,9 +123,9 @@ function updateMenu(current_game, client_team) {
         document.getElementById("duel_menu").style.display = "flex";
         document.getElementById("duel_info").innerHTML = current_game.duel.team_1_fighter + " vs " + current_game.duel.team_2_fighter
         clearMenu();
-        var cards = current_game.team_playing == client_team.team_json ? 
-                    current_game.duel.team_1_cards :
-                    current_game.duel.team_2_cards;
+        var cards = client_team == "red" ? 
+                    current_game.team_red.cards :
+                    current_game.team_blue.cards;
         for(let i = 0; i < cards.length; i++) {
             document.getElementById("card_" + cards[i]).style.display = "inline";
         }
@@ -138,7 +142,7 @@ function updateGameInfo(current_game, client_team) {
     document.getElementById("player_red_custom_name").innerHTML = current_game.team_red.custom_name;
     document.getElementById("player_blue_custom_name").innerHTML = current_game.team_blue.custom_name;
     var team = client_team == "red" ? current_game.team_red : current_game.team_blue; 
-    if(current_game.selected_case != null){
+    if(current_game.selected_case != null && client_team == current_game.team_playing){
         document.getElementById("player_moves_left").innerHTML = "Moves left: " + current_game.selected_case.movements_left;
     } else {
         document.getElementById("player_moves_left").innerHTML = "";
@@ -155,17 +159,27 @@ function updateGame(current_game, team) {
     document.getElementById("all").style.display = "flex";
 }
 
+socket.on("updateGame", function (data) {
+    this.current_game = JSON.parse(data.current_game);
+    console.log(data.client_team)
+    updateBoard(this.current_game.board);
+    updateMenu(this.current_game, data.client_team);
+    updateGameInfo(this.current_game, data.client_team);
+});
+/*
 socket.on("updateBoard", function (data) {
     this.current_game = JSON.parse(data.current_game);
-    updateBoard(this.current_game.board);
+    client_team = data.client_team
+    updateGame(this.current_game.board, client_team);
 });
 
 socket.on("updateMenu", function (data) {
     this.current_game = JSON.parse(data.current_game);
-    updateMenu(this.current_game, this.current_game.team_playing);
+    console.log("UPDATED!", this.current_game.team_playing, data.client_team)
+    updateMenu(this.current_game, data.client_team);
 });
 
 socket.on("updateGameInfo", function(data) {
     this.current_game = JSON.parse(data.current_game);
-    updateGameInfo(this.current_game, this.current_game.team_playing);
-})
+    updateGameInfo(this.current_game, data.client_team);
+})*/
