@@ -130,7 +130,6 @@ class Game:
                     if possible_action.position1[0] == self.selected_case.x and possible_action.position1[1] == self.selected_case.y:
                         self.board.square(possible_action.position2[0], possible_action.position2[1]).set_available(True)
 
-
     def select_duel_card(self, card, team):
         """
             Selects the team's card for a duel, if both players have already selected a card
@@ -145,7 +144,7 @@ class Game:
             if isinstance(result, Board):
                 self._board = result
                 self._duel = None
-                self.pass_turn(self.team_playing)
+                self._action_class.update(self)
             else:
                 self._duel = result
         return

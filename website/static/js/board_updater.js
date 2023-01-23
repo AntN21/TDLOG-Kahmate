@@ -92,10 +92,7 @@ function updateMenu(current_game, client_team) {
         document.getElementById("turn_text").innerHTML = "It is " + current_game.team_playing + "'s turn";
     }
     clearMenu()
-    console.log(current_game);
-    console.log(current_game.team_playing, client_team)
     if(current_game.team_playing == client_team) {
-        console.log("HE IS PLAYING!!!")
         document.getElementById("next_turn").style.display = "inline";
         var selected_case = current_game.selected_case;
         if(selected_case != null) {
@@ -161,25 +158,7 @@ function updateGame(current_game, team) {
 
 socket.on("updateGame", function (data) {
     this.current_game = JSON.parse(data.current_game);
-    console.log(data.client_team)
     updateBoard(this.current_game.board);
     updateMenu(this.current_game, data.client_team);
     updateGameInfo(this.current_game, data.client_team);
 });
-/*
-socket.on("updateBoard", function (data) {
-    this.current_game = JSON.parse(data.current_game);
-    client_team = data.client_team
-    updateGame(this.current_game.board, client_team);
-});
-
-socket.on("updateMenu", function (data) {
-    this.current_game = JSON.parse(data.current_game);
-    console.log("UPDATED!", this.current_game.team_playing, data.client_team)
-    updateMenu(this.current_game, data.client_team);
-});
-
-socket.on("updateGameInfo", function(data) {
-    this.current_game = JSON.parse(data.current_game);
-    updateGameInfo(this.current_game, data.client_team);
-})*/

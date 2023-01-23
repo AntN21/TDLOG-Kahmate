@@ -32,7 +32,7 @@ def game_view(team, request):
     if request.method == "POST":
         if "instructions" in request.form:
             return render_template("instructions.html")
-        controller.process(team, request.form)
+        controller.process_game(team, request.form)
 
     return render_game(team, current_game.toJSON())
 

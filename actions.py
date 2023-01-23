@@ -26,7 +26,7 @@ class Action:
         """Return the targeted position"""
         return self._position2
 
-    def toJSON(self):
+    def toDict(self):
         res = {}
         res["position_1"] = self.position1
         res["position_2"] = self.position2

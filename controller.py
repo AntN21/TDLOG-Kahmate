@@ -14,14 +14,12 @@ class Controller:
             if self.current_game.teams["red"].custom_name == "":
                 playe_1_name = form["player_name"]
                 self.current_game.set_custom_name("red", playe_1_name)
-                self.emit_update_menu("red")
-                self.socket.emit("updateGameInfo", {"current_game": self.current_game.toJSON()})
+                self.socket.emit("updateGame", {"current_game": self.current_game.toJSON(), "client_team": other("red")})
                 return redirect("/red")
             if self.current_game.teams["blue"].custom_name == "":
                 player_2_name = form["player_name"]
                 self.current_game.set_custom_name("blue", player_2_name)
-                self.emit_update_menu("blue")
-                self.socket.emit("updateGameInfo", {"current_game": self.current_game.toJSON()})
+                self.socket.emit("updateGame", {"current_game": self.current_game.toJSON(), "client_team": other("blue")})
                 return redirect("/blue")
         if "instructions" in form:
             return render_template("instructions.html")
@@ -32,7 +30,7 @@ class Controller:
         self.socket.emit("updateMenu", {"current_game": self.current_game.toJSON(),
                                         "client_team": other(team)})
 
-    def process(self, team, form):
+    def process_game(self, team, form):
         if "square" in form:
             position = re.sub(r"[() ]", "", form["square"]).split(",")
             self.current_game.select_square(position[1], position[0], team)
