@@ -1,6 +1,9 @@
 var socket = io.connect()
-var players = ["clever_red", "strong_red", "tough_red", "fast_red", "ordinary_red", "ko_red",
-                "clever_blue", "strong_blue", "tough_blue", "fast_blue", "ordinary_blue","ko_blue"];
+
+const Teams = {
+    RED: "red",
+    BLUE: "blue"
+}
 
 var BOARD_WIDTH = 13
 var BOARD_HEIGHT = 8
@@ -66,7 +69,7 @@ function clearMenu() {
     
     document.getElementById("move").style.display = "None";
     document.getElementById("ball_kick").style.display = "None";
-    document.getElementById("plackage").style.display = "None";
+    document.getElementById("tackle").style.display = "None";
     document.getElementById("forced_passage").style.display = "None";
     document.getElementById("pass").style.display = "None";
     document.getElementById("next_turn").style.display = "None";
@@ -109,8 +112,8 @@ function updateMenu(current_game, client_team) {
                         document.getElementById("pass").style.display = "inline";
                     if(action.type == "BallKick")
                         document.getElementById("ball_kick").style.display = "inline";
-                    if(action.type == "Plackage")
-                       document.getElementById("plackage").style.display = "inline";
+                    if(action.type == "Tackle")
+                       document.getElementById("tackle").style.display = "inline";
                 }
             }
         }
@@ -120,7 +123,7 @@ function updateMenu(current_game, client_team) {
         document.getElementById("duel_menu").style.display = "flex";
         document.getElementById("duel_info").innerHTML = current_game.duel.team_1_fighter + " vs " + current_game.duel.team_2_fighter
         clearMenu();
-        var cards = client_team == "red" ? 
+        var cards = client_team == Teams.RED ? 
                     current_game.team_red.cards :
                     current_game.team_blue.cards;
         for(let i = 0; i < cards.length; i++) {
@@ -138,7 +141,7 @@ function updateGameInfo(current_game, client_team) {
     document.getElementById("player_info_card").style.backgroundColor = client_team;
     document.getElementById("player_red_custom_name").innerHTML = current_game.team_red.custom_name;
     document.getElementById("player_blue_custom_name").innerHTML = current_game.team_blue.custom_name;
-    var team = client_team == "red" ? current_game.team_red : current_game.team_blue; 
+    var team = client_team == Teams.RED ? current_game.team_red : current_game.team_blue; 
     if(current_game.selected_case != null && client_team == current_game.team_playing){
         document.getElementById("player_moves_left").innerHTML = "Moves left: " + current_game.selected_case.movements_left;
     } else {
@@ -149,6 +152,7 @@ function updateGameInfo(current_game, client_team) {
 }
 
 function updateGame(current_game, team) {
+    console.log(current_game)
     this.current_game = JSON.parse(current_game);
     updateBoard(this.current_game.board)
     updateGameInfo(this.current_game, team)

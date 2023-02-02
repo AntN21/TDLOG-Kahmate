@@ -1,62 +1,71 @@
-from constants import MOVE, PASS, PLACKAGE, FORCED_PASSAGE, BALL_KICK
+"""
+Controller file
+"""
 import re
-from game import Game
 from flask import render_template, redirect
-from constants import other
+from constants import Actions, Teams, other
+from game import Game
+
 
 class Controller:
-    def __init__(self, SOCKET):
+    """
+    From a flask socket_io, the controller class creates a Game and can be modified from the
+    view using their forms and executing all updates with the socket
+    """
+
+    def __init__(self, socket):
         self.current_game = Game()
-        self.socket = SOCKET
+        self.socket = socket
+
+    def emit_update_game(self, team):
+        """
+        Emits the updates game instruction through the socket to all teams
+        """
+        self.socket.emit(
+            "updateGame",
+            {"current_game": self.current_game.toJSON(), "client_team": other(team)},
+        )
 
     def process_player_selection(self, form):
+        """
+        This method will handle the player selection form events
+        """
         if "start_game" in form:
-            if self.current_game.teams["red"].custom_name == "":
+            if self.current_game.teams[Teams.RED.value].custom_name == "":
                 playe_1_name = form["player_name"]
-                self.current_game.set_custom_name("red", playe_1_name)
-                self.socket.emit("updateGame", {"current_game": self.current_game.toJSON(), "client_team": other("red")})
-                return redirect("/red")
-            if self.current_game.teams["blue"].custom_name == "":
+                self.current_game.set_custom_name(Teams.RED.value, playe_1_name)
+                self.emit_update_game(Teams.RED.value)
+                return redirect("/" + Teams.RED.value)
+            if self.current_game.teams[Teams.BLUE.value].custom_name == "":
                 player_2_name = form["player_name"]
-                self.current_game.set_custom_name("blue", player_2_name)
-                self.socket.emit("updateGame", {"current_game": self.current_game.toJSON(), "client_team": other("blue")})
-                return redirect("/blue")
+                self.current_game.set_custom_name(Teams.BLUE.value, player_2_name)
+                self.emit_update_game(Teams.BLUE.value)
+                return redirect("/" + Teams.BLUE.value)
         if "instructions" in form:
             return render_template("instructions.html")
-        if "back" in form:
-            return render_template("player_selection.html")
-
-    def emit_update_menu(self, team):
-        self.socket.emit("updateMenu", {"current_game": self.current_game.toJSON(),
-                                        "client_team": other(team)})
+        return render_template("player_selection.html")
 
     def process_game(self, team, form):
+        """
+        This method will handle all game events from the view's form
+        """
         if "square" in form:
             position = re.sub(r"[() ]", "", form["square"]).split(",")
             self.current_game.select_square(position[1], position[0], team)
-        if "card_1" in form:
-            self.current_game.select_duel_card(1, team)
-        if "card_2" in form:
-            self.current_game.select_duel_card(2, team)
-        if "card_3" in form:
-            self.current_game.select_duel_card(3, team)
-        if "card_4" in form:
-            self.current_game.select_duel_card(4, team)
-        if "card_5" in form:
-            self.current_game.select_duel_card(5, team)
-        if "card_6" in form:
-            self.current_game.select_duel_card(6, team)
+        if any("card" in element for element in form):
+            card = list(form)[0].split("_")[1]
+            self.current_game.select_duel_card(int(card), team)
         if "next_turn" in form:
             self.current_game.pass_turn(team)
         if "ball_kick" in form:
-            self.current_game.select_action(BALL_KICK, team)
-        if "plackage" in form:
-            self.current_game.select_action(PLACKAGE, team)
+            self.current_game.select_action(Actions.BALL_KICK.value, team)
+        if "tackle" in form:
+            self.current_game.select_action(Actions.TACKLE.value, team)
         if "forced_passage" in form:
-            self.current_game.select_action(FORCED_PASSAGE, team)
+            self.current_game.select_action(Actions.FORCED_PASSAGE.value, team)
         if "move" in form:
-            self.current_game.select_action(MOVE, team)
+            self.current_game.select_action(Actions.MOVE.value, team)
         if "pass" in form:
-            self.current_game.select_action(PASS, team)
+            self.current_game.select_action(Actions.PASS.value, team)
 
-        self.socket.emit("updateGame", {"current_game": self.current_game.toJSON(), "client_team": other(team)})
+        self.emit_update_game(team)
