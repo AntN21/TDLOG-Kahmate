@@ -4,7 +4,7 @@ File containing the tackle action class
 import random as rd
 from actions.action import Action
 from actions.duel import Duel
-from actions.action_utils import get_neighbours, forward
+from actions.action_utils import get_neighbours, forward, check_duel
 
 
 class Tackle(Action):
@@ -43,19 +43,17 @@ class Tackle(Action):
     def play(self, game):
         """
         Executes tackle action or loads the duel.
-        If the game was not in a duel state, it will return a Duel. It the game
-        had a duel, then it will first execute along the rules and the duel result
-        (containing the player that won and both player's scores)
         """
-        if game.duel is None:
-            return Duel(self.position1, self.position2)
-        duel_results = game.duel.play(game)
-        if duel_results is None:
-            return Duel(self.position1, self.position2, -1)
+        duel_results = check_duel(game, self.position1, self.position2, )
+        if isinstance(duel_results, Duel):
+            return duel_results
+        winner = duel_results[0]
+        defense_score = duel_results[1]
+        attack_score = duel_results[2]
         attacker = game.team_playing
         game.board(self.position1).player.available_moves = 0
-        if duel_results[0] == attacker:
-            if duel_results[1] - duel_results[2] >= 2:
+        if winner == attacker:
+            if defense_score - attack_score >= 2:
                 p_ball = self.position1
             else:
                 p_ball = [self.position2[0] + forward(attacker), self.position2[1]]

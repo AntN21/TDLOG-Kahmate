@@ -4,7 +4,7 @@ to play the game.
 """
 import json
 import random as rd
-from constants import Actions, Teams
+from constants import Teams
 from board import Board
 from players.ordinary import Ordinary
 from players.clever import Clever

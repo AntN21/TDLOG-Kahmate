@@ -1,5 +1,6 @@
 """Some methods used by different actions"""
 import math
+from actions.duel import Duel
 from constants import Teams
 
 
@@ -35,6 +36,21 @@ def move_ball(game, position1, position2):
         position1[0], position1[1], position2[0], position2[1]
     )
     return game.board
+
+def check_duel(game, position1, position2):
+    """
+    If the game was not in a duel state, it will return a Duel. If the game
+    had a duel, then it will first execute it and return the result
+    containing the player that won and both player's scores (or another duel
+    if they tied)
+    """
+    if game.duel is None:
+        return Duel(position1, position2)
+    duel_results = game.duel.play(game)
+    if duel_results is None:
+        return Duel(position1, position2, -1)
+    return duel_results
+
 
 def accessibles_cases(path_length, board, position1):
     """

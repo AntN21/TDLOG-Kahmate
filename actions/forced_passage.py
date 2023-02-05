@@ -4,7 +4,7 @@ File containing the forced passage action class
 from constants import other
 from actions.action import Action
 from actions.duel import Duel
-from actions.action_utils import forward, get_neighbours
+from actions.action_utils import forward, get_neighbours, check_duel
 
 
 class ForcedPassage(Action):
@@ -34,14 +34,12 @@ class ForcedPassage(Action):
 
     def play(self, game):
         """
-        Raises a duel if it was not already raised. If not executes the action.
+        Executes forced passage action or loads the duel.
         """
-        if game.duel is None:
-            return Duel(self.position1, self.position2)
-        duel_result = game.duel.play(game)
-        if duel_result is None:
-            return Duel(self.position1, self.position2, -1)
-        winner = duel_result[0]
+        duel_results = check_duel(game, self.position1, self.position2)
+        if isinstance(duel_results, Duel):
+            return duel_results
+        winner = duel_results[0]
         attacker = game.team_playing
         if winner == attacker:
             game.board(self.position2).player.set_stunned()
