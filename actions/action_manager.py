@@ -15,6 +15,7 @@ class ActionManager:
     This class generates an array with all the possible actions that can be executed given a
     current game state.
     """
+
     def __init__(self, width, height):
         self.all_moves = {}
 
@@ -37,9 +38,10 @@ class ActionManager:
                 for pos_1_y in range(height):
                     for pos_2_x in range(width):
                         for pos_2_y in range(height):
-                            self.all_moves[self.action_names[index]][pos_1_y][pos_1_x].append(
-                                key([pos_1_x, pos_1_y], [pos_2_x, pos_2_y])
-                            )
+                            self.all_moves[self.action_names[index]][
+                                pos_1_y][
+                                pos_1_x
+                            ].append(key([pos_1_x, pos_1_y], [pos_2_x, pos_2_y]))
         self.possible_moves = copy.copy(self.all_moves)
 
     def update(self, game):
@@ -52,7 +54,9 @@ class ActionManager:
             ]
             for pos_1_x in range(self.width):
                 for pos_1_y in range(self.height):
-                    for action in self.all_moves[self.action_names[index]][pos_1_y][pos_1_x]:
+                    for action in self.all_moves[self.action_names[index]][pos_1_y][
+                        pos_1_x
+                    ]:
                         if action.is_possible(game):
                             self.possible_moves[self.action_names[index]][pos_1_y][
                                 pos_1_x

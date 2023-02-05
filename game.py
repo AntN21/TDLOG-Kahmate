@@ -19,6 +19,7 @@ class Team:
     The class team contains the name of the team (red or blue, from the constants file)
     the custom name of the player, the cards that they have and the quantity of players moved.
     """
+
     def __init__(self, name, custom_name=""):
         self._name = name
         self.players_moved = []
