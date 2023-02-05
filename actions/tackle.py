@@ -44,7 +44,11 @@ class Tackle(Action):
         """
         Executes tackle action or loads the duel.
         """
-        duel_results = check_duel(game, self.position1, self.position2, )
+        duel_results = check_duel(
+            game,
+            self.position1,
+            self.position2,
+        )
         if isinstance(duel_results, Duel):
             return duel_results
         winner = duel_results[0]

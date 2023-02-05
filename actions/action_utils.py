@@ -28,14 +28,14 @@ def get_neighbours(pos):
         )
     return neighbours
 
+
 def move_ball(game, position1, position2):
     """
     Moves the ball from position 1 to position 2.
     """
-    game.board.move_ball(
-        position1[0], position1[1], position2[0], position2[1]
-    )
+    game.board.move_ball(position1[0], position1[1], position2[0], position2[1])
     return game.board
+
 
 def check_duel(game, position1, position2):
     """
