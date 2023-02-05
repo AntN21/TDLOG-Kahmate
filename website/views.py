@@ -29,7 +29,7 @@ def game_view(team, current_request):
             return render_template("instructions.html")
         controller.process_game(team, current_request.form)
 
-    return render_game(team, current_game.toJSON())
+    return render_game(team, current_game.to_json())
 
 
 @views.route("/" + Teams.RED.value, methods=["POST", "GET"])

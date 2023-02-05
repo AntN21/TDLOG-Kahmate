@@ -1,6 +1,6 @@
 """
-    game contains all game information, it also handles the main functions needed
-    to play the game.
+Game contains all game information, it also handles the main functions needed
+to play the game.
 """
 import json
 import random as rd
@@ -15,6 +15,10 @@ from actions.action_manager import ActionManager
 
 
 class Team:
+    """
+    The class team contains the name of the team (red or blue, from the constants file)
+    the custom name of the player, the cards that they have and the quantity of players moved.
+    """
     def __init__(self, name, custom_name=""):
         self._name = name
         self.players_moved = []
@@ -22,6 +26,9 @@ class Team:
         self.cards = list(range(1, 6 + 1))
 
     def to_dict(self):
+        """
+        This function converts the class to a dict.
+        """
         team_json = {}
         team_json["custom_name"] = self.custom_name
         team_json["players_moved"] = [str(player) for player in self.players_moved]
@@ -30,14 +37,20 @@ class Team:
 
 
 class Game:
+    """
+    The Game class will contain all the information related with the state of the game. This
+    will be the board, the turn that we are currently on, the selected case, the selected action,
+    if there is any winner, if there is a duel currently taking place, both teams information, and
+    the action_manager that will handle all possible moves.
+    """
+
     def __init__(self):
         self._board = Board()
         self._turn = 0
         self._selected_case = None
-        self._selected_action = "starting"
+        self._selected_action = None
         self._winner = None
         self.initial_placing()
-        self._started = False
         self._duel = None
         self.teams = {
             Teams.RED.value: Team(Teams.RED.value),
@@ -46,10 +59,6 @@ class Game:
         self.team_playing = Teams.RED.value
         self._action_class = ActionManager(self._board.width, self._board.height)
         self._action_class.update(self)
-
-    @property
-    def turn(self):
-        return self._turn
 
     @property
     def selected_case(self):
@@ -193,8 +202,6 @@ class Game:
         if self._winner is not None:
             return
         self._turn += 1
-        if self._turn > 1:
-            self._started = True
 
         self._selected_case = None
         self.board.clear_available()
@@ -212,7 +219,7 @@ class Game:
                     square.player.recover()
         self._action_class.update(self)
 
-    def toJSON(self):
+    def to_json(self):
         res = {}
         res["team_playing"] = self.team_playing
         res["board"] = []
@@ -237,17 +244,7 @@ class Game:
         else:
             res["selected_case"] = None
 
-        possible_moves = []
-        for action_type in self._action_class.possible_moves:
-            for initial_line in self._action_class.possible_moves[action_type]:
-                for initial_square in initial_line:
-                    for possible_action in initial_square:
-                        action_json = {}
-                        action_json["type"] = action_type
-                        action_json["position_1"] = possible_action.position1
-                        action_json["position_2"] = possible_action.position2
-                        possible_moves.append(action_json)
-        res["actions"] = possible_moves
+        res["actions"] = self._action_class.get_possible_moves()
 
         team_red = self.teams[Teams.RED.value].to_dict()
         team_blue = self.teams[Teams.BLUE.value].to_dict()
