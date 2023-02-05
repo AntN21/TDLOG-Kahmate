@@ -38,8 +38,7 @@ class ActionManager:
                 for pos_1_y in range(height):
                     for pos_2_x in range(width):
                         for pos_2_y in range(height):
-                            self.all_moves[self.action_names[index]][
-                                pos_1_y][
+                            self.all_moves[self.action_names[index]][pos_1_y][
                                 pos_1_x
                             ].append(key([pos_1_x, pos_1_y], [pos_2_x, pos_2_y]))
         self.possible_moves = copy.copy(self.all_moves)

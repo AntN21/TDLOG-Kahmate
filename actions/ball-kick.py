@@ -2,7 +2,7 @@
 File containing the ball kick class
 """
 from actions.action import Action
-from actions.action_utils import forward
+from actions.action_utils import forward, move_ball
 
 
 def in_front(board, position):
@@ -56,9 +56,6 @@ class BallKick(Action):
 
     def play(self, game):
         """
-        Moves the ball from position 1 to position 2.
+        Executes a ball kick
         """
-        game.board.move_ball(
-            self.position1[0], self.position1[1], self.position2[0], self.position2[1]
-        )
-        return game.board
+        return move_ball(game, self.position1, self.position2)
