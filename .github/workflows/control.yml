@@ -19,28 +19,24 @@ jobs:
   build:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
-
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v3
-
-      # Runs a single command using the runners shell
-      - name: Run a one-line script
-        run: echo Hello, world!
-
-      # Runs a set of commands using the runners shell
-      - name: Run a multi-line script
-        run: |
-          echo Add other actions to build,
-          echo test, and deploy your project.
-      
-      # Runs black formatter
+      - name: Setup Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7.4
+          architecture: x64
+        # Runs black formatter
       - name: Run black formatter
         uses: rickstaa/action-black@v1.3.0
-      
-      # Runs flake8 to check simple code-smells
-      - name: Flake8 action
-        uses: suo/flake8-github-action@v1
-
+      - name: Checkout PyTorch
+        uses: actions/checkout@master
+      - name: Install flake8
+        run: pip install flake8
+        # Runs flake8
+      - name: Run flake8
+        uses: suo/flake8-github-action@releases/v1
+        with:
+          checkName: 'build'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
