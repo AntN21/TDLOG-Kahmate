@@ -36,10 +36,14 @@ jobs:
           pip install black flake8 pytest
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
       
-      #- name: Run black formatter
-      #  run: |
-      #    black
+      
+      # Runs black formatter
+      - uses: actions/checkout@v2
+      - uses: rickstaa/action-black@v1
+        with:
+          black_args: ". --check"
 
+      # Runs Flake8
       - name: Lint with flake8
         run: |
           # stop the build if there are Python syntax errors or undefined names
@@ -47,6 +51,7 @@ jobs:
           # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
           flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
       
+      # Runs Pytest
       - name: Test with pytest
         run: |
           pytest
