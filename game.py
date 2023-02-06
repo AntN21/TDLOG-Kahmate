@@ -87,7 +87,7 @@ class Game:
             Tough(Teams.RED.value),
             Fast(Teams.RED.value),
             Clever(Teams.RED.value),
-            Ordinary(Teams.RED.value)
+            Ordinary(Teams.RED.value),
         ]:
             self._board.put_player(player, 1, height)
             height += 1
@@ -98,11 +98,13 @@ class Game:
             Tough(Teams.BLUE.value),
             Fast(Teams.BLUE.value),
             Clever(Teams.BLUE.value),
-            Ordinary(Teams.BLUE.value)
+            Ordinary(Teams.BLUE.value),
         ]:
-            self._board.put_player(player, self.board.width-2, height)
+            self._board.put_player(player, self.board.width - 2, height)
             height += 1
-        self._board.put_ball(floor(self.board.width/2), rd.randint(1, self.board.height-2))
+        self._board.put_ball(
+            floor(self.board.width / 2), rd.randint(1, self.board.height - 2)
+        )
 
     def set_custom_name(self, team, custom_name):
         """Sets the custom name (nickname) of one team"""
@@ -132,7 +134,11 @@ class Game:
 
                 if isinstance(result, Board):
                     self._board = result
-                    goal = self.board.width-1 if self.team_playing == Teams.RED.value else 0
+                    goal = (
+                        self.board.width - 1
+                        if self.team_playing == Teams.RED.value
+                        else 0
+                    )
                     if selected_case.pos_x == goal:
                         self._winner = self.team_playing
                 else:
