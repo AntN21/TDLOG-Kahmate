@@ -4,6 +4,7 @@ to play the game.
 """
 import json
 import random as rd
+from math import floor
 from constants import Teams
 from board import Board
 from players.ordinary import Ordinary
@@ -79,31 +80,32 @@ class Game:
 
     def initial_placing(self):
         """Place the players in an initial configuration"""
-        height = 0
+        height = 1
         for player in [
-            Ordinary(Teams.RED.value),
             Ordinary(Teams.RED.value),
             Strong(Teams.RED.value),
             Tough(Teams.RED.value),
             Fast(Teams.RED.value),
             Clever(Teams.RED.value),
+            Ordinary(Teams.RED.value)
         ]:
             self._board.put_player(player, 1, height)
             height += 1
-        height = 0
+        height = 1
         for player in [
-            Ordinary(Teams.BLUE.value),
             Ordinary(Teams.BLUE.value),
             Strong(Teams.BLUE.value),
             Tough(Teams.BLUE.value),
             Fast(Teams.BLUE.value),
             Clever(Teams.BLUE.value),
+            Ordinary(Teams.BLUE.value)
         ]:
-            self._board.put_player(player, 11, height)
+            self._board.put_player(player, self.board.width-2, height)
             height += 1
-        self._board.put_ball(6, rd.randint(1, 6))
+        self._board.put_ball(floor(self.board.width/2), rd.randint(1, self.board.height-2))
 
     def set_custom_name(self, team, custom_name):
+        """Sets the custom name (nickname) of one team"""
         self.teams[team].custom_name = custom_name
 
     def select_square(self, pos_x, pos_y, team):
@@ -130,7 +132,7 @@ class Game:
 
                 if isinstance(result, Board):
                     self._board = result
-                    goal = 12 if self.team_playing == "red" else 0
+                    goal = self.board.width-1 if self.team_playing == Teams.RED.value else 0
                     if selected_case.pos_x == goal:
                         self._winner = self.team_playing
                 else:
@@ -221,6 +223,9 @@ class Game:
         self._action_class.update(self)
 
     def to_json(self):
+        """
+        Converts the game state into a json to be used in the java script file
+        """
         res = {}
         res["team_playing"] = self.team_playing
         res["board"] = []

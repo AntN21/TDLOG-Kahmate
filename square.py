@@ -83,7 +83,3 @@ class Square:
         player = self.player
         self._player = None
         return player
-
-    def l1_distance(self, square2):
-        """Returns the distance from other square (without diagonals)"""
-        return abs(self.pos_x - square2.x) + abs(self.pos_y - square2.y)
