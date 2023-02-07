@@ -1,6 +1,9 @@
 var socket = io.connect()
-var players = ["clever_red", "strong_red", "tough_red", "fast_red", "ordinary_red", "ko_red",
-                "clever_blue", "strong_blue", "tough_blue", "fast_blue", "ordinary_blue","ko_blue"];
+
+const Teams = {
+    RED: "red",
+    BLUE: "blue"
+}
 
 var BOARD_WIDTH = 13
 var BOARD_HEIGHT = 8
@@ -66,7 +69,7 @@ function clearMenu() {
     
     document.getElementById("move").style.display = "None";
     document.getElementById("ball_kick").style.display = "None";
-    document.getElementById("plackage").style.display = "None";
+    document.getElementById("tackle").style.display = "None";
     document.getElementById("forced_passage").style.display = "None";
     document.getElementById("pass").style.display = "None";
     document.getElementById("next_turn").style.display = "None";
@@ -92,10 +95,7 @@ function updateMenu(current_game, client_team) {
         document.getElementById("turn_text").innerHTML = "It is " + current_game.team_playing + "'s turn";
     }
     clearMenu()
-    console.log(current_game);
-    console.log(current_game.team_playing, client_team)
     if(current_game.team_playing == client_team) {
-        console.log("HE IS PLAYING!!!")
         document.getElementById("next_turn").style.display = "inline";
         var selected_case = current_game.selected_case;
         if(selected_case != null) {
@@ -112,8 +112,8 @@ function updateMenu(current_game, client_team) {
                         document.getElementById("pass").style.display = "inline";
                     if(action.type == "BallKick")
                         document.getElementById("ball_kick").style.display = "inline";
-                    if(action.type == "Plackage")
-                       document.getElementById("plackage").style.display = "inline";
+                    if(action.type == "Tackle")
+                       document.getElementById("tackle").style.display = "inline";
                 }
             }
         }
@@ -123,7 +123,7 @@ function updateMenu(current_game, client_team) {
         document.getElementById("duel_menu").style.display = "flex";
         document.getElementById("duel_info").innerHTML = current_game.duel.team_1_fighter + " vs " + current_game.duel.team_2_fighter
         clearMenu();
-        var cards = client_team == "red" ? 
+        var cards = client_team == Teams.RED ? 
                     current_game.team_red.cards :
                     current_game.team_blue.cards;
         for(let i = 0; i < cards.length; i++) {
@@ -141,17 +141,18 @@ function updateGameInfo(current_game, client_team) {
     document.getElementById("player_info_card").style.backgroundColor = client_team;
     document.getElementById("player_red_custom_name").innerHTML = current_game.team_red.custom_name;
     document.getElementById("player_blue_custom_name").innerHTML = current_game.team_blue.custom_name;
-    var team = client_team == "red" ? current_game.team_red : current_game.team_blue; 
+    var team = client_team == Teams.RED ? current_game.team_red : current_game.team_blue; 
     if(current_game.selected_case != null && client_team == current_game.team_playing){
-        document.getElementById("player_moves_left").innerHTML = "Moves left: " + current_game.selected_case.movements_left;
+        document.getElementById("player_moves_left").innerHTML = "Player moves left: " + current_game.selected_case.movements_left;
     } else {
         document.getElementById("player_moves_left").innerHTML = "";
     }
-    document.getElementById("team_moves_left").innerHTML = "Moves left: " + (2-team.players_moved.length);
-    document.getElementById("cards_left").innerHTML = "Cards left: " + team.cards;
+    document.getElementById("team_moves_left").innerHTML = "Team moves left: " + (2-team.players_moved.length);
+    document.getElementById("cards_left").innerHTML = "Team cards left: " + team.cards;
 }
 
 function updateGame(current_game, team) {
+    console.log(current_game)
     this.current_game = JSON.parse(current_game);
     updateBoard(this.current_game.board)
     updateGameInfo(this.current_game, team)
@@ -161,25 +162,7 @@ function updateGame(current_game, team) {
 
 socket.on("updateGame", function (data) {
     this.current_game = JSON.parse(data.current_game);
-    console.log(data.client_team)
     updateBoard(this.current_game.board);
     updateMenu(this.current_game, data.client_team);
     updateGameInfo(this.current_game, data.client_team);
 });
-/*
-socket.on("updateBoard", function (data) {
-    this.current_game = JSON.parse(data.current_game);
-    client_team = data.client_team
-    updateGame(this.current_game.board, client_team);
-});
-
-socket.on("updateMenu", function (data) {
-    this.current_game = JSON.parse(data.current_game);
-    console.log("UPDATED!", this.current_game.team_playing, data.client_team)
-    updateMenu(this.current_game, data.client_team);
-});
-
-socket.on("updateGameInfo", function(data) {
-    this.current_game = JSON.parse(data.current_game);
-    updateGameInfo(this.current_game, data.client_team);
-})*/

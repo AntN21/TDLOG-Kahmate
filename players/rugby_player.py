@@ -1,4 +1,8 @@
-from constants import RED_TEAM, BLUE_TEAM
+"""
+Rugby player class file. All players extend this class
+"""
+from constants import Teams
+
 
 class RugbyPlayer:
     """
@@ -8,14 +12,17 @@ class RugbyPlayer:
         - his bonuses for attack (int att_bonus) and defence (int def_bonus);
     """
 
-    def __init__(self, type, team, max_move, att_bonus, def_bonus):
-        assert team == RED_TEAM or team == BLUE_TEAM, f"{team} is not a correct team color."
-        self._type = type
+    def __init__(self, player_type, team, max_move, attack_bonus, defense_bonus):
+        assert team in (
+            Teams.RED.value,
+            Teams.BLUE.value,
+        ), f"{team} is not a correct team color."
+        self._type = player_type
         self._team = team
         self._stunned_state = 0
         self._max_move = max_move
-        self._att_bonus = att_bonus
-        self._def_bonus = def_bonus
+        self._attack_bonus = attack_bonus
+        self._defense_bonus = defense_bonus
         self._available_moves = self.max_move
         self._just_lost = False
 
@@ -26,28 +33,28 @@ class RugbyPlayer:
 
     @property
     def team(self):
-        """Return the team color of the player."""
+        """Return the team color of the player"""
         return self._team
 
     @property
     def stunned(self):
-        """Return the stunning state of the player."""
+        """Return true if the player is stunned"""
         return self._stunned_state > 0
 
     @property
     def max_move(self):
-        """Return the maximum movements the player can do."""
+        """Return the maximum movements the player can do"""
         return self._max_move
 
     @property
-    def att_bonus(self):
-        """Return the attack bonus of the player."""
-        return self._att_bonus
+    def attack_bonus(self):
+        """Return the attack bonus of the player"""
+        return self._attack_bonus
 
     @property
-    def def_bonus(self):
-        """Return the defense bonus of the player."""
-        return self._def_bonus
+    def defense_bonus(self):
+        """Return the defense bonus of the player"""
+        return self._defense_bonus
 
     @property
     def available_moves(self):
@@ -55,48 +62,48 @@ class RugbyPlayer:
         return self._available_moves
 
     @available_moves.setter
-    def available_moves(self,avail_moves):
-        """Return the number of available moves of the player."""
-        self._available_moves=avail_moves
+    def available_moves(self, avail_moves):
+        """Sets the number of available moves of the player."""
+        self._available_moves = avail_moves
 
-    def reduce_moves(self,steps):
-        self._available_moves -= steps
+    def reduce_moves(self, steps):
+        """Reduces the moves already made"""
+        assert (
+            steps <= self.available_moves
+        ), "The player has not enough available moves to go that far."
+        self.available_moves -= steps
 
     def set_stunned(self):
-        """Turn the player stunning state into True."""
+        """Turn the player stunning state into 2, ."""
         self._stunned_state = 2
 
     def recover(self):
-        """Decrease the stunned state of the player."""
-        self.reset_lost()
+        """Decrease the stunned state of the player and removes the "resent lost" state"""
+        self.reset_just_lost()
         if self._stunned_state > 0:
             self._stunned_state -= 1
-
-    def move(self, n):
-        """Reduce _available_moves of n moves."""
-        assert (
-            n <= self.available_moves
-        ), "The player has not enough available moves to go that far."
-        self._available_moves -= n
 
     def reset_moves(self):
         """Reset _available_moves to the maximum number of moves."""
         self._available_moves = self.max_move
 
-    def lost(self):
+    def set_just_lost(self):
+        """Set just lost to true"""
         self._just_lost = True
 
-    def reset_lost(self):
+    def reset_just_lost(self):
+        """Resets the just lost attribute to false"""
         self._just_lost = False
 
-    def has_just_lost(self):
+    def get_just_lost(self):
+        """Gets if the player has just lost"""
         return self._just_lost
 
     def full_reset(self):
         """Reset the state of the player : stunning state and available moves."""
         self.recover()
         self.reset_moves()
-        self.reset_lost()
+        self.reset_just_lost()
 
     def __str__(self):
         if self.stunned:

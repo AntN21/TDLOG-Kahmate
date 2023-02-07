@@ -1,5 +1,9 @@
-from players.rugbyPlayer import RugbyPlayer
+"""
+Clever player class file
+"""
+from players.rugby_player import RugbyPlayer
 from constants import CLEVER_ATT_BONUS, CLEVER_DEF_BONUS, CLEVER_MAX_MOVE
+
 
 class Clever(RugbyPlayer):
     """Define a 'Clever' player with its characteristics."""
