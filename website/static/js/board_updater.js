@@ -143,12 +143,12 @@ function updateGameInfo(current_game, client_team) {
     document.getElementById("player_blue_custom_name").innerHTML = current_game.team_blue.custom_name;
     var team = client_team == Teams.RED ? current_game.team_red : current_game.team_blue; 
     if(current_game.selected_case != null && client_team == current_game.team_playing){
-        document.getElementById("player_moves_left").innerHTML = "Moves left: " + current_game.selected_case.movements_left;
+        document.getElementById("player_moves_left").innerHTML = "Player moves left: " + current_game.selected_case.movements_left;
     } else {
         document.getElementById("player_moves_left").innerHTML = "";
     }
-    document.getElementById("team_moves_left").innerHTML = "Moves left: " + (2-team.players_moved.length);
-    document.getElementById("cards_left").innerHTML = "Cards left: " + team.cards;
+    document.getElementById("team_moves_left").innerHTML = "Team moves left: " + (2-team.players_moved.length);
+    document.getElementById("cards_left").innerHTML = "Team cards left: " + team.cards;
 }
 
 function updateGame(current_game, team) {
