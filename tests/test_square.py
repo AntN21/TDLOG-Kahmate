@@ -13,7 +13,7 @@ mock_player = Ordinary(Teams.RED.value)
 
 def get_mock_square():
     """Returns a mock square"""
-    return Square(r.randint(0, BOARD_WIDTH), r.randint(0, BOARD_HEIGHT))
+    return Square(r.randint(0, BOARD_WIDTH - 1), r.randint(0, BOARD_HEIGHT - 1))
 
 
 class TestSquare(unittest.TestCase):
