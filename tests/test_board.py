@@ -6,6 +6,7 @@ import random as r
 from board import Board
 from constants import Teams
 from players.ordinary import Ordinary
+from tests.test_utils import get_random_coordinates
 
 TOTAL_TESTS = 20
 r.seed(1)
@@ -19,13 +20,6 @@ def get_mock_player():
 def get_random_coordinates_set(board, size):
     """Gets an array of random pair coordinates"""
     return [(get_random_coordinates(board)) for _ in range(size)]
-
-
-def get_random_coordinates(board):
-    """Gets a random pair of coordinates to test a function"""
-    x_square = r.randint(0, board.width - 1)
-    y_square = r.randint(0, board.height - 1)
-    return x_square, y_square
 
 
 class TestBoard(unittest.TestCase):
