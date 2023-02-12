@@ -329,5 +329,6 @@ class TestGame(unittest.TestCase):
         self.assertEqual(mock_game_json["team_red"], mock_game_json["team_blue"])
         self.assertEqual(len(mock_game_json["team_red"]["cards"]), 6)
 
+
 if __name__ == "__main__":
     unittest.main()
