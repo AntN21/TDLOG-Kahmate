@@ -287,3 +287,10 @@ class Game:
         else:
             res["winner"] = None
         return json.dumps(res)
+
+    def load_json(self,json_file):
+        """
+        Loads a game state from a json file
+        """
+        pass
+    
