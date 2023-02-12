@@ -45,7 +45,7 @@ class Move(Action):
         Checks that the position 1 contains a ready-to-move player and that position
         2 is inside its limits and without a player on it.
         """
-        current_team = game.teams[game.team_playing]
+        current_team = game.teams[game.team_playing.value]
         player = game.board(self.position1).player
         has_ball = game.board(self.position1).ball
         goal = get_goal(game.team_playing)

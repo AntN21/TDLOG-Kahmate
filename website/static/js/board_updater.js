@@ -42,7 +42,7 @@ function updateBoard(board) {
             }
             if(selected_square_json.player) {
                 var image = document.createElement("img");
-                var player = selected_square_json.player
+                var player = selected_square_json.player_string
                 image.src = get_src(player);
                 image.draggable = false;
                 image.style.width = "40px";

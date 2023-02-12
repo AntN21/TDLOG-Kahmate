@@ -23,7 +23,7 @@ class Controller:
         """
         self.socket.emit(
             "updateGame",
-            {"current_game": self.current_game.to_json(), "client_team": other(team)},
+            {"current_game": self.current_game.to_json(), "client_team": str(Teams.INSTANCE.other(team))},
         )
 
     def process_player_selection(self, form):
@@ -32,15 +32,15 @@ class Controller:
         """
         if "start_game" in form:
             if self.current_game.teams[Teams.RED.value].custom_name == "":
-                playe_1_name = form["player_name"]
-                self.current_game.set_custom_name(Teams.RED.value, playe_1_name)
-                self.emit_update_game(Teams.RED.value)
-                return redirect("/" + Teams.RED.value)
+                player_1_name = form["player_name"]
+                self.current_game.set_custom_name(str(Teams.RED), player_1_name)
+                self.emit_update_game(str(Teams.RED))
+                return redirect("/" + str(Teams.RED))
             if self.current_game.teams[Teams.BLUE.value].custom_name == "":
                 player_2_name = form["player_name"]
                 self.current_game.set_custom_name(Teams.BLUE.value, player_2_name)
-                self.emit_update_game(Teams.BLUE.value)
-                return redirect("/" + Teams.BLUE.value)
+                self.emit_update_game(str(Teams.BLUE))
+                return redirect("/" + str(Teams.BLUE))
         if "instructions" in form:
             return render_template("instructions.html")
         return render_template("player_selection.html")
@@ -49,6 +49,7 @@ class Controller:
         """
         This method will handle all game events from the view's form
         """
+        team = Teams.RED if team == 'red' else Teams.BLUE
         if "square" in form:
             position = re.sub(r"[() ]", "", form["square"]).split(",")
             self.current_game.select_square(position[1], position[0], team)

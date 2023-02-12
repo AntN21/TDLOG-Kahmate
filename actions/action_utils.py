@@ -5,7 +5,7 @@ from constants import Teams
 
 
 def forward(team):
-    """Indicates wich direction is forward"""
+    """Indicates which direction is forward"""
     return 1 if team == Teams.RED.value else -1
 
 
