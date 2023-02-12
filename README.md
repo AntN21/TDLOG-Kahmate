@@ -1,28 +1,32 @@
 # TDLOG-Kahmate
-// Overleaf
-https://www.overleaf.com/6978927524tzjrmbrpqcpg
-//
- http://jeuxstrategieter.free.fr/Kahmate_complet.php
-1 pion ballon
 
-Pour chaque équipe 
-6 pions
-2x 3 dép. +0/+0
-1x 2 dép. +2/+1
-1x 3 dép. +1/+0
-1x 4 dép. -1/-1
-1x 3 dép. +0/+1
 
-6 cartes d'endurance de valeur 1 à 6.
-[1,2,3,4,5,6] qui se vide et qui se réinitialise dès qu'elle est vide
+## Installing necessary packages:
 
-Action 
--Déplacement
--Passe              -> interception => Duel
--coup de pied à suivre
--Marquer un essai
--Plaquage (parfait) => Duel
--Forcer le passage  => Duel
+To run the tests and check the coverage, we have to install all needed packages for the app (flask and flask_socketio) and all test related packages (coverage). So it could be like:
 
-Plateau 11x8
-Tableau qui contient nos pions OU Coordonnées incluses dans notre classe pion.
+`pip install coverage flask flask_socketio`
+
+Or having them installed with conda.
+
+## Running tests and coverage:
+
+We then run the test coverage by opening the terminal in the directory's root and writing the following comand:
+
+`coverage run --source=. -m unittest discover && coverage report`
+
+The line coverage should be around 88% for all python modules combined (only testing the model, not controller or view)
+
+
+## Executing the game
+
+To execute the game, we run the following command of the terminal we already opened:
+
+`python main.py`
+
+In the message on the terminal, it should say: Running on http://127.0.0.1:8000
+
+Finally we can enter that address two times in any browser to start interacting with the game. Once you enter the name of each player in its respective tab/window, then you will be able to play. Note that Red starts first.
+
+
+
