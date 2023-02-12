@@ -3,6 +3,7 @@ Test for class game
 """
 import unittest
 import random as r
+import json
 from game import Game
 from constants import Teams, Actions
 from tests.test_utils import get_random_coordinates
@@ -26,8 +27,9 @@ def get_mock_game_info():
     return mock_game, red_player_square, blue_player_square
 
 
-def get_duel_mock_game_info():
-    """Returns a mock_game where there is a duel taking place"""
+def get_confronted_players_mock_game_info():
+    """Returns a mock_game where two players are facing each other with
+    their two squares"""
     mock_game, red_player_square, blue_player_square = get_mock_game_info()
     new_red_pos_x, new_red_pos_y = 2, 2
     new_blue_pos_x, new_blue_pos_y = 2, 3
@@ -40,20 +42,57 @@ def get_duel_mock_game_info():
         new_blue_pos_x,
         new_blue_pos_y,
     )
-    mock_game.board.put_ball(new_blue_pos_x, new_blue_pos_y)
+    return (
+        mock_game,
+        mock_game.board.square(new_red_pos_x, new_red_pos_x),
+        mock_game.board.square(new_blue_pos_x, new_blue_pos_y),
+    )
+
+
+def get_tackle_duel_mock_game_info():
+    """Returns a mock_game where there is a tackle duel taking place"""
+    (
+        mock_game,
+        red_player_square,
+        blue_player_square,
+    ) = get_confronted_players_mock_game_info()
+    mock_game.board.put_ball(blue_player_square.pos_x, blue_player_square.pos_y)
 
     # Pass turn two times to update actions
     mock_game.pass_turn(Teams.RED.value)
     mock_game.pass_turn(Teams.BLUE.value)
 
-    mock_game.select_square(new_red_pos_x, new_red_pos_y, Teams.RED.value)
-    mock_game.select_action(Actions.TACKLE.value, Teams.RED.value)
-    mock_game.select_square(new_blue_pos_x, new_blue_pos_y, Teams.RED.value)
-    return (
-        mock_game,
-        mock_game.board.square(new_red_pos_x, new_red_pos_y),
-        mock_game.board.square(new_blue_pos_x, new_blue_pos_y),
+    mock_game.select_square(
+        red_player_square.pos_x, red_player_square.pos_y, Teams.RED.value
     )
+    mock_game.select_action(Actions.TACKLE.value, Teams.RED.value)
+    mock_game.select_square(
+        blue_player_square.pos_x, blue_player_square.pos_y, Teams.RED.value
+    )
+    return mock_game, red_player_square, blue_player_square
+
+
+def get_forced_passage_duel_mock_game_info():
+    """Returns a mock_game where there is a forced passage duel taking place"""
+    (
+        mock_game,
+        red_player_square,
+        blue_player_square,
+    ) = get_confronted_players_mock_game_info()
+    mock_game.board.put_ball(red_player_square.pos_x, red_player_square.pos_y)
+
+    # Pass turn two times to update actions
+    mock_game.pass_turn(Teams.RED.value)
+    mock_game.pass_turn(Teams.BLUE.value)
+
+    mock_game.select_square(
+        red_player_square.pos_x, red_player_square.pos_y, Teams.RED.value
+    )
+    mock_game.select_action(Actions.FORCED_PASSAGE.value, Teams.RED.value)
+    mock_game.select_square(
+        blue_player_square.pos_x, blue_player_square.pos_y, Teams.RED.value
+    )
+    return mock_game, red_player_square, blue_player_square
 
 
 def get_available_squares(game):
@@ -160,7 +199,11 @@ class TestGame(unittest.TestCase):
         self.assertEqual(player_present, available_square.player)
 
         # Case duel
-        duel_game, red_player_square, blue_player_square = get_duel_mock_game_info()
+        (
+            duel_game,
+            red_player_square,
+            blue_player_square,
+        ) = get_tackle_duel_mock_game_info()
         duel_game.select_square(
             red_player_square.pos_x, red_player_square.pos_y, Teams.RED.value
         )
@@ -189,7 +232,7 @@ class TestGame(unittest.TestCase):
         self.assertGreater(len(available_squares), 0)
 
         # Duel case
-        duel_game, red_player_square, _ = get_duel_mock_game_info()
+        duel_game, red_player_square, _ = get_tackle_duel_mock_game_info()
         duel_game.select_action(Actions.MOVE.value, Teams.RED.value)
         available_squares = get_available_squares(duel_game)
         self.assertEqual(0, len(available_squares))
@@ -198,7 +241,7 @@ class TestGame(unittest.TestCase):
         """Tests the selection of cards for a duel"""
 
         # Test 1st tie and already used card
-        duel_mock_game, _, _ = get_duel_mock_game_info()
+        duel_mock_game, _, _ = get_tackle_duel_mock_game_info()
         duel_mock_game.select_duel_card(1, Teams.RED.value)
         self.assertFalse(duel_mock_game.duel.is_ready())
         duel_mock_game.select_duel_card(1, Teams.BLUE.value)
@@ -208,23 +251,83 @@ class TestGame(unittest.TestCase):
             duel_mock_game.select_duel_card(1, Teams.BLUE.value)
 
         # Test 1st win
-        duel_mock_game, _, blue_square = get_duel_mock_game_info()
+        duel_mock_game, _, blue_square = get_tackle_duel_mock_game_info()
         duel_mock_game.select_duel_card(2, Teams.RED.value)
         duel_mock_game.select_duel_card(1, Teams.BLUE.value)
         self.assertTrue(blue_square.player.stunned)
 
         # Test 2nd tie
-        duel_mock_game, red_square, _ = get_duel_mock_game_info()
+        duel_mock_game, red_square, _ = get_tackle_duel_mock_game_info()
         duel_mock_game.select_duel_card(1, Teams.RED.value)
         duel_mock_game.select_duel_card(1, Teams.BLUE.value)
         duel_mock_game.select_duel_card(2, Teams.RED.value)
         duel_mock_game.select_duel_card(2, Teams.BLUE.value)
         self.assertTrue(red_square.player.stunned)
 
+    def test_pass_turn(self):
+        """Pass turn function test"""
+        mock_game, red_player_square, blue_player_square = get_mock_game_info()
 
-# def pass_turn(self, team):
-#
-# def to_json(self):
+        # Test other team's turn
+        mock_game.select_square(
+            red_player_square.pos_x, red_player_square.pos_y, Teams.RED.value
+        )
+        self.assertTrue(red_player_square.selected)
+        mock_game.pass_turn(Teams.BLUE.value)
+        self.assertTrue(red_player_square.selected)
+
+        # Test resets moves
+        mock_game.select_action(Actions.MOVE.value, Teams.RED.value)
+        target_square = r.choice(get_available_squares(mock_game))
+        mock_game.select_square(
+            target_square.pos_x, target_square.pos_y, Teams.RED.value
+        )
+        self.assertNotEqual(
+            target_square.player.available_moves, target_square.player.max_move
+        )
+        mock_game.pass_turn(Teams.RED.value)
+        self.assertEqual(
+            target_square.player.available_moves, target_square.player.max_move
+        )
+
+        # Test cleans availables and selected squares
+        mock_game.select_square(
+            blue_player_square.pos_x, blue_player_square.pos_y, Teams.BLUE.value
+        )
+        mock_game.select_action(Actions.MOVE.value, Teams.BLUE.value)
+        self.assertGreater(len(get_available_squares(mock_game)), 0)
+        self.assertTrue(blue_player_square.selected)
+        mock_game.pass_turn(Teams.BLUE.value)
+        self.assertEqual(0, len(get_available_squares(mock_game)))
+        self.assertFalse(blue_player_square.selected)
+
+        # Test cleans stunned and lost states
+        duel_mock_game, _, blue_square = get_forced_passage_duel_mock_game_info()
+        duel_mock_game.select_duel_card(2, Teams.RED.value)
+        duel_mock_game.select_duel_card(1, Teams.BLUE.value)
+        self.assertTrue(blue_square.player.stunned)
+        self.assertTrue(blue_square.player.get_just_lost())
+        duel_mock_game.pass_turn(Teams.RED.value)
+        self.assertTrue(blue_square.player.stunned)
+        duel_mock_game.pass_turn(Teams.BLUE.value)
+        self.assertFalse(blue_square.player.get_just_lost())
+        duel_mock_game.pass_turn(Teams.RED.value)
+        self.assertFalse(blue_square.player.stunned)
+
+    def test_to_json(self):
+        """Tests if the json was correctly created"""
+        mock_game, _, _ = get_mock_game_info()
+        mock_game_json = json.loads(mock_game.to_json())
+        self.assertEqual(mock_game_json["team_playing"], Teams.RED.value)
+        self.assertEqual(
+            len(mock_game_json["board"]),
+            mock_game.board.width * mock_game.board.height,
+        )
+        self.assertGreater(len(mock_game_json["actions"]), 0)
+        self.assertIsNone(mock_game_json["duel"])
+        self.assertIsNone(mock_game_json["winner"])
+        self.assertEqual(mock_game_json["team_red"], mock_game_json["team_blue"])
+        self.assertEqual(len(mock_game_json["team_red"]["cards"]), 6)
 
 if __name__ == "__main__":
     unittest.main()
