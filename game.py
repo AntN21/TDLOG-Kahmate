@@ -286,5 +286,4 @@ class Game:
             res["winner"] = self.team_playing
         else:
             res["winner"] = None
-
         return json.dumps(res)
