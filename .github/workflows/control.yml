@@ -5,10 +5,10 @@ name: CI
 # Controls when the workflow will run
 on:
   # Triggers the workflow on push or pull request events but only for the "main" branch
-  push:
-    branches: [ "main" ]
   pull_request:
-    branches: [ "main" ]
+  push:
+    branches: 
+      - "main"
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -55,10 +55,3 @@ jobs:
       - name: Test with coverage
         run: |
           coverage run --source=. -m unittest discover && coverage report
-
-      # Analyze coverage.xml
-      - name: Get Cover 
-        uses: orgoro/coverage@v3
-        with:
-            coverageFile: ./coverage.xml
-            token: ${{ secrets.GITHUB_TOKEN }}
