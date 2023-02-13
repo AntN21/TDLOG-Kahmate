@@ -220,7 +220,7 @@ class Game:
         self._selected_case = None
         self.board.clear_available()
         self.board.clear_selected()
-        self.team_playing = Teams.INSTANCE.other(self.team_playing)
+        self.team_playing = Teams.RED.other(self.team_playing)
         self.teams[self.team_playing].players_moved = []
         for square in self.board.squares:
             if square.player is not None:

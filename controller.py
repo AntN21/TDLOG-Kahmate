@@ -23,7 +23,7 @@ class Controller:
         """
         self.socket.emit(
             "updateGame",
-            {"current_game": self.current_game.to_json(), "client_team": Teams.INSTANCE.other(team).value},
+            {"current_game": self.current_game.to_json(), "client_team": Teams.RED.other(team).value},
         )
 
     def process_player_selection(self, form):

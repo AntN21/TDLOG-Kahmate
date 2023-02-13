@@ -12,7 +12,6 @@ class Player_type(Enum):
     Enumerator of player type
     """
 
-
     ORDINARY = 0
     CLEVER = 1
     STRONG = 2
