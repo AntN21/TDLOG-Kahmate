@@ -56,8 +56,8 @@ class Game:
         self.initial_placing()
         self._duel = None
         self.teams = {
-            Teams.RED.value: Team(Teams.RED),
-            Teams.BLUE.value: Team(Teams.BLUE),
+            Teams.RED: Team(Teams.RED),
+            Teams.BLUE: Team(Teams.BLUE),
         }
         self.team_playing = Teams.RED
         self._action_class = ActionManager(self._board.width, self._board.height)
@@ -221,7 +221,7 @@ class Game:
         self.board.clear_available()
         self.board.clear_selected()
         self.team_playing = Teams.INSTANCE.other(self.team_playing)
-        self.teams[self.team_playing.value].players_moved = []
+        self.teams[self.team_playing].players_moved = []
         for square in self.board.squares:
             if square.player is not None:
                 square.player.reset_moves()
@@ -234,7 +234,7 @@ class Game:
         Converts the game state into a json to be used in the java script file
         """
         res = {}
-        res["team_playing"] = str(self.team_playing)
+        res["team_playing"] = self.team_playing.value
         res["board"] = []
         for square in self.board.squares:
             res["board"].append(
@@ -260,16 +260,16 @@ class Game:
 
         res["actions"] = self._action_class.get_possible_moves()
 
-        team_red = self.teams[Teams.RED.value].to_dict()
-        team_blue = self.teams[Teams.BLUE.value].to_dict()
+        team_red = self.teams[Teams.RED].to_dict()
+        team_blue = self.teams[Teams.BLUE].to_dict()
 
         res["team_red"] = team_red
         res["team_blue"] = team_blue
 
         if self.duel is not None:
             duel = {}
-            duel["team_1_cards"] = self.teams[Teams.RED.value].cards
-            duel["team_2_cards"] = self.teams[Teams.BLUE.value].cards
+            duel["team_1_cards"] = self.teams[Teams.RED].cards
+            duel["team_2_cards"] = self.teams[Teams.BLUE].cards
             duel["team_1_fighter"] = str(
                 self.board.square(
                     self._duel.position1[0], self._duel.position1[1]

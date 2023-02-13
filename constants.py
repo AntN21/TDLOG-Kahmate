@@ -11,7 +11,8 @@ class Player_type(Enum):
     """
     Enumerator of player type
     """
-    INSTANCE = -1
+
+
     ORDINARY = 0
     CLEVER = 1
     STRONG = 2
@@ -57,9 +58,9 @@ class Teams(Enum):
     """
     Enumerator of both teams colors
     """
-    INSTANCE = -1
-    RED = 0
-    BLUE = 1
+
+    RED = "red"
+    BLUE = "blue"
 
     def __str__(self):
         return f'{self.name}'.lower()

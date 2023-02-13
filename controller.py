@@ -23,7 +23,7 @@ class Controller:
         """
         self.socket.emit(
             "updateGame",
-            {"current_game": self.current_game.to_json(), "client_team": str(Teams.INSTANCE.other(team))},
+            {"current_game": self.current_game.to_json(), "client_team": Teams.INSTANCE.other(team).value},
         )
 
     def process_player_selection(self, form):
@@ -31,15 +31,15 @@ class Controller:
         This method will handle the player selection form events
         """
         if "start_game" in form:
-            if self.current_game.teams[Teams.RED.value].custom_name == "":
+            if self.current_game.teams[Teams.RED].custom_name == "":
                 player_1_name = form["player_name"]
-                self.current_game.set_custom_name(str(Teams.RED), player_1_name)
-                self.emit_update_game(str(Teams.RED))
+                self.current_game.set_custom_name(Teams.RED, player_1_name)
+                self.emit_update_game(Teams.RED)
                 return redirect("/" + str(Teams.RED))
-            if self.current_game.teams[Teams.BLUE.value].custom_name == "":
+            if self.current_game.teams[Teams.BLUE].custom_name == "":
                 player_2_name = form["player_name"]
-                self.current_game.set_custom_name(Teams.BLUE.value, player_2_name)
-                self.emit_update_game(str(Teams.BLUE))
+                self.current_game.set_custom_name(Teams.BLUE, player_2_name)
+                self.emit_update_game(Teams.BLUE)
                 return redirect("/" + str(Teams.BLUE))
         if "instructions" in form:
             return render_template("instructions.html")
@@ -49,7 +49,9 @@ class Controller:
         """
         This method will handle all game events from the view's form
         """
-        team = Teams.RED if team == 'red' else Teams.BLUE
+
+        print("t  ", team.value)
+        #team = Teams.RED if team == 'red' else Teams.BLUE
         if "square" in form:
             position = re.sub(r"[() ]", "", form["square"]).split(",")
             self.current_game.select_square(position[1], position[0], team)
