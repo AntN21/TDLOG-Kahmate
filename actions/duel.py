@@ -1,7 +1,7 @@
 """
 File containing the duel class
 """
-from constants import other
+from constants import Teams
 from actions.action import Action
 
 
@@ -42,10 +42,10 @@ class Duel(Action):
         assert attacker == game.team_playing
         card1, card2 = self._attacker_choice, self._defender_choice
         game.teams[attacker].cards.remove(self._attacker_choice)
-        game.teams[other(attacker)].cards.remove(self._defender_choice)
+        game.teams[Teams.RED.other(attacker)].cards.remove(self._defender_choice)
         if len(game.teams[attacker].cards) == 0:
             game.teams[attacker].cards = list(range(1, 6 + 1))
-            game.teams[other(attacker)].cards = list(range(1, 6 + 1))
+            game.teams[Teams.RED.other(attacker)].cards = list(range(1, 6 + 1))
         player1 = game.board(self.position1).player
         player2 = game.board(self.position2).player
         score_attack = card1 + player1.attack_bonus
@@ -53,7 +53,7 @@ class Duel(Action):
         if score_attack > score_defense:
             return (attacker, score_attack, score_defense)
         if score_defense > score_attack:
-            return (other(attacker), score_defense, score_attack)
+            return (Teams.RED.other(attacker), score_defense, score_attack)
         if self._duel_number >= 0:
             return None
-        return (other(attacker), score_defense, score_attack)
+        return (Teams.RED.other(attacker), score_defense, score_attack)

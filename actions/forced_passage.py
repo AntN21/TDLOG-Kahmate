@@ -1,7 +1,7 @@
 """
 File containing the forced passage action class
 """
-from constants import other
+from constants import Teams
 from actions.action import Action
 from actions.duel import Duel
 from actions.action_utils import forward, get_neighbours, check_duel
@@ -46,7 +46,7 @@ class ForcedPassage(Action):
             game.board(self.position2).player.set_just_lost()
         else:
             game.board(self.position1).player.set_stunned()
-            p_ball = [self.position1[0] + forward(other(attacker)), self.position1[1]]
+            p_ball = [self.position1[0] + forward(Teams.RED.other(attacker)), self.position1[1]]
             game.board.move_ball(
                 self.position1[0], self.position1[1], p_ball[0], p_ball[1]
             )

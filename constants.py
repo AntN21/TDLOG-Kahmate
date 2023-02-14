@@ -79,7 +79,7 @@ def other(team):
 
 def get_goal(team):
     """Get the back of the team's side"""
-    return BOARD_WIDTH - 1 if team == Teams.RED.value else 0
+    return BOARD_WIDTH - 1 if team == Teams.RED else 0
 
 
 class Actions(Enum):

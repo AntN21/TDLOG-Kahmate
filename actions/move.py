@@ -1,7 +1,7 @@
 """
 File containing the move action class
 """
-from constants import other, get_goal
+from constants import Teams, get_goal
 from actions.action import Action
 from actions.action_utils import path_exists
 
@@ -49,7 +49,7 @@ class Move(Action):
         player = game.board(self.position1).player
         has_ball = game.board(self.position1).ball
         goal = get_goal(game.team_playing)
-        back = get_goal(other(game.team_playing))
+        back = get_goal(Teams.RED.other(game.team_playing))
 
         if player is None or player.team != game.team_playing or player.stunned:
             return False

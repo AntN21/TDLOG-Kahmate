@@ -65,7 +65,7 @@ def get_tackle_duel_mock_game_info():
     mock_game.select_square(
         red_player_square.pos_x, red_player_square.pos_y, Teams.RED
     )
-    mock_game.select_action(Actions.TACKLE, Teams.RED)
+    mock_game.select_action(Actions.TACKLE.value, Teams.RED)
     mock_game.select_square(
         blue_player_square.pos_x, blue_player_square.pos_y, Teams.RED
     )
@@ -88,7 +88,7 @@ def get_forced_passage_duel_mock_game_info():
     mock_game.select_square(
         red_player_square.pos_x, red_player_square.pos_y, Teams.RED
     )
-    mock_game.select_action(Actions.FORCED_PASSAGE, Teams.RED)
+    mock_game.select_action(Actions.FORCED_PASSAGE.value, Teams.RED)
     mock_game.select_square(
         blue_player_square.pos_x, blue_player_square.pos_y, Teams.RED
     )
@@ -188,7 +188,7 @@ class TestGame(unittest.TestCase):
 
         # Case player selected, touching an available square
         player_present = red_player_square.player
-        mock_game.select_action(Actions.MOVE, Teams.RED)
+        mock_game.select_action(Actions.MOVE.value, Teams.RED)
         available_squares = get_available_squares(mock_game)
         self.assertGreater(len(available_squares), 0)
         available_square = r.choice(available_squares)
@@ -309,7 +309,7 @@ class TestGame(unittest.TestCase):
         self.assertTrue(blue_square.player.get_just_lost())
         duel_mock_game.pass_turn(Teams.RED)
         self.assertTrue(blue_square.player.stunned)
-        duel_mock_game.pass_turn(Teams.BLUE.value)
+        duel_mock_game.pass_turn(Teams.BLUE)
         self.assertFalse(blue_square.player.get_just_lost())
         duel_mock_game.pass_turn(Teams.RED)
         self.assertFalse(blue_square.player.stunned)
@@ -318,7 +318,7 @@ class TestGame(unittest.TestCase):
         """Tests if the json was correctly created"""
         mock_game, _, _ = get_mock_game_info()
         mock_game_json = json.loads(mock_game.to_json())
-        self.assertEqual(mock_game_json["team_playing"], Teams.RED)
+        self.assertEqual(mock_game_json["team_playing"], Teams.RED.value)
         self.assertEqual(
             len(mock_game_json["board"]),
             mock_game.board.width * mock_game.board.height,
