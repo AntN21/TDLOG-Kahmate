@@ -15,7 +15,7 @@ rd.seed(1)
 
 def get_team():
     """Gets a random team"""
-    return rd.choice([Teams.RED.value, Teams.BLUE.value])
+    return rd.choice([Teams.RED, Teams.BLUE])
 
 
 def get_players():
