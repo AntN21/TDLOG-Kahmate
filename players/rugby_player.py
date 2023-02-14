@@ -84,7 +84,8 @@ class RugbyPlayer:
         self.available_moves -= steps
 
     def set_stunned(self):
-        """Turn the player stunning state into 2, ."""
+        """Turn the player stunning state into 2. It will decrease decrease each turn
+        so that it becomes available once they skip the next turn."""
         self._stunned_state = 2
 
     def recover(self):
@@ -108,12 +109,6 @@ class RugbyPlayer:
     def get_just_lost(self):
         """Gets if the player has just lost"""
         return self._just_lost
-
-    def full_reset(self):
-        """Reset the state of the player : stunning state and available moves."""
-        self.recover()
-        self.reset_moves()
-        self.reset_just_lost()
 
     def __str__(self):
         if self.stunned:
