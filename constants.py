@@ -7,7 +7,7 @@ from enum import Enum
 BOARD_WIDTH = 13  # The width includes both goals
 BOARD_HEIGHT = 8
 
-class Player_type(Enum):
+class PlayerType(Enum):
     """
     Enumerator of player type
     """
@@ -21,11 +21,6 @@ class Player_type(Enum):
     def __str__(self):
         return f'{self.name}'.lower()
 
-    def type(self, index):
-        for player_type in list(Player_type):
-            if index == player_type.value:
-                return player_type
-        return None
 
 # Ordinary player characteristics
 ORDINARY_MAX_MOVE = 3
@@ -58,8 +53,8 @@ class Teams(Enum):
     Enumerator of both teams colors
     """
 
-    RED = "red"
-    BLUE = "blue"
+    RED = 0
+    BLUE = 1
 
     def __str__(self):
         return f'{self.name}'.lower()

@@ -5,6 +5,9 @@ const Teams = {
     BLUE: 1
 }
 
+const Teams3 = ['red','blue'];
+
+
 var BOARD_WIDTH = 13
 var BOARD_HEIGHT = 8
 
@@ -40,7 +43,7 @@ function updateBoard(board) {
                 image.style.width = "40px";
                 selected_square_element.appendChild(image);
             }
-            if(selected_square_json.player) {
+            if(selected_square_json.player != -1) {
                 var image = document.createElement("img");
                 var player = selected_square_json.player_string
                 image.src = get_src(player);
@@ -86,19 +89,15 @@ function updateMenu(current_game, client_team) {
     /**
      *   Show all menu buttons that are available in the current game for the designated team
      */
-     if (client_team=='red'){
-        client_team = 0
-     }
-     if (client_team = 'blue'){
-        client_team = 1
-     }
+
+
     document.getElementById("turn_card").style.backgroundColor = current_game.team_playing;
     if(current_game.winner != null){
         document.getElementById("turn_text").innerHTML = "PLAYER " + current_game.winner + " WON!";
         clearMenu()
         return
     } else {
-        document.getElementById("turn_text").innerHTML = "It is " + current_game.team_playing + "'s turn";
+        document.getElementById("turn_text").innerHTML =  "It is " + current_game.team_playing + "'s turn";
     }
     clearMenu()
     if(current_game.team_playing == client_team) {
@@ -171,4 +170,5 @@ socket.on("updateGame", function (data) {
     updateBoard(this.current_game.board);
     updateMenu(this.current_game, data.client_team);
     updateGameInfo(this.current_game, data.client_team);
+
 });

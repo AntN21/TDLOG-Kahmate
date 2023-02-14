@@ -42,6 +42,16 @@ class RugbyPlayer:
         return self._stunned_state > 0
 
     @property
+    def stunned_state(self):
+        """Return the stunned state of a player"""
+        return self._stunned_state
+
+    @stunned_state.setter
+    def stunned_state(self,s_state):
+        """Sets the stunned state of a player."""
+        self._stunned_state = s_state
+
+    @property
     def max_move(self):
         """Return the maximum movements the player can do"""
         return self._max_move

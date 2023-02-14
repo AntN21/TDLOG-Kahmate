@@ -2,7 +2,7 @@
 Ordinary player class file
 """
 from players.rugby_player import RugbyPlayer
-from constants import ORDINARY_ATT_BONUS, ORDINARY_DEF_BONUS, ORDINARY_MAX_MOVE
+from constants import ORDINARY_ATT_BONUS, ORDINARY_DEF_BONUS, ORDINARY_MAX_MOVE, PlayerType
 
 
 class Ordinary(RugbyPlayer):
@@ -10,7 +10,7 @@ class Ordinary(RugbyPlayer):
 
     def __init__(self, team):
         super().__init__(
-            "ordinary",
+            PlayerType.ORDINARY,
             team,
             ORDINARY_MAX_MOVE,
             ORDINARY_ATT_BONUS,

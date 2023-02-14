@@ -16,7 +16,7 @@ def render_game(team, current_game):
     Draws the game template with the game json, team (red/blue), player json,
     and player names as the arguments.
     """
-    return render_template("game.html", current_game=current_game, client_team=str(team))
+    return render_template("game.html", current_game=current_game,client_team=team.value, client_team_string=str(team))
 
 
 def game_view(team, current_request):

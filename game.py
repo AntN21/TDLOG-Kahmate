@@ -5,6 +5,7 @@ to play the game.
 import json
 import random as rd
 from math import floor
+from enum import Enum
 from constants import Teams
 from board import Board
 from players.rugby_player import RugbyPlayer
@@ -37,6 +38,7 @@ class Team:
         team_json["players_moved"] = [str(player) for player in self.players_moved]
         team_json["cards"] = self.cards
         return team_json
+
 
 
 class Game:
@@ -239,7 +241,8 @@ class Game:
         for square in self.board.squares:
             res["board"].append(
                 {
-                    "player": None if square.player is None else str(square.player),
+                    "player": -1 if square.player is None else 100 * square.player.stunned_state
+                                                            + 10 * square.player.type.value + square.player.team.value,
                     "player_string": None if square.player is None else str(square.player),
                     "ball": square.ball,
                     "available": square.available,
@@ -285,18 +288,19 @@ class Game:
             res["duel"] = None
 
         if self.winner is not None:
-            res["winner"] = self.team_playing.name
+            res["winner"] = str(self.team_playing)
         else:
             res["winner"] = None
 
         jres = json.dumps(res)
-        jsonFile = open("debug.json", "w")
+        jsonFile = open("test.json", "w")
         jsonFile.write(jres)
         jsonFile.close()
 
         return json.dumps(res)
 
-    def load_json(self,json_file):
+    def load_json(self, json_file):
+        RUGBYPLAYERS = [Ordinary, Clever, Strong, Tough, Fast]
         """
         Loads a game state from a json file
         """
@@ -307,12 +311,15 @@ class Game:
 
             self.board.squares[index].set_ball(game_state["board"][index]["ball"])
             player_data = game_state["board"][index]["player"]
-            player_d = None if player_data is None else player_data.split('_')
-            #player = None if player_d is None else RugbyPlayer(player_d[0], player_d[1],
-            #self.board.squares[index].set_player()
-            #"player": None if square.player is None else str(square.player),
-            #"ball": square.ball,
-            #"available": square.available,
-            #"selected": square.selected,
-        pass
-    
+            stunned_state = player_data/100
+            player_type = (player_data - 100*stunned_state ) / 10
+            team_index = player_data % 10
+            player = None if team_index == -1 else RUGBYPLAYERS[player_type](list(Teams)[team_index])
+            player.stunned_state = stunned_state
+
+            team_strings = ["team_red", "team_blue"]
+            for index in range(2):
+                team = self.teams[list(Teams)[index]]
+                team.custom_name = game_state[team_strings[index]]["custom_name"]
+                team.players_moved = game_state[team_strings[index]]["custom_name"]
+                team.cards = game_state[team_strings[index]]["cards"]

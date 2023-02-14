@@ -3,9 +3,19 @@ Controller file
 """
 import re
 from flask import render_template, redirect
+from enum import Enum
 from constants import Actions, Teams, other
 from game import Game
 
+class Instruction(Enum):
+    SQUARE = 0
+    CARD = 1
+    NEXT_TURN = 2
+    BALL_KICK = 3
+    TACKLE = 4
+    FORCED_PASSAGE = 5
+    MOVE = 6
+    PASS = 7
 
 class Controller:
     """
@@ -51,6 +61,7 @@ class Controller:
         """
 
         print("t  ", team.value)
+        print("f",form)
         #team = Teams.RED if team == 'red' else Teams.BLUE
         if "square" in form:
             position = re.sub(r"[() ]", "", form["square"]).split(",")
