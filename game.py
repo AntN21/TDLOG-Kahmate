@@ -40,7 +40,6 @@ class Team:
         return team_json
 
 
-
 class Game:
     """
     The Game class will contain all the information related with the state of the game. This
@@ -141,11 +140,7 @@ class Game:
 
                 if isinstance(result, Board):
                     self._board = result
-                    goal = (
-                        self.board.width - 1
-                        if self.team_playing == Teams.RED
-                        else 0
-                    )
+                    goal = self.board.width - 1 if self.team_playing == Teams.RED else 0
                     if selected_case.pos_x == goal:
                         self._winner = self.team_playing
                 else:
@@ -241,9 +236,14 @@ class Game:
         for square in self.board.squares:
             res["board"].append(
                 {
-                    "player": -1 if square.player is None else 100 * square.player.stunned_state
-                                                            + 10 * square.player.type.value + square.player.team.value,
-                    "player_string": None if square.player is None else str(square.player),
+                    "player": -1
+                    if square.player is None
+                    else 100 * square.player.stunned_state
+                    + 10 * square.player.type.value
+                    + square.player.team.value,
+                    "player_string": None
+                    if square.player is None
+                    else str(square.player),
                     "ball": square.ball,
                     "available": square.available,
                     "selected": square.selected,
@@ -307,14 +307,18 @@ class Game:
         game_state = json.loads(json_file.read())
         self.team_playing = game_state["team_playing"]
         self.board = Board()
-        for index in range(len(game_state["board" ])):
+        for index in range(len(game_state["board"])):
 
             self.board.squares[index].set_ball(game_state["board"][index]["ball"])
             player_data = game_state["board"][index]["player"]
-            stunned_state = player_data/100
-            player_type = (player_data - 100*stunned_state ) / 10
+            stunned_state = player_data / 100
+            player_type = (player_data - 100 * stunned_state) / 10
             team_index = player_data % 10
-            player = None if team_index == -1 else RUGBYPLAYERS[player_type](list(Teams)[team_index])
+            player = (
+                None
+                if team_index == -1
+                else RUGBYPLAYERS[player_type](list(Teams)[team_index])
+            )
             player.stunned_state = stunned_state
 
             team_strings = ["team_red", "team_blue"]

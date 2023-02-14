@@ -2,7 +2,12 @@
 Ordinary player class file
 """
 from players.rugby_player import RugbyPlayer
-from constants import ORDINARY_ATT_BONUS, ORDINARY_DEF_BONUS, ORDINARY_MAX_MOVE, PlayerType
+from constants import (
+    ORDINARY_ATT_BONUS,
+    ORDINARY_DEF_BONUS,
+    ORDINARY_MAX_MOVE,
+    PlayerType,
+)
 
 
 class Ordinary(RugbyPlayer):

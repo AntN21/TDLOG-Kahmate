@@ -62,9 +62,7 @@ def get_tackle_duel_mock_game_info():
     mock_game.pass_turn(Teams.RED)
     mock_game.pass_turn(Teams.BLUE)
 
-    mock_game.select_square(
-        red_player_square.pos_x, red_player_square.pos_y, Teams.RED
-    )
+    mock_game.select_square(red_player_square.pos_x, red_player_square.pos_y, Teams.RED)
     mock_game.select_action(Actions.TACKLE.value, Teams.RED)
     mock_game.select_square(
         blue_player_square.pos_x, blue_player_square.pos_y, Teams.RED
@@ -85,9 +83,7 @@ def get_forced_passage_duel_mock_game_info():
     mock_game.pass_turn(Teams.RED)
     mock_game.pass_turn(Teams.BLUE)
 
-    mock_game.select_square(
-        red_player_square.pos_x, red_player_square.pos_y, Teams.RED
-    )
+    mock_game.select_square(red_player_square.pos_x, red_player_square.pos_y, Teams.RED)
     mock_game.select_action(Actions.FORCED_PASSAGE.value, Teams.RED)
     mock_game.select_square(
         blue_player_square.pos_x, blue_player_square.pos_y, Teams.RED
@@ -111,7 +107,8 @@ class TestGame(unittest.TestCase):
             sum(
                 1
                 for square in mock_game.board.squares
-                if square.player is not None and square.player.type == PlayerType.ORDINARY
+                if square.player is not None
+                and square.player.type == PlayerType.ORDINARY
             ),
         )
         self.assertEqual(
@@ -279,9 +276,7 @@ class TestGame(unittest.TestCase):
         # Test resets moves
         mock_game.select_action(Actions.MOVE.value, Teams.RED)
         target_square = r.choice(get_available_squares(mock_game))
-        mock_game.select_square(
-            target_square.pos_x, target_square.pos_y, Teams.RED
-        )
+        mock_game.select_square(target_square.pos_x, target_square.pos_y, Teams.RED)
         self.assertNotEqual(
             target_square.player.available_moves, target_square.player.max_move
         )

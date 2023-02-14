@@ -7,6 +7,7 @@ from enum import Enum
 from constants import Actions, Teams, other
 from game import Game
 
+
 class Instruction(Enum):
     SQUARE = 0
     CARD = 1
@@ -16,6 +17,7 @@ class Instruction(Enum):
     FORCED_PASSAGE = 5
     MOVE = 6
     PASS = 7
+
 
 class Controller:
     """
@@ -33,7 +35,10 @@ class Controller:
         """
         self.socket.emit(
             "updateGame",
-            {"current_game": self.current_game.to_json(), "client_team": Teams.RED.other(team).value},
+            {
+                "current_game": self.current_game.to_json(),
+                "client_team": Teams.RED.other(team).value,
+            },
         )
 
     def process_player_selection(self, form):
@@ -61,8 +66,8 @@ class Controller:
         """
 
         print("t  ", team.value)
-        print("f",form)
-        #team = Teams.RED if team == 'red' else Teams.BLUE
+        print("f", form)
+        # team = Teams.RED if team == 'red' else Teams.BLUE
         if "square" in form:
             position = re.sub(r"[() ]", "", form["square"]).split(",")
             self.current_game.select_square(position[1], position[0], team)

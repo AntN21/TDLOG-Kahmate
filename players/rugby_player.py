@@ -13,10 +13,7 @@ class RugbyPlayer:
     """
 
     def __init__(self, player_type, team, max_move, attack_bonus, defense_bonus):
-        assert team in (
-            Teams.RED,
-            Teams.BLUE,
-        ), f"{team} is not a correct team color."
+        assert team in (Teams.RED, Teams.BLUE,), f"{team} is not a correct team color."
         self._type = player_type
         self._team = team
         self._stunned_state = 0
@@ -47,7 +44,7 @@ class RugbyPlayer:
         return self._stunned_state
 
     @stunned_state.setter
-    def stunned_state(self,s_state):
+    def stunned_state(self, s_state):
         """Sets the stunned state of a player."""
         self._stunned_state = s_state
 

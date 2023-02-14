@@ -9,4 +9,6 @@ class Fast(RugbyPlayer):
     """Define a 'Fast' player with its characteristics."""
 
     def __init__(self, team):
-        super().__init__(PlayerType.FAST, team, FAST_MAX_MOVE, FAST_ATT_BONUS, FAST_DEF_BONUS)
+        super().__init__(
+            PlayerType.FAST, team, FAST_MAX_MOVE, FAST_ATT_BONUS, FAST_DEF_BONUS
+        )
