@@ -248,12 +248,10 @@ class Game:
             )
 
         if self.selected_case is not None:
-            selected_case = {}
-            selected_case["position"] = [
+            selected_case = {"position": [
                 self.selected_case.pos_x,
-                self.selected_case.pos_y,
-            ]
-            selected_case["movements_left"] = self.selected_case.player.available_moves
+                self.selected_case.pos_y
+            ], "movements_left": self.selected_case.player.available_moves}
             res["selected_case"] = selected_case
         else:
             res["selected_case"] = None
@@ -289,15 +287,9 @@ class Game:
         else:
             res["winner"] = None
 
-        jres = json.dumps(res)
-        jsonFile = open("test.json", "w")
-        jsonFile.write(jres)
-        jsonFile.close()
-
         return json.dumps(res)
 
     def load_json(self, json_file_name):
-
         """
         Loads a game state from a json file
         """

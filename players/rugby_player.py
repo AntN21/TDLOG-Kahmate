@@ -81,7 +81,7 @@ class RugbyPlayer:
         self.available_moves -= steps
 
     def set_stunned(self):
-        """Turn the player stunning state into 2. It will decrease decrease each turn
+        """Turn the player stunning state into 2. It will decrease each turn
         so that it becomes available once they skip the next turn."""
         self._stunned_state = 2
 
