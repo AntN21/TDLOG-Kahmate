@@ -3,7 +3,7 @@ Controller file
 """
 import re
 from flask import render_template, redirect
-from constants import Actions, Teams, other
+from constants import Actions, Teams
 from game import Game
 
 
@@ -23,7 +23,10 @@ class Controller:
         """
         self.socket.emit(
             "updateGame",
-            {"current_game": self.current_game.to_json(), "client_team": other(team)},
+            {
+                "current_game": self.current_game.to_json(),
+                "client_team": Teams.RED.other(team).value,
+            },
         )
 
     def process_player_selection(self, form):
@@ -31,16 +34,16 @@ class Controller:
         This method will handle the player selection form events
         """
         if "start_game" in form:
-            if self.current_game.teams[Teams.RED.value].custom_name == "":
-                playe_1_name = form["player_name"]
-                self.current_game.set_custom_name(Teams.RED.value, playe_1_name)
-                self.emit_update_game(Teams.RED.value)
-                return redirect("/" + Teams.RED.value)
-            if self.current_game.teams[Teams.BLUE.value].custom_name == "":
+            if self.current_game.teams[Teams.RED].custom_name == "":
+                player_1_name = form["player_name"]
+                self.current_game.set_custom_name(Teams.RED, player_1_name)
+                self.emit_update_game(Teams.RED)
+                return redirect("/" + str(Teams.RED))
+            if self.current_game.teams[Teams.BLUE].custom_name == "":
                 player_2_name = form["player_name"]
-                self.current_game.set_custom_name(Teams.BLUE.value, player_2_name)
-                self.emit_update_game(Teams.BLUE.value)
-                return redirect("/" + Teams.BLUE.value)
+                self.current_game.set_custom_name(Teams.BLUE, player_2_name)
+                self.emit_update_game(Teams.BLUE)
+                return redirect("/" + str(Teams.BLUE))
         if "instructions" in form:
             return render_template("instructions.html")
         return render_template("player_selection.html")
@@ -49,6 +52,7 @@ class Controller:
         """
         This method will handle all game events from the view's form
         """
+
         if "square" in form:
             position = re.sub(r"[() ]", "", form["square"]).split(",")
             self.current_game.select_square(position[1], position[0], team)

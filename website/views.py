@@ -16,7 +16,12 @@ def render_game(team, current_game):
     Draws the game template with the game json, team (red/blue), player json,
     and player names as the arguments.
     """
-    return render_template("game.html", current_game=current_game, client_team=team)
+    return render_template(
+        "game.html",
+        current_game=current_game,
+        client_team=team.value,
+        client_team_string=str(team),
+    )
 
 
 def game_view(team, current_request):
@@ -32,16 +37,16 @@ def game_view(team, current_request):
     return render_game(team, current_game.to_json())
 
 
-@views.route("/" + Teams.RED.value, methods=["POST", "GET"])
+@views.route("/" + str(Teams.RED), methods=["POST", "GET"])
 def red():
     """Show red player's perspective"""
-    return game_view(Teams.RED.value, request)
+    return game_view(Teams.RED, request)
 
 
-@views.route("/" + Teams.BLUE.value, methods=["POST", "GET"])
+@views.route("/" + str(Teams.BLUE), methods=["POST", "GET"])
 def blue():
     """Show blue player's perspective"""
-    return game_view(Teams.BLUE.value, request)
+    return game_view(Teams.BLUE, request)
 
 
 @views.route("/", methods=["POST", "GET"])

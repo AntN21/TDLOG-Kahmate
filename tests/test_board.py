@@ -14,7 +14,7 @@ r.seed(1)
 
 def get_mock_player():
     """Returns a mock player"""
-    return Ordinary(Teams.RED.value)
+    return Ordinary(Teams.RED)
 
 
 def get_random_coordinates_set(board, size):

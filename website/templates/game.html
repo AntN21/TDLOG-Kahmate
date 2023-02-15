@@ -7,7 +7,7 @@
         updateGame({{current_game|tojson|safe}}, "{{client_team}}");
     }
 </script>
-<form action="{{ url_for('views.' + client_team) }}" method="POST")">
+<form action="{{ url_for('views.' + client_team_string) }}" method="POST">
     <body onload="update()">
         <div id="all" style="display: none; flex-direction: row;">
             <div style="display: flex; flex-direction:column; margin: 20px; align-items: center;">

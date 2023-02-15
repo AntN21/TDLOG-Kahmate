@@ -7,6 +7,22 @@ from enum import Enum
 BOARD_WIDTH = 13  # The width includes both goals
 BOARD_HEIGHT = 8
 
+
+class PlayerType(Enum):
+    """
+    Enumerator of player type
+    """
+
+    ORDINARY = 0
+    CLEVER = 1
+    STRONG = 2
+    TOUGH = 3
+    FAST = 4
+
+    def __str__(self):
+        return f"{self.name}".lower()
+
+
 # Ordinary player characteristics
 ORDINARY_MAX_MOVE = 3
 ORDINARY_ATT_BONUS = 0
@@ -38,8 +54,19 @@ class Teams(Enum):
     Enumerator of both teams colors
     """
 
-    RED = "red"
-    BLUE = "blue"
+    RED = 0
+    BLUE = 1
+
+    def __str__(self):
+        return f"{self.name}".lower()
+
+    def other(self, team):
+        """Returns the opposite team"""
+        if team == Teams.BLUE:
+            return Teams.RED
+        if team == Teams.RED:
+            return Teams.BLUE
+        return None
 
 
 def other(team):
@@ -53,7 +80,7 @@ def other(team):
 
 def get_goal(team):
     """Get the back of the team's side"""
-    return BOARD_WIDTH - 1 if team == Teams.RED.value else 0
+    return BOARD_WIDTH - 1 if team == Teams.RED else 0
 
 
 class Actions(Enum):

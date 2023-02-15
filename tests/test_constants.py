@@ -10,14 +10,14 @@ class TestConstants(unittest.TestCase):
 
     def test_other(self):
         """other function test"""
-        self.assertEqual(Teams.BLUE.value, other(Teams.RED.value))
-        self.assertEqual(Teams.RED.value, other(Teams.BLUE.value))
+        self.assertEqual(Teams.BLUE, Teams.RED.other(Teams.RED))
+        self.assertEqual(Teams.RED, Teams.RED.other(Teams.BLUE))
         self.assertIsNone(other("Other"))
 
     def test_get_goal(self):
         """get goal function test"""
-        self.assertEqual(0, get_goal(Teams.BLUE.value))
-        self.assertEqual(BOARD_WIDTH - 1, get_goal(Teams.RED.value))
+        self.assertEqual(0, get_goal(Teams.BLUE))
+        self.assertEqual(BOARD_WIDTH - 1, get_goal(Teams.RED))
 
 
 if __name__ == "__main__":

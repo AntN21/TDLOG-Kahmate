@@ -5,13 +5,12 @@ to play the game.
 import json
 import random as rd
 from math import floor
+
 from constants import Teams
 from board import Board
-from players.ordinary import Ordinary
-from players.clever import Clever
-from players.fast import Fast
-from players.strong import Strong
-from players.tough import Tough
+
+from players.players import Ordinary, Clever, Fast, Strong, Tough, RUGBY_PLAYERS
+
 from actions.action_manager import ActionManager
 
 
@@ -55,10 +54,10 @@ class Game:
         self.initial_placing()
         self._duel = None
         self.teams = {
-            Teams.RED.value: Team(Teams.RED.value),
-            Teams.BLUE.value: Team(Teams.BLUE.value),
+            Teams.RED: Team(Teams.RED),
+            Teams.BLUE: Team(Teams.BLUE),
         }
-        self.team_playing = Teams.RED.value
+        self.team_playing = Teams.RED
         self._action_class = ActionManager(self._board.width, self._board.height)
         self._action_class.update(self)
 
@@ -78,27 +77,31 @@ class Game:
     def board(self):
         return self._board
 
+    @board.setter
+    def board(self, n_board):
+        self._board = n_board
+
     def initial_placing(self):
         """Place the players in an initial configuration"""
         height = 1
         for player in [
-            Ordinary(Teams.RED.value),
-            Strong(Teams.RED.value),
-            Tough(Teams.RED.value),
-            Fast(Teams.RED.value),
-            Clever(Teams.RED.value),
-            Ordinary(Teams.RED.value),
+            Ordinary(Teams.RED),
+            Strong(Teams.RED),
+            Tough(Teams.RED),
+            Fast(Teams.RED),
+            Clever(Teams.RED),
+            Ordinary(Teams.RED),
         ]:
             self._board.put_player(player, 1, height)
             height += 1
         height = 1
         for player in [
-            Ordinary(Teams.BLUE.value),
-            Strong(Teams.BLUE.value),
-            Tough(Teams.BLUE.value),
-            Fast(Teams.BLUE.value),
-            Clever(Teams.BLUE.value),
-            Ordinary(Teams.BLUE.value),
+            Ordinary(Teams.BLUE),
+            Strong(Teams.BLUE),
+            Tough(Teams.BLUE),
+            Fast(Teams.BLUE),
+            Clever(Teams.BLUE),
+            Ordinary(Teams.BLUE),
         ]:
             self._board.put_player(player, self.board.width - 2, height)
             height += 1
@@ -134,11 +137,7 @@ class Game:
 
                 if isinstance(result, Board):
                     self._board = result
-                    goal = (
-                        self.board.width - 1
-                        if self.team_playing == Teams.RED.value
-                        else 0
-                    )
+                    goal = self.board.width - 1 if self.team_playing == Teams.RED else 0
                     if selected_case.pos_x == goal:
                         self._winner = self.team_playing
                 else:
@@ -215,11 +214,7 @@ class Game:
         self._selected_case = None
         self.board.clear_available()
         self.board.clear_selected()
-        self.team_playing = (
-            Teams.BLUE.value
-            if self.team_playing == Teams.RED.value
-            else Teams.RED.value
-        )
+        self.team_playing = Teams.RED.other(self.team_playing)
         self.teams[self.team_playing].players_moved = []
         for square in self.board.squares:
             if square.player is not None:
@@ -233,12 +228,19 @@ class Game:
         Converts the game state into a json to be used in the java script file
         """
         res = {}
-        res["team_playing"] = self.team_playing
+        res["team_playing"] = self.team_playing.value
         res["board"] = []
         for square in self.board.squares:
             res["board"].append(
                 {
-                    "player": None if square.player is None else str(square.player),
+                    "player": -1
+                    if square.player is None
+                    else 100 * square.player.stunned_state
+                    + 10 * square.player.type.value
+                    + square.player.team.value,
+                    "player_string": None
+                    if square.player is None
+                    else str(square.player),
                     "ball": square.ball,
                     "available": square.available,
                     "selected": square.selected,
@@ -246,28 +248,26 @@ class Game:
             )
 
         if self.selected_case is not None:
-            selected_case = {}
-            selected_case["position"] = [
-                self.selected_case.pos_x,
-                self.selected_case.pos_y,
-            ]
-            selected_case["movements_left"] = self.selected_case.player.available_moves
+            selected_case = {
+                "position": [self.selected_case.pos_x, self.selected_case.pos_y],
+                "movements_left": self.selected_case.player.available_moves,
+            }
             res["selected_case"] = selected_case
         else:
             res["selected_case"] = None
 
         res["actions"] = self._action_class.get_possible_moves()
 
-        team_red = self.teams[Teams.RED.value].to_dict()
-        team_blue = self.teams[Teams.BLUE.value].to_dict()
+        team_red = self.teams[Teams.RED].to_dict()
+        team_blue = self.teams[Teams.BLUE].to_dict()
 
         res["team_red"] = team_red
         res["team_blue"] = team_blue
 
         if self.duel is not None:
             duel = {}
-            duel["team_1_cards"] = self.teams[Teams.RED.value].cards
-            duel["team_2_cards"] = self.teams[Teams.BLUE.value].cards
+            duel["team_1_cards"] = self.teams[Teams.RED].cards
+            duel["team_2_cards"] = self.teams[Teams.BLUE].cards
             duel["team_1_fighter"] = str(
                 self.board.square(
                     self._duel.position1[0], self._duel.position1[1]
@@ -283,8 +283,38 @@ class Game:
             res["duel"] = None
 
         if self.winner is not None:
-            res["winner"] = self.team_playing
+            res["winner"] = str(self.team_playing)
         else:
             res["winner"] = None
 
         return json.dumps(res)
+
+    def load_json(self, json_file_name):
+        """
+        Loads a game state from a json file
+        """
+        game_file = open(json_file_name, "r")
+        game_state = json.loads(game_file.read())
+        self.team_playing = list(Teams)[game_state["team_playing"]]
+        self.board = Board()
+        for index in range(len(game_state["board"])):
+            self.board.squares[index].set_ball(game_state["board"][index]["ball"])
+            player_data = game_state["board"][index]["player"]
+            if player_data == -1:
+                player = None
+            else:
+                stunned_state = player_data // 100
+                player_type = (player_data % 100) // 10
+                team_index = player_data % 10
+                player = RUGBY_PLAYERS[player_type](list(Teams)[team_index])
+                player.stunned_state = stunned_state
+
+            self.board.squares[index].set_player(player)
+
+            team_strings = ["team_red", "team_blue"]
+            for team_index in range(2):
+                team = self.teams[list(Teams)[index]]
+                team.custom_name = game_state[team_strings[index]]["custom_name"]
+                team.players_moved = []
+                team.cards = game_state[team_strings[index]]["cards"]
+        self._action_class.update(self)

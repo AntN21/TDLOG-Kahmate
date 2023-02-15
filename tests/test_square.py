@@ -8,7 +8,7 @@ from square import Square
 from players.ordinary import Ordinary
 
 r.seed(1)
-mock_player = Ordinary(Teams.RED.value)
+mock_player = Ordinary(Teams.RED)
 
 
 def get_mock_square():

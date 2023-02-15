@@ -14,8 +14,8 @@ class RugbyPlayer:
 
     def __init__(self, player_type, team, max_move, attack_bonus, defense_bonus):
         assert team in (
-            Teams.RED.value,
-            Teams.BLUE.value,
+            Teams.RED,
+            Teams.BLUE,
         ), f"{team} is not a correct team color."
         self._type = player_type
         self._team = team
@@ -40,6 +40,16 @@ class RugbyPlayer:
     def stunned(self):
         """Return true if the player is stunned"""
         return self._stunned_state > 0
+
+    @property
+    def stunned_state(self):
+        """Return the stunned state of a player"""
+        return self._stunned_state
+
+    @stunned_state.setter
+    def stunned_state(self, s_state):
+        """Sets the stunned state of a player."""
+        self._stunned_state = s_state
 
     @property
     def max_move(self):
@@ -74,7 +84,7 @@ class RugbyPlayer:
         self.available_moves -= steps
 
     def set_stunned(self):
-        """Turn the player stunning state into 2. It will decrease decrease each turn
+        """Turn the player stunning state into 2. It will decrease each turn
         so that it becomes available once they skip the next turn."""
         self._stunned_state = 2
 

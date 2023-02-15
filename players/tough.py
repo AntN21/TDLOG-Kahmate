@@ -2,7 +2,7 @@
 Tough player class file
 """
 from players.rugby_player import RugbyPlayer
-from constants import TOUGH_ATT_BONUS, TOUGH_DEF_BONUS, TOUGH_MAX_MOVE
+from constants import TOUGH_ATT_BONUS, TOUGH_DEF_BONUS, TOUGH_MAX_MOVE, PlayerType
 
 
 class Tough(RugbyPlayer):
@@ -10,5 +10,5 @@ class Tough(RugbyPlayer):
 
     def __init__(self, team):
         super().__init__(
-            "tough", team, TOUGH_MAX_MOVE, TOUGH_ATT_BONUS, TOUGH_DEF_BONUS
+            PlayerType.TOUGH, team, TOUGH_MAX_MOVE, TOUGH_ATT_BONUS, TOUGH_DEF_BONUS
         )

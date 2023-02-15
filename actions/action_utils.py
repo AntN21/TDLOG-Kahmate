@@ -5,8 +5,8 @@ from constants import Teams
 
 
 def forward(team):
-    """Indicates wich direction is forward"""
-    return 1 if team == Teams.RED.value else -1
+    """Indicates which direction is forward"""
+    return 1 if team == Teams.RED else -1
 
 
 def path_exists(path_length, board, position1, position2):

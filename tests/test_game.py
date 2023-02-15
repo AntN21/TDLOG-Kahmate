@@ -5,7 +5,7 @@ import unittest
 import random as r
 import json
 from game import Game
-from constants import Teams, Actions
+from constants import Teams, Actions, PlayerType
 from tests.test_utils import get_random_coordinates
 
 TOTAL_TESTS = 20
@@ -20,9 +20,9 @@ def get_mock_game_info():
     blue_player_square = None
     for square in mock_game.board.squares:
         if square.player is not None:
-            if square.player.team == Teams.RED.value:
+            if square.player.team == Teams.RED:
                 red_player_square = square
-            if square.player.team == Teams.BLUE.value:
+            if square.player.team == Teams.BLUE:
                 blue_player_square = square
     return mock_game, red_player_square, blue_player_square
 
@@ -59,15 +59,13 @@ def get_tackle_duel_mock_game_info():
     mock_game.board.put_ball(blue_player_square.pos_x, blue_player_square.pos_y)
 
     # Pass turn two times to update actions
-    mock_game.pass_turn(Teams.RED.value)
-    mock_game.pass_turn(Teams.BLUE.value)
+    mock_game.pass_turn(Teams.RED)
+    mock_game.pass_turn(Teams.BLUE)
 
+    mock_game.select_square(red_player_square.pos_x, red_player_square.pos_y, Teams.RED)
+    mock_game.select_action(Actions.TACKLE.value, Teams.RED)
     mock_game.select_square(
-        red_player_square.pos_x, red_player_square.pos_y, Teams.RED.value
-    )
-    mock_game.select_action(Actions.TACKLE.value, Teams.RED.value)
-    mock_game.select_square(
-        blue_player_square.pos_x, blue_player_square.pos_y, Teams.RED.value
+        blue_player_square.pos_x, blue_player_square.pos_y, Teams.RED
     )
     return mock_game, red_player_square, blue_player_square
 
@@ -82,15 +80,13 @@ def get_forced_passage_duel_mock_game_info():
     mock_game.board.put_ball(red_player_square.pos_x, red_player_square.pos_y)
 
     # Pass turn two times to update actions
-    mock_game.pass_turn(Teams.RED.value)
-    mock_game.pass_turn(Teams.BLUE.value)
+    mock_game.pass_turn(Teams.RED)
+    mock_game.pass_turn(Teams.BLUE)
 
+    mock_game.select_square(red_player_square.pos_x, red_player_square.pos_y, Teams.RED)
+    mock_game.select_action(Actions.FORCED_PASSAGE.value, Teams.RED)
     mock_game.select_square(
-        red_player_square.pos_x, red_player_square.pos_y, Teams.RED.value
-    )
-    mock_game.select_action(Actions.FORCED_PASSAGE.value, Teams.RED.value)
-    mock_game.select_square(
-        blue_player_square.pos_x, blue_player_square.pos_y, Teams.RED.value
+        blue_player_square.pos_x, blue_player_square.pos_y, Teams.RED
     )
     return mock_game, red_player_square, blue_player_square
 
@@ -111,7 +107,8 @@ class TestGame(unittest.TestCase):
             sum(
                 1
                 for square in mock_game.board.squares
-                if square.player is not None and square.player.type == "ordinary"
+                if square.player is not None
+                and square.player.type == PlayerType.ORDINARY
             ),
         )
         self.assertEqual(
@@ -119,7 +116,7 @@ class TestGame(unittest.TestCase):
             sum(
                 1
                 for square in mock_game.board.squares
-                if square.player is not None and square.player.type == "fast"
+                if square.player is not None and square.player.type == PlayerType.FAST
             ),
         )
         self.assertEqual(
@@ -127,7 +124,7 @@ class TestGame(unittest.TestCase):
             sum(
                 1
                 for square in mock_game.board.squares
-                if square.player is not None and square.player.type == "tough"
+                if square.player is not None and square.player.type == PlayerType.TOUGH
             ),
         )
         self.assertEqual(
@@ -135,7 +132,7 @@ class TestGame(unittest.TestCase):
             sum(
                 1
                 for square in mock_game.board.squares
-                if square.player is not None and square.player.type == "strong"
+                if square.player is not None and square.player.type == PlayerType.STRONG
             ),
         )
         self.assertEqual(
@@ -143,7 +140,7 @@ class TestGame(unittest.TestCase):
             sum(
                 1
                 for square in mock_game.board.squares
-                if square.player is not None and square.player.type == "clever"
+                if square.player is not None and square.player.type == PlayerType.CLEVER
             ),
         )
         self.assertEqual(
@@ -151,12 +148,12 @@ class TestGame(unittest.TestCase):
             sum(
                 1
                 for square in mock_game.board.squares
-                if square.player is not None and square.player.team == Teams.RED.value
+                if square.player is not None and square.player.team == Teams.RED
             ),
         )
         self.assertEqual(1, sum(1 for square in mock_game.board.squares if square.ball))
 
-        self.assertEqual(Teams.RED.value, mock_game.team_playing)
+        self.assertEqual(Teams.RED, mock_game.team_playing)
         self.assertIsNone(mock_game.duel)
         self.assertIsNone(mock_game.selected_case)
         self.assertIsNone(mock_game.winner)
@@ -167,33 +164,33 @@ class TestGame(unittest.TestCase):
 
         # Case not your turn
         mock_game.select_square(
-            blue_player_square.pos_x, blue_player_square.pos_y, Teams.BLUE.value
+            blue_player_square.pos_x, blue_player_square.pos_y, Teams.BLUE
         )
         self.assertFalse(blue_player_square.selected)
 
         # Case select player
         mock_game.select_square(
-            red_player_square.pos_x, red_player_square.pos_y, Teams.RED.value
+            red_player_square.pos_x, red_player_square.pos_y, Teams.RED
         )
         self.assertTrue(red_player_square.selected)
 
         # Case player selected, touching anywhere
         pos_x, pos_y = get_random_coordinates(mock_game.board)
-        mock_game.select_square(pos_x, pos_y, Teams.RED.value)
+        mock_game.select_square(pos_x, pos_y, Teams.RED)
 
         mock_game.select_square(
-            red_player_square.pos_x, red_player_square.pos_y, Teams.RED.value
+            red_player_square.pos_x, red_player_square.pos_y, Teams.RED
         )
         self.assertTrue(red_player_square.selected)
 
         # Case player selected, touching an available square
         player_present = red_player_square.player
-        mock_game.select_action(Actions.MOVE.value, Teams.RED.value)
+        mock_game.select_action(Actions.MOVE.value, Teams.RED)
         available_squares = get_available_squares(mock_game)
         self.assertGreater(len(available_squares), 0)
         available_square = r.choice(available_squares)
         mock_game.select_square(
-            available_square.pos_x, available_square.pos_y, Teams.RED.value
+            available_square.pos_x, available_square.pos_y, Teams.RED
         )
         self.assertIsNone(red_player_square.player)
         self.assertEqual(player_present, available_square.player)
@@ -205,7 +202,7 @@ class TestGame(unittest.TestCase):
             blue_player_square,
         ) = get_tackle_duel_mock_game_info()
         duel_game.select_square(
-            red_player_square.pos_x, red_player_square.pos_y, Teams.RED.value
+            red_player_square.pos_x, red_player_square.pos_y, Teams.RED
         )
         self.assertFalse(red_player_square.selected)
 
@@ -214,26 +211,26 @@ class TestGame(unittest.TestCase):
         mock_game, red_player_square, _ = get_mock_game_info()
 
         # Case no square selected
-        mock_game.select_action(Actions.MOVE.value, Teams.RED.value)
+        mock_game.select_action(Actions.MOVE.value, Teams.RED)
         available_squares = get_available_squares(mock_game)
         self.assertEqual(0, len(available_squares))
 
         # Case other player's turn
         mock_game.select_square(
-            red_player_square.pos_x, red_player_square.pos_y, Teams.RED.value
+            red_player_square.pos_x, red_player_square.pos_y, Teams.RED
         )
-        mock_game.select_action(Actions.MOVE.value, Teams.BLUE.value)
+        mock_game.select_action(Actions.MOVE.value, Teams.BLUE)
         available_squares = get_available_squares(mock_game)
         self.assertEqual(0, len(available_squares))
 
         # Correct selection case
-        mock_game.select_action(Actions.MOVE.value, Teams.RED.value)
+        mock_game.select_action(Actions.MOVE.value, Teams.RED)
         available_squares = get_available_squares(mock_game)
         self.assertGreater(len(available_squares), 0)
 
         # Duel case
         duel_game, red_player_square, _ = get_tackle_duel_mock_game_info()
-        duel_game.select_action(Actions.MOVE.value, Teams.RED.value)
+        duel_game.select_action(Actions.MOVE.value, Teams.RED)
         available_squares = get_available_squares(duel_game)
         self.assertEqual(0, len(available_squares))
 
@@ -242,26 +239,26 @@ class TestGame(unittest.TestCase):
 
         # Test 1st tie and already used card
         duel_mock_game, _, _ = get_tackle_duel_mock_game_info()
-        duel_mock_game.select_duel_card(1, Teams.RED.value)
+        duel_mock_game.select_duel_card(1, Teams.RED)
         self.assertFalse(duel_mock_game.duel.is_ready())
-        duel_mock_game.select_duel_card(1, Teams.BLUE.value)
+        duel_mock_game.select_duel_card(1, Teams.BLUE)
         self.assertIsNotNone(duel_mock_game.duel)
-        duel_mock_game.select_duel_card(1, Teams.RED.value)
+        duel_mock_game.select_duel_card(1, Teams.RED)
         with self.assertRaises(ValueError):
-            duel_mock_game.select_duel_card(1, Teams.BLUE.value)
+            duel_mock_game.select_duel_card(1, Teams.BLUE)
 
         # Test 1st win
         duel_mock_game, _, blue_square = get_tackle_duel_mock_game_info()
-        duel_mock_game.select_duel_card(2, Teams.RED.value)
-        duel_mock_game.select_duel_card(1, Teams.BLUE.value)
+        duel_mock_game.select_duel_card(2, Teams.RED)
+        duel_mock_game.select_duel_card(1, Teams.BLUE)
         self.assertTrue(blue_square.player.stunned)
 
         # Test 2nd tie
         duel_mock_game, red_square, _ = get_tackle_duel_mock_game_info()
-        duel_mock_game.select_duel_card(1, Teams.RED.value)
-        duel_mock_game.select_duel_card(1, Teams.BLUE.value)
-        duel_mock_game.select_duel_card(2, Teams.RED.value)
-        duel_mock_game.select_duel_card(2, Teams.BLUE.value)
+        duel_mock_game.select_duel_card(1, Teams.RED)
+        duel_mock_game.select_duel_card(1, Teams.BLUE)
+        duel_mock_game.select_duel_card(2, Teams.RED)
+        duel_mock_game.select_duel_card(2, Teams.BLUE)
         self.assertTrue(red_square.player.stunned)
 
     def test_pass_turn(self):
@@ -270,48 +267,46 @@ class TestGame(unittest.TestCase):
 
         # Test other team's turn
         mock_game.select_square(
-            red_player_square.pos_x, red_player_square.pos_y, Teams.RED.value
+            red_player_square.pos_x, red_player_square.pos_y, Teams.RED
         )
         self.assertTrue(red_player_square.selected)
-        mock_game.pass_turn(Teams.BLUE.value)
+        mock_game.pass_turn(Teams.BLUE)
         self.assertTrue(red_player_square.selected)
 
         # Test resets moves
-        mock_game.select_action(Actions.MOVE.value, Teams.RED.value)
+        mock_game.select_action(Actions.MOVE.value, Teams.RED)
         target_square = r.choice(get_available_squares(mock_game))
-        mock_game.select_square(
-            target_square.pos_x, target_square.pos_y, Teams.RED.value
-        )
+        mock_game.select_square(target_square.pos_x, target_square.pos_y, Teams.RED)
         self.assertNotEqual(
             target_square.player.available_moves, target_square.player.max_move
         )
-        mock_game.pass_turn(Teams.RED.value)
+        mock_game.pass_turn(Teams.RED)
         self.assertEqual(
             target_square.player.available_moves, target_square.player.max_move
         )
 
         # Test cleans availables and selected squares
         mock_game.select_square(
-            blue_player_square.pos_x, blue_player_square.pos_y, Teams.BLUE.value
+            blue_player_square.pos_x, blue_player_square.pos_y, Teams.BLUE
         )
-        mock_game.select_action(Actions.MOVE.value, Teams.BLUE.value)
+        mock_game.select_action(Actions.MOVE.value, Teams.BLUE)
         self.assertGreater(len(get_available_squares(mock_game)), 0)
         self.assertTrue(blue_player_square.selected)
-        mock_game.pass_turn(Teams.BLUE.value)
+        mock_game.pass_turn(Teams.BLUE)
         self.assertEqual(0, len(get_available_squares(mock_game)))
         self.assertFalse(blue_player_square.selected)
 
         # Test cleans stunned and lost states
         duel_mock_game, _, blue_square = get_forced_passage_duel_mock_game_info()
-        duel_mock_game.select_duel_card(2, Teams.RED.value)
-        duel_mock_game.select_duel_card(1, Teams.BLUE.value)
+        duel_mock_game.select_duel_card(2, Teams.RED)
+        duel_mock_game.select_duel_card(1, Teams.BLUE)
         self.assertTrue(blue_square.player.stunned)
         self.assertTrue(blue_square.player.get_just_lost())
-        duel_mock_game.pass_turn(Teams.RED.value)
+        duel_mock_game.pass_turn(Teams.RED)
         self.assertTrue(blue_square.player.stunned)
-        duel_mock_game.pass_turn(Teams.BLUE.value)
+        duel_mock_game.pass_turn(Teams.BLUE)
         self.assertFalse(blue_square.player.get_just_lost())
-        duel_mock_game.pass_turn(Teams.RED.value)
+        duel_mock_game.pass_turn(Teams.RED)
         self.assertFalse(blue_square.player.stunned)
 
     def test_to_json(self):
