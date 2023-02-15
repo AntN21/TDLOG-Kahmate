@@ -45,13 +45,11 @@ class BallKick(Action):
                     abs(self.position2[1] - self.position1[1]) <= 3
                     and 12 > self.position2[0] > 0
                 ):
-                    if (
-                        (self.position2[0] - self.position1[0]) * forward(player.team)
-                        <= 3
-                        and (self.position2[0] - self.position1[0])
-                        * forward(player.team)
-                        >= 1
-                    ):
+                    if (self.position2[0] - self.position1[0]) * forward(
+                        player.team
+                    ) <= 3 and (self.position2[0] - self.position1[0]) * forward(
+                        player.team
+                    ) >= 1:
                         return True
         return False
 
