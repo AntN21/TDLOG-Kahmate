@@ -6,6 +6,7 @@ from flask import render_template, redirect
 from constants import Actions, Teams
 from game import Game
 
+
 class Controller:
     """
     From a flask socket_io, the controller class creates a Game and can be modified from the
