@@ -298,7 +298,6 @@ class Game:
         self.team_playing = list(Teams)[game_state["team_playing"]]
         self.board = Board()
         for index in range(len(game_state["board"])):
-
             self.board.squares[index].set_ball(game_state["board"][index]["ball"])
             player_data = game_state["board"][index]["player"]
             if player_data == -1:
