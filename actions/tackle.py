@@ -60,9 +60,7 @@ class Tackle(Action):
                 if p_ball[0] < 0 or p_ball[0] > game.board.width:
                     delta_y = self.position2[0] - self.position1[0]
                     if delta_y != 0:
-                        if (
-                                game.board.height > p_ball[1] + delta_y >= 0
-                        ):
+                        if game.board.height > p_ball[1] + delta_y >= 0:
                             p_ball[1] += delta_y
                         else:
                             p_ball[0] -= 2 * forward(attacker)
@@ -72,9 +70,7 @@ class Tackle(Action):
                             [self.position2[0], self.position2[1] - 1],
                         ]
                         possible_pos = [
-                            p
-                            for p in possible_pos
-                            if 0 <= p[1] < game.board.height
+                            p for p in possible_pos if 0 <= p[1] < game.board.height
                         ]
                         p_ball = rd.choice(possible_pos)
             game.board.move_ball(

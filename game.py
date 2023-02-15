@@ -248,10 +248,10 @@ class Game:
             )
 
         if self.selected_case is not None:
-            selected_case = {"position": [
-                self.selected_case.pos_x,
-                self.selected_case.pos_y
-            ], "movements_left": self.selected_case.player.available_moves}
+            selected_case = {
+                "position": [self.selected_case.pos_x, self.selected_case.pos_y],
+                "movements_left": self.selected_case.player.available_moves,
+            }
             res["selected_case"] = selected_case
         else:
             res["selected_case"] = None
