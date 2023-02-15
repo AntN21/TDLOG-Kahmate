@@ -1,12 +1,25 @@
 var socket = io.connect()
 
-const Teams = {
-    RED: 0,
-    BLUE: 1
+
+class Teams {
+    /**
+     *   Teams enum for javascript
+     */
+
+  static RED = new Teams('red',0);
+  static BLUE = new Teams('blue',1);
+
+  static #list = Object.freeze([Teams.RED, Teams.BLUE]);
+  static list(){
+    return Teams.#list;
+  }
+
+  constructor(name,  value) {
+    this.name = name
+    this.value = value;
+    Object.freeze(this);
+  }
 }
-
-const Teams3 = ['red','blue'];
-
 
 var BOARD_WIDTH = 13
 var BOARD_HEIGHT = 8
@@ -91,13 +104,13 @@ function updateMenu(current_game, client_team) {
      */
 
 
-    document.getElementById("turn_card").style.backgroundColor = current_game.team_playing;
+    document.getElementById("turn_card").style.backgroundColor = Teams.list()[current_game.team_playing].name;
     if(current_game.winner != null){
         document.getElementById("turn_text").innerHTML = "PLAYER " + current_game.winner + " WON!";
         clearMenu()
         return
     } else {
-        document.getElementById("turn_text").innerHTML =  "It is " + current_game.team_playing + "'s turn";
+        document.getElementById("turn_text").innerHTML =  "It is " + Teams.list()[current_game.team_playing].name + "'s turn";
     }
     clearMenu()
     if(current_game.team_playing == client_team) {
@@ -128,7 +141,7 @@ function updateMenu(current_game, client_team) {
         document.getElementById("duel_menu").style.display = "flex";
         document.getElementById("duel_info").innerHTML = current_game.duel.team_1_fighter + " vs " + current_game.duel.team_2_fighter
         clearMenu();
-        var cards = client_team == Teams.RED ? 
+        var cards = client_team == Teams.RED.value ?
                     current_game.team_red.cards :
                     current_game.team_blue.cards;
         for(let i = 0; i < cards.length; i++) {
@@ -143,10 +156,10 @@ function updateGameInfo(current_game, client_team) {
     /**
      *   Updates all game info shown (current player's turn, available moves, available cards)
      */
-    document.getElementById("player_info_card").style.backgroundColor = client_team;
+    document.getElementById("player_info_card").style.backgroundColor = Teams.list()[client_team].name ;
     document.getElementById("player_red_custom_name").innerHTML = current_game.team_red.custom_name;
     document.getElementById("player_blue_custom_name").innerHTML = current_game.team_blue.custom_name;
-    var team = client_team == Teams.RED ? current_game.team_red : current_game.team_blue; 
+    var team = client_team == Teams.RED.value ? current_game.team_red : current_game.team_blue;
     if(current_game.selected_case != null && client_team == current_game.team_playing){
         document.getElementById("player_moves_left").innerHTML = "Player moves left: " + current_game.selected_case.movements_left;
     } else {

@@ -5,15 +5,12 @@ to play the game.
 import json
 import random as rd
 from math import floor
-from enum import Enum
+
 from constants import Teams
 from board import Board
-from players.rugby_player import RugbyPlayer
-from players.ordinary import Ordinary
-from players.clever import Clever
-from players.fast import Fast
-from players.strong import Strong
-from players.tough import Tough
+
+from players.players import Ordinary, Clever, Fast, Strong, Tough, RUGBY_PLAYERS
+
 from actions.action_manager import ActionManager
 
 
@@ -299,31 +296,34 @@ class Game:
 
         return json.dumps(res)
 
-    def load_json(self, json_file):
-        RUGBYPLAYERS = [Ordinary, Clever, Strong, Tough, Fast]
+    def load_json(self, json_file_name):
+
         """
         Loads a game state from a json file
         """
-        game_state = json.loads(json_file.read())
-        self.team_playing = game_state["team_playing"]
+        game_file = open(json_file_name, "r")
+        game_state = json.loads(game_file.read())
+        self.team_playing = list(Teams)[game_state["team_playing"]]
         self.board = Board()
         for index in range(len(game_state["board"])):
 
             self.board.squares[index].set_ball(game_state["board"][index]["ball"])
             player_data = game_state["board"][index]["player"]
-            stunned_state = player_data / 100
-            player_type = (player_data - 100 * stunned_state) / 10
-            team_index = player_data % 10
-            player = (
-                None
-                if team_index == -1
-                else RUGBYPLAYERS[player_type](list(Teams)[team_index])
-            )
-            player.stunned_state = stunned_state
+            if player_data == -1:
+                player = None
+            else:
+                stunned_state = player_data // 100
+                player_type = (player_data % 100) // 10
+                team_index = player_data % 10
+                player = RUGBY_PLAYERS[player_type](list(Teams)[team_index])
+                player.stunned_state = stunned_state
+
+            self.board.squares[index].set_player(player)
 
             team_strings = ["team_red", "team_blue"]
-            for index in range(2):
+            for team_index in range(2):
                 team = self.teams[list(Teams)[index]]
                 team.custom_name = game_state[team_strings[index]]["custom_name"]
-                team.players_moved = game_state[team_strings[index]]["custom_name"]
+                team.players_moved = []
                 team.cards = game_state[team_strings[index]]["cards"]
+        self._action_class.update(self)

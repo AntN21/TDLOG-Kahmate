@@ -51,9 +51,9 @@ class Duel(Action):
         score_attack = card1 + player1.attack_bonus
         score_defense = card2 + player2.defense_bonus
         if score_attack > score_defense:
-            return (attacker, score_attack, score_defense)
+            return attacker, score_attack, score_defense
         if score_defense > score_attack:
-            return (Teams.RED.other(attacker), score_defense, score_attack)
+            return Teams.RED.other(attacker), score_defense, score_attack
         if self._duel_number >= 0:
             return None
-        return (Teams.RED.other(attacker), score_defense, score_attack)
+        return Teams.RED.other(attacker), score_defense, score_attack
